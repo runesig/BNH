@@ -2,8 +2,8 @@ OBJECT Codeunit 5231100 BB Kunder
 {
   OBJECT-PROPERTIES
   {
-    Date=18.10.17;
-    Time=19:30:49;
+    Date=02.01.20;
+    Time=13:11:08;
     Modified=Yes;
     Version List=Konv. BNH;
   }
@@ -22,6 +22,8 @@ OBJECT Codeunit 5231100 BB Kunder
       CustomerL@1101103000 : Record 18;
       NoneDigitsL@1101103002 : Text;
     BEGIN
+      MESSAGE('Test');
+
       IF BBKundeL.FINDFIRST THEN
         REPEAT
             NoneDigitsL := '';
