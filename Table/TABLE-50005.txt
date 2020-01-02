@@ -1,0 +1,111 @@
+OBJECT Table 50005 Internal Veheicle
+{
+  OBJECT-PROPERTIES
+  {
+    Date=14.11.18;
+    Time=14:21:06;
+    Modified=Yes;
+    Version List=BNH;
+  }
+  PROPERTIES
+  {
+    CaptionML=[ENU=Internal Veheicle;
+               NOR=Interne kj›ret›y];
+  }
+  FIELDS
+  {
+    { 1   ;   ;User ID             ;Code50        ;CaptionML=[ENU=User ID;
+                                                              NOR=Bruker ID] }
+    { 2   ;   ;VIN                 ;Code20        ;CaptionML=[ENU=VIN;
+                                                              NOR=Chassisnr.] }
+    { 10  ;   ;License No.         ;Code10        ;CaptionML=[ENU=License No.;
+                                                              NOR=Reg.nr.] }
+    { 11  ;   ;Current Book No.    ;Code10        ;CaptionML=[ENU=Current Book No.;
+                                                              NOR=Gjeldende prosjektnr.] }
+    { 12  ;   ;Make Code           ;Code10        ;CaptionML=[ENU=Make Code;
+                                                              NOR=Merkekode] }
+    { 13  ;   ;Model               ;Text50        ;CaptionML=[ENU=Model;
+                                                              NOR=Modell] }
+    { 14  ;   ;Location Code       ;Code10        ;CaptionML=[ENU=Location Code;
+                                                              NOR=Lokasjonskode] }
+    { 15  ;   ;Department Code     ;Code10        ;CaptionML=[ENU=Department Code;
+                                                              NOR=Avdelingskode] }
+    { 16  ;   ;Date of Sale        ;Date          ;CaptionML=[ENU=Date of Sale;
+                                                              NOR=Salgsdato] }
+    { 17  ;   ;Plassering / Status ;Code20        ;CaptionML=[ENU=Plassering / Status;
+                                                              NOR=Plassering / Status] }
+    { 18  ;   ;Financing           ;Text30        ;CaptionML=[ENU=Financing;
+                                                              NOR=Finansiering] }
+    { 19  ;   ;Initial Registration;Date          ;CaptionML=[ENU=Initial Registration;
+                                                              NOR=F›rste reg. dato] }
+    { 20  ;   ;Vehicle Category Code;Code10       ;CaptionML=[ENU=Vehicle Category Code;
+                                                              NOR=Kj›ret›ykategorikode] }
+    { 50  ;   ;Buyer               ;Code20        ;CaptionML=[ENU=Buyer;
+                                                              NOR=Kj›per] }
+    { 51  ;   ;Buyer Name          ;Text50        ;FieldClass=FlowField;
+                                                   CalcFormula=Lookup(Customer.Name WHERE (No.=FIELD(Buyer)));
+                                                   CaptionML=[ENU=Buyer Name;
+                                                              NOR=Navn kj›per] }
+    { 60  ;   ;User                ;Code20        ;FieldClass=FlowField;
+                                                   CalcFormula=Lookup("Vehicle Customer"."Customer No." WHERE (VIN=FIELD(VIN),
+                                                                                                               Type=CONST(Vehicle User)));
+                                                   CaptionML=[ENU=User;
+                                                              NOR=Bruker] }
+    { 61  ;   ;User Name           ;Text50        ;FieldClass=FlowField;
+                                                   CalcFormula=Lookup(Customer.Name WHERE (No.=FIELD(User)));
+                                                   CaptionML=[ENU=User Name;
+                                                              NOR=Navn bruker] }
+    { 70  ;   ;Driver              ;Code20        ;FieldClass=FlowField;
+                                                   CalcFormula=Lookup("Vehicle Customer"."Customer No." WHERE (VIN=FIELD(VIN),
+                                                                                                               Type=CONST(Driver)));
+                                                   CaptionML=[ENU=Driver;
+                                                              NOR=Sj†f›r] }
+    { 71  ;   ;Driver Name         ;Text50        ;FieldClass=FlowField;
+                                                   CalcFormula=Lookup(Customer.Name WHERE (No.=FIELD(Driver)));
+                                                   CaptionML=[ENU=Driver Name;
+                                                              NOR=Navn sj†f›r] }
+    { 80  ;   ;Owner               ;Code20        ;FieldClass=FlowField;
+                                                   CalcFormula=Lookup("Vehicle Customer"."Customer No." WHERE (VIN=FIELD(VIN),
+                                                                                                               Type=CONST(Owner)));
+                                                   CaptionML=[ENU=Owner;
+                                                              NOR=Eier] }
+    { 81  ;   ;Owner Name          ;Text50        ;FieldClass=FlowField;
+                                                   CalcFormula=Lookup(Customer.Name WHERE (No.=FIELD(Owner)));
+                                                   CaptionML=[ENU=Owner Name;
+                                                              NOR=Navn eier] }
+    { 100 ;   ;Sals Price          ;Decimal       ;CaptionML=[ENU=Sals Price;
+                                                              NOR=Salgspris] }
+    { 101 ;   ;Purch. Order No.    ;Code10        ;FieldClass=FlowField;
+                                                   CalcFormula=Lookup("Purchase Line"."Document No." WHERE (VIN=FIELD(VIN),
+                                                                                                            Type=FILTER(Item),
+                                                                                                            Item Type=FILTER(Vehicle),
+                                                                                                            Order Type=FILTER('Vehicle Sales & Purchases')));
+                                                   CaptionML=[ENU=Purch. Order No.;
+                                                              NOR=Kj›p ordrenr.] }
+    { 102 ;   ;Salesperson Code    ;Code10        ;FieldClass=FlowField;
+                                                   CalcFormula=Lookup("Vehicle Ledger Entry"."Salespers./Purch. Code" WHERE (VIN=FIELD(VIN),
+                                                                                                                             Entry Type=FILTER(Sale),
+                                                                                                                             Current Sales Ledger Entry=FILTER(Yes),
+                                                                                                                             Vehicle=FILTER(Yes)));
+                                                   CaptionML=[ENU=Salesperson Code;
+                                                              NOR=Selgerkode] }
+    { 103 ;   ;Salesperson         ;Text30        ;FieldClass=FlowField;
+                                                   CalcFormula=Lookup(Salesperson/Purchaser.Name WHERE (Code=FIELD(Salesperson Code)));
+                                                   CaptionML=[ENU=Salesperson;
+                                                              NOR=Salgsperson] }
+  }
+  KEYS
+  {
+    {    ;User ID,VIN                             ;Clustered=Yes }
+  }
+  FIELDGROUPS
+  {
+  }
+  CODE
+  {
+
+    BEGIN
+    END.
+  }
+}
+

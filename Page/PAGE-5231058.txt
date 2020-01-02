@@ -1,0 +1,52 @@
+OBJECT Page 5231058 Blanket Order
+{
+  OBJECT-PROPERTIES
+  {
+    Date=01.11.17;
+    Time=09:33:04;
+    Modified=Yes;
+    Version List=BlanketOrderBNH;
+  }
+  PROPERTIES
+  {
+    SourceTable=Table5231052;
+    PageType=CardPart;
+    ShowFilter=No;
+  }
+  CONTROLS
+  {
+    { 1101103000;;Container;
+                ContainerType=ContentArea }
+
+    { 1101103007;1;Group  ;
+                GroupType=Group;
+                Layout=Columns }
+
+    { 1101103001;2;Field  ;
+                SourceExpr="Blanket Order No.";
+                Visible=FALSE }
+
+    { 1101103002;2;Field  ;
+                SourceExpr="Repeating Group Code" }
+
+    { 1101103003;2;Field  ;
+                SourceExpr="Agreement Type" }
+
+    { 1101103004;2;Field  ;
+                SourceExpr="Start Date" }
+
+    { 1101103005;2;Field  ;
+                SourceExpr="End Date" }
+
+    { 1101103006;2;Field  ;
+                SourceExpr="Selling Location" }
+
+  }
+  CODE
+  {
+
+    BEGIN
+    END.
+  }
+}
+

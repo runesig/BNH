@@ -1,0 +1,25 @@
+OBJECT Codeunit 5231117 BNH Delete Vehicle
+{
+  OBJECT-PROPERTIES
+  {
+    Date=24.02.17;
+    Time=18:25:56;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    TableNo=5025400;
+    OnRun=BEGIN
+            DELETE( TRUE );
+          END;
+
+  }
+  CODE
+  {
+
+    BEGIN
+    END.
+  }
+}
+

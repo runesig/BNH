@@ -1,0 +1,145 @@
+OBJECT Table 5231124 BNH Item
+{
+  OBJECT-PROPERTIES
+  {
+    Date=24.11.17;
+    Time=22:49:49;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+  }
+  FIELDS
+  {
+    { 1   ;   ;Primary Key         ;Integer        }
+    { 2   ;   ;Status              ;Option        ;OptionCaptionML=[ENU=" ,Ignore,OK,Error";
+                                                                    NOR=" ,Ignorer,OK,Feil"];
+                                                   OptionString=[ ,Ignore,OK,Error] }
+    { 3   ;   ;Datetime            ;DateTime      ;CaptionML=[ENU=Time;
+                                                              NOR=Tidspunkt] }
+    { 4   ;   ;Update message      ;Text250       ;CaptionML=[ENU=Message;
+                                                              NOR=Melding] }
+    { 5   ;   ;No.                 ;Code50        ;FieldClass=FlowField;
+                                                   CalcFormula=Lookup(Item.No. WHERE (Manufacturer No.=FIELD(PROD-CODE)));
+                                                   TableRelation=Item;
+                                                   CaptionML=[ENU=Item No.;
+                                                              NOR=Varenr.] }
+    { 6   ;   ;Location Code       ;Code10        ;TableRelation=Location;
+                                                   CaptionML=[DAN=Lokationskode;
+                                                              DEU=Lagerortcode;
+                                                              ENU=Location Code;
+                                                              NOR=Lokasjonskode;
+                                                              SVE=Lagerortskod] }
+    { 7   ;   ;Location Name       ;Text50        ;FieldClass=FlowField;
+                                                   CalcFormula=Lookup(Location.Name WHERE (Code=FIELD(Location Code)));
+                                                   CaptionML=[ENU=Location;
+                                                              NOR=Lokasjon];
+                                                   Editable=No }
+    { 8   ;   ;Inventory           ;Decimal       ;CaptionML=[ENU=Inventory;
+                                                              NOR=Beholdning];
+                                                   DecimalPlaces=0:2;
+                                                   BlankNumbers=BlankZero;
+                                                   Editable=No }
+    { 9   ;   ;Max Inventory       ;Decimal       ;FieldClass=FlowField;
+                                                   CalcFormula=Max("BNH Item".Inventory WHERE (PROD-CODE=FIELD(PROD-CODE)));
+                                                   CaptionML=[ENU=Maks beholdning;
+                                                              NOR=Maks beholdning];
+                                                   DecimalPlaces=0:2;
+                                                   BlankNumbers=BlankZero;
+                                                   Editable=No }
+    { 10  ;   ;PROD-GRP            ;Text50         }
+    { 11  ;   ;Make Code           ;Code10        ;TableRelation=Make;
+                                                   CaptionML=[ENU=Make Code;
+                                                              NOR=Merkekode] }
+    { 12  ;   ;Journal Entries     ;Integer       ;FieldClass=FlowField;
+                                                   CalcFormula=Count("Item Journal Line" WHERE (Journal Template Name=CONST(VARE),
+                                                                                                Journal Batch Name=FIELD(Batch Name),
+                                                                                                Item No.=FIELD(PROD-CODE)));
+                                                   CaptionML=[ENU=Journal Entries;
+                                                              NOR=Kladd];
+                                                   BlankNumbers=BlankZero;
+                                                   Editable=No }
+    { 13  ;   ;Positive Adjustments;Integer       ;FieldClass=FlowField;
+                                                   CalcFormula=Count("Item Ledger Entry" WHERE (Item No.=FIELD(No.),
+                                                                                                Entry Type=CONST(Positive Adjmt.)));
+                                                   CaptionML=[ENU=Positive Adjustments;
+                                                              NOR=Oppjusteringer];
+                                                   BlankNumbers=BlankZero;
+                                                   Editable=No }
+    { 14  ;   ;Batch Name          ;Code10         }
+    { 20  ;   ;PROD-CODE           ;Text50         }
+    { 21  ;   ;PROD-CODE2          ;Code50         }
+    { 30  ;   ;PRODS-NAME          ;Text50         }
+    { 40  ;   ;FOREIGN-NAME        ;Text50         }
+    { 50  ;   ;TAX-CODE            ;Text50         }
+    { 60  ;   ;RE-PURCHASE-PRICE   ;Text50         }
+    { 70  ;   ;LATEST-PURCH-PRICE  ;Text50         }
+    { 80  ;   ;AVERAGE-PRICE       ;Text50         }
+    { 90  ;   ;PRICE-A             ;Text50         }
+    { 100 ;   ;PRICE-B             ;Text50         }
+    { 110 ;   ;REPLACING-PROD      ;Text50         }
+    { 120 ;   ;REPLACE-CODE        ;Text50         }
+    { 130 ;   ;PART-TYPE           ;Text50         }
+    { 140 ;   ;PROD-TYPE           ;Text50         }
+    { 150 ;   ;DISCOUNT-CODE       ;Text50         }
+    { 160 ;   ;DISCOUNT-CODE1      ;Text50         }
+    { 170 ;   ;CALCULATION-CODE    ;Text50         }
+    { 180 ;   ;SALES-PRICE         ;Text50         }
+    { 190 ;   ;PRICE-CHANGE-DATE   ;Text50         }
+    { 200 ;   ;SUPPLIER            ;Text50         }
+    { 210 ;   ;CREATION-DATE       ;Text50         }
+    { 220 ;   ;MISC-1              ;Text50         }
+    { 230 ;   ;MISC-2              ;Text50         }
+    { 240 ;   ;MISC-3              ;Text50         }
+    { 250 ;   ;STOCK-ADDR          ;Text50         }
+    { 260 ;   ;STOCK-AMOUNT        ;Text50         }
+    { 270 ;   ;INVENTORY-DATE      ;Text50         }
+    { 280 ;   ;AGE-CODE            ;Text50         }
+    { 290 ;   ;DEPR-CODE           ;Text50         }
+    { 300 ;   ;REORDER-CODE        ;Text50         }
+    { 310 ;   ;MIN-ORDER-POINT     ;Text50         }
+    { 320 ;   ;ORDER-POINT         ;Text50         }
+    { 330 ;   ;ECON-ORDER-QTY      ;Text50         }
+    { 340 ;   ;EXPECTED-DEMAND     ;Text50         }
+    { 350 ;   ;ORDER-PROPOSAL      ;Text50         }
+    { 360 ;   ;ON-STOCK            ;Text50         }
+    { 370 ;   ;REALISATION         ;Text50         }
+    { 380 ;   ;LAST-BUYING-DTE     ;Text50         }
+    { 390 ;   ;PURCHASES-PCS-MONTH ;Text50         }
+    { 400 ;   ;PURCHASES-PCS-THIS-Y;Text50         }
+    { 410 ;   ;PURCHASES-PCS-PREV-Y;Text50         }
+    { 420 ;   ;LAST-SALES-DTE      ;Text50         }
+    { 430 ;   ;DELIVERY-AMOUNT 1   ;Text50         }
+    { 440 ;   ;DELIVERY-AMOUNT 2   ;Text50         }
+    { 450 ;   ;DELIVERY-AMOUNT 3   ;Text50         }
+    { 460 ;   ;DELIVERY-AMOUNT 4   ;Text50         }
+    { 470 ;   ;DELIVERY-AMOUNT 5   ;Text50         }
+    { 480 ;   ;DELIVERY-AMOUNT 6   ;Text50         }
+    { 490 ;   ;DELIVERY-AMOUNT 7   ;Text50         }
+    { 500 ;   ;DELIVERY-AMOUNT 8   ;Text50         }
+    { 510 ;   ;DELIVERY-AMOUNT 9   ;Text50         }
+    { 520 ;   ;DELIVERY-AMOUNT 10  ;Text50         }
+    { 530 ;   ;DELIVERY-AMOUNT 11  ;Text50         }
+    { 540 ;   ;DELIVERY-AMOUNT 12  ;Text50         }
+    { 550 ;   ;SALES-PCS-THIS-YEAR ;Text50         }
+    { 560 ;   ;SALES-PCS-PREV-YEAR ;Text50         }
+    { 570 ;   ;ADD-COST-CODE       ;Text50         }
+    { 580 ;   ;PACKAGE             ;Text50         }
+  }
+  KEYS
+  {
+    {    ;Primary Key                             ;Clustered=Yes }
+    {    ;PROD-CODE                                }
+  }
+  FIELDGROUPS
+  {
+  }
+  CODE
+  {
+
+    BEGIN
+    END.
+  }
+}
+

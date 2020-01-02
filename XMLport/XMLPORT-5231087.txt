@@ -1,0 +1,249 @@
+OBJECT XMLport 5231087 Portrait Dialog Reminder Exp.2
+{
+  OBJECT-PROPERTIES
+  {
+    Date=15.01.18;
+    Time=16:33:47;
+    Modified=Yes;
+    Version List=BNH Portrait;
+  }
+  PROPERTIES
+  {
+    CaptionML=ENU=Portrait Dialog Options Export;
+    Direction=Export;
+    TextEncoding=WINDOWS;
+    Format=Variable Text;
+    FieldDelimiter=<None>;
+    FieldSeparator=<TAB>;
+    TableSeparator=<NewLine>;
+    UseRequestPage=Yes;
+  }
+  ELEMENTS
+  {
+    { [{C19D763B-C1F1-473D-8D3E-3640AD129D95}];  ;root                ;Element ;Text    ;
+                                                  MinOccurs=Zero }
+
+    { [{81B82F2C-CB05-41E2-8925-E5AD58B43EC2}];1 ;Header              ;Element ;Table   ;
+                                                  SourceTable=Table98 }
+
+    { [{C86B1D71-1403-44E5-9D47-41212B8D9020}];2 ;JobEntryNoHeader    ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 JobEntryNoHeader := 'Job_Entry_Id';
+                                                                               END;
+                                                                                }
+
+    { [{0738E8FA-D803-487F-8429-BA1CE1D0AD0D}];2 ;AddressNoHeader     ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 AddressNoHeader := 'Record_Id';
+                                                                               END;
+                                                                                }
+
+    { [{7A52B0B3-9B35-4A9D-B390-D8159B49F66A}];2 ;LicensePlateHeader  ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 LicensePlateHeader := 'License_Plate';
+                                                                               END;
+                                                                                }
+
+    { [{5EB189C8-AE27-43ED-AB61-680C6979EA90}];2 ;StartDateTimeHeader ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 StartDateTimeHeader := 'Start_DateTime';
+                                                                               END;
+                                                                                }
+
+    { [{E52B7E43-33C7-4D94-97D0-81DF1AD0BD71}];2 ;StatusIdHeader      ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 StatusIdHeader := 'Status';
+                                                                               END;
+                                                                                }
+
+    { [{251A3B1C-F033-420B-B2BC-6F7085B97970}];2 ;JobDescriptionHeader;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 JobDescriptionHeader := 'Job_Description';
+                                                                               END;
+                                                                                }
+
+    { [{E806DC4A-9533-4347-8AE0-45963507DBB4}];2 ;OrderNoHeader       ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 OrderNoHeader := 'Order_Id';
+                                                                               END;
+                                                                                }
+
+    { [{CD156E3A-0D97-42CD-BA08-85CE0526D813}];2 ;BookedByUserIdHeader;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 BookedByUserIdHeader := 'Booked_By_User';
+                                                                               END;
+                                                                                }
+
+    { [{8FA51B54-8DD5-407B-98E4-F993394FC237}];2 ;GroupIdHeader       ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 GroupIdHeader := 'Group_Id';
+                                                                               END;
+                                                                                }
+
+    { [{B10143FB-07BF-41DF-8A12-99F7CA9D5827}];2 ;RecordOperationHeader;Element;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 RecordOperationHeader := 'Record_Operation';
+                                                                               END;
+                                                                                }
+
+    { [{9CE4350A-6C4F-49B9-AA5A-1139360E188C}];2 ;LocationCodeHeader  ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 LocationCodeHeader := 'Location_Code';
+                                                                               END;
+                                                                                }
+
+    { [{8269B823-3137-4145-BB91-369522AEC16F}];1 ;WorkshopplannerJobs ;Element ;Table   ;
+                                                  SourceTable=Table1057600;
+                                                  Export::OnAfterGetRecord=BEGIN
+                                                                             CustomerG.RESET;
+                                                                             CustomerG.SETRANGE("No.", "WorkshopPlanner - Jobs".CustContNo);
+                                                                             IF CustomerG.FINDFIRST THEN
+                                                                               AddressNo := FORMAT(CustomerG."Address No.")
+                                                                             ELSE BEGIN
+                                                                               ContactG.RESET;
+                                                                               ContactG.SETRANGE("No.", "WorkshopPlanner - Jobs".CustContNo);
+                                                                               IF ContactG.FINDFIRST THEN
+                                                                                 AddressNo := FORMAT(CustomerG."Address No.")
+                                                                               ELSE
+                                                                                 currXMLport.SKIP;
+                                                                             END;
+                                                                           END;
+                                                                            }
+
+    { [{768FCF4C-2E64-42E9-952B-BFB0486E997A}];2 ;JobEntryNo          ;Element ;Field   ;
+                                                  DataType=Integer;
+                                                  SourceField=WorkshopPlanner - Jobs::JobEntryNo }
+
+    { [{8EE9D0CE-FB11-40C8-86C0-DA1012DBBF22}];2 ;AddressNo           ;Element ;Text    ;
+                                                  DataType=Integer }
+
+    { [{0B588B43-9385-48DC-B849-F9ADF18BBEF0}];2 ;LicensePlate        ;Element ;Field   ;
+                                                  DataType=Code;
+                                                  SourceField=WorkshopPlanner - Jobs::LicenseNo }
+
+    { [{C6232ED6-41AB-4839-8527-B7906DAB58A0}];2 ;StartDateTime       ;Element ;Text    ;
+                                                  DataType=DateTime;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 IF "WorkshopPlanner - Jobs".StartDateTime = 0DT THEN
+                                                                                   StartDateTime := ''
+                                                                                 ELSE
+                                                                                   StartDateTime := FORMAT("WorkshopPlanner - Jobs".StartDateTime, 0, '<Year4>.<Month,2>.<Day,2>');
+                                                                                   //StartDateTime := FORMAT("WorkshopPlanner - Jobs".StartDateTime, 0, '<Year4>.<Month,2>.<Day,2> <Hours24,2>:<Minutes,2>');
+                                                                               END;
+                                                                                }
+
+    { [{B28130DE-D879-4267-9298-0F125FDD4DB2}];2 ;StatusId            ;Element ;Text    ;
+                                                  DataType=Code;
+                                                  Export::OnBeforePassVariable=VAR
+                                                                                 TabL@1000000000 : Char;
+                                                                               BEGIN
+                                                                                 TabL := 9;
+                                                                                 StatusId := DELCHR("WorkshopPlanner - Jobs".StatusId, '=', FORMAT(TabL));
+                                                                               END;
+                                                                                }
+
+    { [{C82089EA-C98C-471E-8076-2BC530428C65}];2 ;JobDescription      ;Element ;Text    ;
+                                                  DataType=Text;
+                                                  Export::OnBeforePassVariable=VAR
+                                                                                 CharTabL@1101103000 : Char;
+                                                                               BEGIN
+                                                                                 CharTabL := 9;
+                                                                                 JobDescription := DELCHR("WorkshopPlanner - Jobs".JobDescription, '=', FORMAT(CharTabL));
+                                                                               END;
+                                                                                }
+
+    { [{F1DFD3F9-3072-49B8-BB9A-C93D204C9FCA}];2 ;OrderNo             ;Element ;Field   ;
+                                                  DataType=Code;
+                                                  SourceField=WorkshopPlanner - Jobs::OrderNo }
+
+    { [{55268D14-531E-432B-80E8-A2C751A0CC89}];2 ;BookedByUserId      ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=WorkshopPlanner - Jobs::BookedByUserId }
+
+    { [{9C5BEB11-2B35-48C4-8958-CFFC62D5DBFC}];2 ;GroupId             ;Element ;Text    ;
+                                                  DataType=Integer;
+                                                  Export::OnBeforePassVariable=VAR
+                                                                                 WPResourcesL@1101103000 : Record 1057601;
+                                                                                 WPGroupsL@1101103001 : Record 1057602;
+                                                                               BEGIN
+                                                                                 WPResourcesL.RESET;
+                                                                                 WPResourcesL.SETRANGE(WPResourcesL.ResourceId, "WorkshopPlanner - Jobs".ResourceId);
+                                                                                 IF WPResourcesL.FINDFIRST THEN
+                                                                                   GroupId := WPResourcesL.GroupId
+                                                                                 ELSE
+                                                                                   GroupId := '';
+                                                                               END;
+                                                                                }
+
+    { [{39340AA7-FCF1-4318-B5EB-D636B8DB1F9E}];2 ;RecordOperation     ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 RecordOperation := 'U';
+                                                                               END;
+                                                                                }
+
+    { [{F40E6BC8-76CD-47DA-BACE-1A3ACCC142F1}];2 ;LocationCode        ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=VAR
+                                                                                 ServiceJobLineL@1101103002 : Record 5025627;
+                                                                                 ServiceHeaderL@1101103000 : Record 5025624;
+                                                                                 ServiceLineL@1101103003 : Record 5025625;
+                                                                                 ArchivedServiceHeaderL@1101103001 : Record 5025636;
+                                                                                 ArchivedServiceLineL@1101103004 : Record 5025637;
+                                                                               BEGIN
+                                                                                 CASE TRUE OF
+
+                                                                                   ServiceJobLineL.GET( ServiceJobLineL."Document Type"::Order, "WorkshopPlanner - Jobs".OrderNo, "WorkshopPlanner - Jobs".ServiceJobNo ):
+                                                                                     LocationCode := ServiceJobLineL."Location Code";
+
+                                                                                   ServiceLineL.GET( ServiceLineL."Document Type"::Order, "WorkshopPlanner - Jobs".OrderNo, "WorkshopPlanner - Jobs".OrderLineNo ):
+                                                                                     LocationCode := ServiceLineL."Location Code";
+
+                                                                                   ServiceHeaderL.GET( ServiceHeaderL."Document Type"::Order, "WorkshopPlanner - Jobs".OrderNo ):
+                                                                                     LocationCode := ServiceHeaderL."Location Code";
+
+                                                                                   ArchivedServiceLineL.GET( ArchivedServiceLineL."Document Type"::Order, "WorkshopPlanner - Jobs".OrderNo, "WorkshopPlanner - Jobs".OrderLineNo ):
+                                                                                     LocationCode := ArchivedServiceLineL."Location Code";
+
+                                                                                   ArchivedServiceHeaderL.GET( ArchivedServiceHeaderL."Document Type"::Order, "WorkshopPlanner - Jobs".OrderNo ):
+                                                                                     LocationCode := ArchivedServiceHeaderL."Location Code";
+
+                                                                                   ELSE
+                                                                                     LocationCode := '';
+
+                                                                                 END;
+                                                                               END;
+                                                                                }
+
+  }
+  EVENTS
+  {
+  }
+  REQUESTPAGE
+  {
+    PROPERTIES
+    {
+    }
+    CONTROLS
+    {
+    }
+  }
+  CODE
+  {
+    VAR
+      C_NoData@1101103000 : TextConst 'ENU=" ";NOR=" "';
+      CustomerG@1101103001 : Record 18;
+      ContactG@1101103002 : Record 5050;
+
+    BEGIN
+    {
+      +----------------------------------------------+
+      | Copyright ¸ 2017   incadea.dms               |
+      +----------------------------------------------+
+      No.   Version Date      ID    Remark
+      ------------------------------------------------
+                    04.12.17  DHO   Initial Version
+                    15.01.18  ALO   Added column Location_Code
+    }
+    END.
+  }
+}
+

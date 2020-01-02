@@ -1,0 +1,44 @@
+OBJECT Table 5231111 BnH Customer tillegg1
+{
+  OBJECT-PROPERTIES
+  {
+    Date=05.11.17;
+    Time=13:46:19;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+  }
+  FIELDS
+  {
+    { 1   ;   ;Primary Key         ;Integer        }
+    { 2   ;   ;Status              ;Option        ;OptionCaptionML=[ENU=" ,Ignore,OK,Error";
+                                                                    NOR=" ,Ignorer,OK,Feil"];
+                                                   OptionString=[ ,Ignore,OK,Error] }
+    { 3   ;   ;Datetime            ;DateTime      ;CaptionML=[ENU=Time;
+                                                              NOR=Tidspunkt] }
+    { 4   ;   ;Update message      ;Text250       ;CaptionML=[ENU=Message;
+                                                              NOR=Melding] }
+    { 5   ;   ;No.                 ;Code20        ;CaptionML=[ENU=Item No.;
+                                                              NOR=Varenr.] }
+    { 10  ;   ;Kundenr             ;Text50         }
+    { 20  ;   ;Fornavn             ;Text100        }
+    { 30  ;   ;Etternavn           ;Text100        }
+    { 40  ;   ;Kredittgrense       ;Text50         }
+  }
+  KEYS
+  {
+    {    ;Primary Key                             ;Clustered=Yes }
+  }
+  FIELDGROUPS
+  {
+  }
+  CODE
+  {
+
+    BEGIN
+    END.
+  }
+}
+

@@ -1,0 +1,53 @@
+OBJECT Page 5231056 Gjentakelsesposter
+{
+  OBJECT-PROPERTIES
+  {
+    Date=03.10.17;
+    Time=12:32:24;
+    Modified=Yes;
+    Version List=BlanketOrderBNH;
+  }
+  PROPERTIES
+  {
+    SourceTable=Table5231051;
+    PageType=List;
+  }
+  CONTROLS
+  {
+    { 1101103000;0;Container;
+                ContainerType=ContentArea }
+
+    { 1101103001;1;Group  ;
+                Name=Group;
+                GroupType=Repeater }
+
+    { 1101103002;2;Field  ;
+                SourceExpr="Blanket Order No." }
+
+    { 1101103003;2;Field  ;
+                SourceExpr=Date }
+
+    { 1101103004;2;Field  ;
+                SourceExpr=Time }
+
+    { 1101103005;2;Field  ;
+                SourceExpr="Document Type" }
+
+    { 1101103006;2;Field  ;
+                SourceExpr="Document No." }
+
+    { 1101103007;2;Field  ;
+                SourceExpr="User ID" }
+
+    { 1101103008;2;Field  ;
+                SourceExpr="Entry No." }
+
+  }
+  CODE
+  {
+
+    BEGIN
+    END.
+  }
+}
+

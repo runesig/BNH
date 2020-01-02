@@ -1,0 +1,139 @@
+OBJECT Codeunit 5231141 BNH Gule lapper Update
+{
+  OBJECT-PROPERTIES
+  {
+    Date=09.12.17;
+    Time=09:17:13;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    TableNo=5231114;
+    OnRun=BEGIN
+            BNHGuleapperG.COPY( Rec );
+
+            CASE TRUE OF
+              BNHGuleapperG.Status = Status::Ignore:
+                EXIT;
+              ELSE
+                InsertRecord();
+            END;
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      BNHGuleapperG@1101103000 : Record 5231114;
+
+    PROCEDURE InsertRecord@1101103022();
+    VAR
+      VehicleRemarkL@1101103001 : Record 5028654;
+      VehicleRemark2L@1101103002 : Record 5028654;
+      CustomerL@1101103000 : Record 18;
+      VehicleL@1101103003 : Record 5025400;
+      LineNoL@1101103004 : Integer;
+      i@1101103005 : Integer;
+    BEGIN
+      BNHGuleapperG.CALCFIELDS(Kundenr);
+      IF BNHGuleapperG.Type = BNHGuleapperG.Type::Customer THEN
+        IF CustomerL.GET(BNHGuleapperG.Kundenr) THEN
+          BEGIN
+          LineNoL := FindLastLineNo(0, BNHGuleapperG.Kundenr);
+            REPEAT
+            i += 1;
+            IF GetText(i) <> '' THEN
+              BEGIN
+              LineNoL += 10000;
+              VehicleRemarkL.INIT;
+              VehicleRemarkL.VALIDATE("Table Name", VehicleRemarkL."Table Name"::Customer);
+              VehicleRemarkL.VALIDATE("No.", CustomerL."No.");
+              VehicleRemarkL."Line No." := LineNoL;
+              VehicleRemarkL.Text := GetText(i);
+              VehicleRemarkL.INSERT(TRUE);
+              END;
+            UNTIL i = 15;
+          END ELSE BEGIN
+          ERROR('Kunde for %1 er ikke konvertert!', BNHGuleapperG."Nr.");
+          END;
+
+      IF BNHGuleapperG.Type = BNHGuleapperG.Type::Vehicle THEN
+        BEGIN
+        VehicleL.SETRANGE("License No.", BNHGuleapperG."Nr.");
+        IF VehicleL.COUNT = 0 THEN
+          ERROR('Finner ikke kj›ret›y for %1', BNHGuleapperG."Nr.");
+        IF VehicleL.FINDFIRST THEN
+          REPEAT
+          LineNoL := FindLastLineNo(2, VehicleL.VIN);
+            REPEAT
+            i += 1;
+            IF GetText(i) <> '' THEN
+              BEGIN
+              LineNoL += 10000;
+              VehicleRemarkL.INIT;
+              VehicleRemarkL.VALIDATE("Table Name", 2);
+              VehicleRemarkL.VALIDATE("No.", VehicleL.VIN);
+              VehicleRemarkL."Line No." := LineNoL;
+              VehicleRemarkL.Text := GetText(i);
+              VehicleRemarkL.INSERT(TRUE);
+              END;
+            UNTIL i = 15;
+          UNTIL VehicleL.NEXT = 0;
+        END;
+    END;
+
+    PROCEDURE FindLastLineNo@1101103007(TableP@1101103000 : '0,1,2';NoP@1101103001 : Code[20]) : Integer;
+    VAR
+      VehicleRemarkL@1101103002 : Record 5028654;
+    BEGIN
+      VehicleRemarkL.SETRANGE("Table Name", TableP);
+      VehicleRemarkL.SETRANGE("No.", NoP);
+      IF VehicleRemarkL.FINDLAST THEN
+        EXIT(VehicleRemarkL."Line No.");
+    END;
+
+    PROCEDURE GetText@1101103020(iP@1101103000 : Integer) : Text[80];
+    BEGIN
+      CASE iP OF
+        1 :
+          IF STRLEN(BNHGuleapperG.Tekst1) > 1 THEN
+            EXIT(BNHGuleapperG.Tekst1)
+            ELSE
+            EXIT('');
+        2 :
+         EXIT(BNHGuleapperG.Notat1);
+        3 :
+         EXIT(BNHGuleapperG.Notat2);
+        4 :
+         EXIT(BNHGuleapperG.Notat3);
+        5 :
+         EXIT(BNHGuleapperG.Notat4);
+        6 :
+         EXIT(BNHGuleapperG.Notat5);
+        7 :
+         EXIT(BNHGuleapperG.Notat6);
+        8 :
+         EXIT(BNHGuleapperG.Notat7);
+        9 :
+         EXIT(BNHGuleapperG.Notat8);
+        10 :
+         EXIT(BNHGuleapperG.Notat9);
+        11 :
+         EXIT(BNHGuleapperG.Notat10);
+        12 :
+         EXIT(BNHGuleapperG.Notat11);
+        13 :
+         EXIT(BNHGuleapperG.Notat12);
+        14 :
+         EXIT(BNHGuleapperG.Notat13);
+        15 :
+         EXIT(BNHGuleapperG.Notat14);
+        END;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

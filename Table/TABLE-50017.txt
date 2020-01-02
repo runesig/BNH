@@ -1,0 +1,65 @@
+OBJECT Table 50017 BNH CSI Used Car Setup
+{
+  OBJECT-PROPERTIES
+  {
+    Date=08.09.18;
+    Time=13:02:39;
+    Modified=Yes;
+    Version List=BNH.01;
+  }
+  PROPERTIES
+  {
+    CaptionML=[ENU=BNH Used Car Setup;
+               NOR=BNH bruktbiloppsett];
+  }
+  FIELDS
+  {
+    { 1   ;   ;Location Code       ;Code10        ;TableRelation=Location;
+                                                   CaptionML=[ENU=Location Code;
+                                                              NOR=Lokasjonskode];
+                                                   NotBlank=Yes }
+    { 2   ;   ;Dealer No.          ;Code10        ;CaptionML=[ENU=Dealer No.;
+                                                              NOR=Forhandlernr.];
+                                                   NotBlank=Yes }
+    { 11  ;   ;Workshop Department ;Code250       ;TableRelation=Department;
+                                                   ValidateTableRelation=No;
+                                                   CaptionML=[ENU=Workshop Department;
+                                                              NOR=Verksted avdeling] }
+    { 12  ;   ;Parts Sales Department;Code250     ;TableRelation=Department;
+                                                   ValidateTableRelation=No;
+                                                   CaptionML=[ENU=Parts Sales Department;
+                                                              NOR=Delesalg avdeling] }
+    { 21  ;   ;Warranty Posting Group;Code250     ;TableRelation="Gen. Business Posting Group";
+                                                   ValidateTableRelation=No;
+                                                   CaptionML=[ENU=Warranty Posting Group;
+                                                              NOR=Garanti bokf›ringsgruppe] }
+    { 22  ;   ;Carsales Posting Group;Code250     ;TableRelation="Gen. Product Posting Group";
+                                                   ValidateTableRelation=No;
+                                                   CaptionML=[ENU=Carsales Posting Groups;
+                                                              NOR=Kj›ret›ysalg bokf›ringsgrupper] }
+  }
+  KEYS
+  {
+    {    ;Location Code                           ;Clustered=Yes }
+  }
+  FIELDGROUPS
+  {
+  }
+  CODE
+  {
+
+    BEGIN
+    {
+      +----------------------------------------------+
+      | 2009 SI-DATA A/S (SID)                       |
+      +----------------------------------------------+
+      | INCADEA ENGINE                               |
+      +----------------------------------------------+
+      No.  Version  Date      ID      Remark
+      ------------------------------------------------
+      01.  7.1.5    07.06.18  JRO     Initiale version
+    }
+    END.
+  }
+}
+

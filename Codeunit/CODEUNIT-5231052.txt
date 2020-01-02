@@ -1,0 +1,71 @@
+OBJECT Codeunit 5231052 BlanketOrder Single Inst.
+{
+  OBJECT-PROPERTIES
+  {
+    Date=17.01.18;
+    Time=14:26:48;
+    Modified=Yes;
+    Version List=BlanketOrderBNH;
+  }
+  PROPERTIES
+  {
+    SingleInstance=Yes;
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      OrderNoG@1101103000 : Code[20];
+      PostingDateG@1101103001 : Date;
+      DocumentDateG@1101103002 : Date;
+
+    PROCEDURE SetOrderValues@1101103000(OrderNoP@1101103000 : Code[20];PostingDateP@1101103001 : Date;DocumentDateP@1101103002 : Date);
+    BEGIN
+
+      OrderNoG      := OrderNoP;
+      PostingDateG  := PostingDateP;
+      DocumentDateG := DocumentDateP;
+    END;
+
+    PROCEDURE GetOrderNo@1101103001() : Code[20];
+    BEGIN
+
+      EXIT(OrderNoG);
+    END;
+
+    PROCEDURE GetPostingDate@1101103002() : Date;
+    BEGIN
+
+      EXIT(PostingDateG);
+    END;
+
+    PROCEDURE GetDocumentDate@1101103003() : Date;
+    BEGIN
+
+      EXIT(DocumentDateG);
+    END;
+
+    PROCEDURE ResetValues@1101103004();
+    BEGIN
+
+      OrderNoG      := '';
+      PostingDateG  := 0D;
+      DocumentDateG := 0D;
+    END;
+
+    BEGIN
+    {
+      +----------------------------------------------+
+      | Copyright ¸ 2017 Incadea                     |
+      +----------------------------------------------+
+      | MYENGINE@INCADEA                             |
+      +----------------------------------------------+
+      No.  Version  Date      ID  Remark
+      ------------------------------------------------
+    }
+    END.
+  }
+}
+

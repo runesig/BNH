@@ -1,0 +1,220 @@
+OBJECT XMLport 5231076 Portrait Dialog Perm. Export
+{
+  OBJECT-PROPERTIES
+  {
+    Date=17.11.17;
+    Time=15:37:34;
+    Modified=Yes;
+    Version List=BNH Portrait;
+  }
+  PROPERTIES
+  {
+    CaptionML=ENU=Portrait Dialog Perm. Export;
+    Direction=Export;
+    TextEncoding=WINDOWS;
+    Format=Variable Text;
+    FieldDelimiter=<None>;
+    FieldSeparator=<TAB>;
+    TableSeparator=<NewLine>;
+    UseRequestPage=Yes;
+  }
+  ELEMENTS
+  {
+    { [{C19D763B-C1F1-473D-8D3E-3640AD129D95}];  ;root                ;Element ;Text    ;
+                                                  MinOccurs=Zero }
+
+    { [{2F33B595-F471-43E5-8833-FC6437A88452}];1 ;Header              ;Element ;Table   ;
+                                                  SourceTable=Table98 }
+
+    { [{E3A437D4-248C-4017-BA05-8D46CD656A47}];2 ;AddressNoHeader     ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 AddressNoHeader := 'Record_Id';
+                                                                               END;
+                                                                                }
+
+    { [{F5534B70-0B37-4386-8C16-8737C569F0E5}];2 ;ChannelHeader       ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 ChannelHeader := 'Channel';
+                                                                               END;
+                                                                                }
+
+    { [{CC0E171D-0FBE-4C14-B8BA-7962D0F65605}];2 ;StatusHeader        ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 StatusHeader := 'Status';
+                                                                               END;
+                                                                                }
+
+    { [{D08748BA-7F74-461F-A064-08A6F54E4D2C}];2 ;RecordOperationHeader;Element;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 RecordOperationHeader := 'Record_Operation';
+                                                                               END;
+                                                                                }
+
+    { [{1BF6A062-7354-40C1-9EF5-00D24878BFCD}];1 ;PhoneDataPriv       ;Element ;Table   ;
+                                                  VariableName=PhoneDataPriv;
+                                                  SourceTable=Table5060972 }
+
+    { [{3DB8410F-89F6-4728-90E8-8CD7E8B6E544}];2 ;PhoneAddressNo      ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 PhoneAddressNo := FORMAT(GetAddressNo(PhoneDataPriv."Contact / Contact Person No."));
+                                                                               END;
+                                                                                }
+
+    { [{833B05D2-9874-415F-850B-6ADCB6D474C4}];2 ;PhoneChannel        ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 PhoneChannel := 'PHONE';
+                                                                               END;
+                                                                                }
+
+    { [{3B92747D-8EC5-4BA1-A3EB-E0AB94E6D8BB}];2 ;PhoneStatus         ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 IF (PhoneDataPriv.Phone OR PhoneDataPriv."Mobile Phone") THEN
+                                                                                   PhoneStatus := '1'
+                                                                                 ELSE
+                                                                                   PhoneStatus := '0';
+                                                                               END;
+                                                                                }
+
+    { [{33549D93-70A6-4BF7-BC30-067C33E9D077}];2 ;PhoneRecordOperation;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 PhoneRecordOperation := 'U';
+                                                                               END;
+                                                                                }
+
+    { [{77963AFD-D601-4621-8B87-8C79AFA67F2F}];1 ;EmailDataPriv       ;Element ;Table   ;
+                                                  VariableName=EmailDataPriv;
+                                                  SourceTable=Table5060972 }
+
+    { [{2DE473A0-57C7-4839-AB7C-AE5E64368CAD}];2 ;EmailAddressNo      ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 EmailAddressNo := FORMAT(GetAddressNo(EmailDataPriv."Contact / Contact Person No."));
+                                                                               END;
+                                                                                }
+
+    { [{FDB46F41-2785-4915-A611-C8BFD1CD948F}];2 ;EmailChannel        ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 EmailChannel := 'EMAIL';
+                                                                               END;
+                                                                                }
+
+    { [{BB54ABB4-6261-4AF9-B59B-40A60C1F0C72}];2 ;EmailStatus         ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 IF EmailDataPriv."E-Mail" THEN
+                                                                                   EmailStatus := '1'
+                                                                                 ELSE
+                                                                                   EmailStatus := '0';
+                                                                               END;
+                                                                                }
+
+    { [{1E99D283-427D-4FBF-9015-DA670AFD2595}];2 ;EmailRecordOperation;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 EmailRecordOperation := 'U';
+                                                                               END;
+                                                                                }
+
+    { [{8452FAA4-1994-4A4C-8885-B7DA32B06E88}];1 ;MailDataPriv        ;Element ;Table   ;
+                                                  VariableName=MailDataPriv;
+                                                  SourceTable=Table5060972 }
+
+    { [{996063E2-D9C0-4648-8785-F9BC9038AE7B}];2 ;MailAddressNo       ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 MailAddressNo := FORMAT(GetAddressNo(MailDataPriv."Contact / Contact Person No."));
+                                                                               END;
+                                                                                }
+
+    { [{6479E183-88CB-4980-884E-B21AAF12B726}];2 ;MailChannel         ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 MailChannel := 'MAIL';
+                                                                               END;
+                                                                                }
+
+    { [{6173DE1F-23EA-4FE4-9185-EC7240416CE2}];2 ;MailStatus          ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 IF MailDataPriv."Regular mail" THEN
+                                                                                   MailStatus := '1'
+                                                                                 ELSE
+                                                                                   MailStatus := '0';
+                                                                               END;
+                                                                                }
+
+    { [{1025875D-3FBD-4BCB-BCE7-44B26C0A93AD}];2 ;MailRecordOperation ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 MailRecordOperation := 'U';
+                                                                               END;
+                                                                                }
+
+    { [{6601D0DA-9DB5-41C1-9626-01768B86F3EB}];1 ;SmsDataPriv         ;Element ;Table   ;
+                                                  VariableName=SmsDataPriv;
+                                                  SourceTable=Table5060972 }
+
+    { [{7FDA0ADE-2574-4845-82AE-FE450F3D29CA}];2 ;SmsAddressNo        ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 SmsAddressNo := FORMAT(GetAddressNo(SmsDataPriv."Contact / Contact Person No."));
+                                                                               END;
+                                                                                }
+
+    { [{988C4708-88A6-4CA0-B300-0268CA3E1347}];2 ;SmsChannel          ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 SmsChannel := 'SMS';
+                                                                               END;
+                                                                                }
+
+    { [{E9C656B0-17FF-4E31-BE67-B6594795DF30}];2 ;SmsStatus           ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 IF SmsDataPriv.SMS THEN
+                                                                                   SmsStatus := '1'
+                                                                                 ELSE
+                                                                                   SmsStatus := '0';
+                                                                               END;
+                                                                                }
+
+    { [{F6A30DFC-9E4D-4B46-B3FC-C7DD09F9E04D}];2 ;SmsRecordOperation  ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 SmsRecordOperation := 'U';
+                                                                               END;
+                                                                                }
+
+  }
+  EVENTS
+  {
+  }
+  REQUESTPAGE
+  {
+    PROPERTIES
+    {
+    }
+    CONTROLS
+    {
+    }
+  }
+  CODE
+  {
+    VAR
+      C_NoData@1101103000 : TextConst 'ENU=" ";NOR=" "';
+      ContactG@1101103001 : Record 5050;
+      DataPrivacyG@1101103002 : Record 5060972;
+
+    PROCEDURE GetAddressNo@1101103000(ContactNoP@1101103000 : Code[20]) AddressNoR : Integer;
+    VAR
+      ContactL@1101103001 : Record 5050;
+    BEGIN
+      ContactL.RESET;
+      ContactL.SETRANGE("No.", ContactNoP);
+      IF ContactL.FINDFIRST THEN
+        EXIT(ContactL."Address No.");
+      EXIT(0);
+    END;
+
+    BEGIN
+    {
+      +----------------------------------------------+
+      | Copyright ¸ 2017   incadea.dms               |
+      +----------------------------------------------+
+      No.   Version Date      ID    Remark
+      ------------------------------------------------
+                    03.10.17  DHO   Initial Version
+    }
+    END.
+  }
+}
+

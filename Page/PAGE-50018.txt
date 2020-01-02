@@ -1,0 +1,52 @@
+OBJECT Page 50018 PDF Tool Setup INC
+{
+  OBJECT-PROPERTIES
+  {
+    Date=07.06.18;
+    Time=09:28:46;
+    Modified=Yes;
+    Version List=BNH.01;
+  }
+  PROPERTIES
+  {
+    SourceTable=Table50014;
+    PageType=List;
+  }
+  CONTROLS
+  {
+    { 1101103000;0;Container;
+                ContainerType=ContentArea }
+
+    { 1101103001;1;Group  ;
+                Name=Group;
+                GroupType=Repeater }
+
+    { 1101103002;2;Field  ;
+                SourceExpr="Primary Key" }
+
+    { 1101103003;2;Field  ;
+                SourceExpr="PDF Directory Path" }
+
+    { 1101103007;2;Field  ;
+                Width=50;
+                SourceExpr="Last Merged File Name" }
+
+  }
+  CODE
+  {
+
+    BEGIN
+    {
+      +----------------------------------------------+
+      | 2009 SI-DATA A/S (SID)                       |
+      +----------------------------------------------+
+      | INCADEA ENGINE                               |
+      +----------------------------------------------+
+      No.  Version  Date      ID      Remark
+      ------------------------------------------------
+      01.  7.1.5    07.06.18  JRO     Initiale version
+    }
+    END.
+  }
+}
+

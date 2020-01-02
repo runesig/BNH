@@ -1,0 +1,62 @@
+OBJECT XMLport 5231099 BNH Usercode
+{
+  OBJECT-PROPERTIES
+  {
+    Date=11.04.18;
+    Time=15:25:52;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    Format=Variable Text;
+    FieldSeparator=[;];
+  }
+  ELEMENTS
+  {
+    { [{75B50CA0-7355-425A-B8F4-9EDCF01A80AB}];  ;CSV                 ;Element ;Text     }
+
+    { [{72B59964-3DF9-408A-96CC-38EF19FF79C7}];1 ;Table               ;Element ;Table   ;
+                                                  SourceTable=Table5231099 }
+
+    { [{88BB2FB7-AB82-4FC9-8ECC-025E2BD393D0}];2 ;A                   ;Element ;Field   ;
+                                                  DataType=Code;
+                                                  SourceField=BNH User code::BNH User }
+
+    { [{42BCAB96-6F2C-4F29-9F17-0651438EA087}];2 ;B                   ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH User code::Navn }
+
+    { [{9636211B-F93F-4F97-A75C-8BA0DC17769E}];2 ;C                   ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH User code::Fornavn }
+
+    { [{CA5FD852-A402-466E-B9A5-AB98DE7FFB76}];2 ;D                   ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH User code::Etternavn }
+
+    { [{C89DEA8D-8B4E-4B23-9692-D26943DA0DC0}];2 ;E                   ;Element ;Field   ;
+                                                  DataType=Code;
+                                                  SourceField=BNH User code::EMSelger kode }
+
+  }
+  EVENTS
+  {
+  }
+  REQUESTPAGE
+  {
+    PROPERTIES
+    {
+    }
+    CONTROLS
+    {
+    }
+  }
+  CODE
+  {
+
+    BEGIN
+    END.
+  }
+}
+

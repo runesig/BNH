@@ -1,0 +1,87 @@
+OBJECT Codeunit 5231116 BNH Delete Vehicles
+{
+  OBJECT-PROPERTIES
+  {
+    Date=06.11.17;
+    Time=20:40:35;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    TableNo=5231115;
+    OnRun=BEGIN
+            CLEAR( RecordCountG );
+
+            WITH BnHVehicleG DO BEGIN
+              COPY( Rec );
+              SETFILTER( VIN, '<>%1', '' );
+              RecordCountG[1] := COUNT;
+
+              IF NOT CONFIRM( C_DeleteVehicles, FALSE, RecordCountG[1] ) THEN
+                EXIT;
+
+              IF NOT CONFIRM( C_Sure, FALSE ) THEN
+                EXIT;
+
+              IF FINDSET THEN
+                REPEAT
+                  BnHVehicleG.CALCFIELDS( VIN );
+                  CASE VehicleG.GET( BnHVehicleG.VIN ) OF
+                    FALSE:
+                      BEGIN
+                        "Q Status" := "Q Status"::Error;
+                        "Q Datetime" := CURRENTDATETIME;
+                        "Q Update message" := C_VehicleDoesNotExist;
+                        MODIFY;
+                        RecordCountG[3] += 1;
+                      END;
+                    TRUE:
+                      BEGIN
+                        COMMIT;
+                        CLEARLASTERROR;
+                        CASE BnHDeleteVehicle.RUN( VehicleG ) OF
+                          TRUE:
+                            BEGIN
+                              "Q Status" := "Q Status"::" ";
+                              "Q Datetime" := 0DT;
+                              "Q Update message" := '';
+                              MODIFY;
+                              RecordCountG[2] += 1;
+                            END;
+                          FALSE:
+                            BEGIN
+                              "Q Status" := "Q Status"::Error;
+                              "Q Datetime" := CURRENTDATETIME;
+                              "Q Update message" := GETLASTERRORTEXT;
+                              MODIFY;
+                              RecordCountG[3] += 1;
+                            END;
+                        END;
+                      END;
+                  END;
+                UNTIL NEXT = 0;
+            END;
+
+            IF GUIALLOWED THEN
+              MESSAGE( C_DeleteVehiclesResults, RecordCountG[1], RecordCountG[2], RecordCountG[3] );
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      VehicleG@1101103003 : Record 5025400;
+      BnHVehicleG@1101103002 : Record 5231115;
+      RecordCountG@1101103001 : ARRAY [3] OF Integer;
+      BnHDeleteVehicle@1101103000 : Codeunit 5231116;
+      C_DeleteVehicles@1101103007 : TextConst 'ENU=Delete %1 Vehicles?;NOR=Slett %1 kj›ret›y?';
+      C_Sure@1101103005 : TextConst 'ENU=Sure?;NOR=Sikker?';
+      C_DeleteVehiclesResults@1101103004 : TextConst 'ENU=Delete Vehicles:\ \%1 processed\%2 deleted\%3 failed;NOR=Slett kj›ret›y:\ \%1 prosessert\%2 slettet\%3 feilet';
+      C_VehicleDoesNotExist@1101103006 : TextConst 'ENU=Vehicle does not exist.;NOR=Kj›ret›y finnes ikke.';
+
+    BEGIN
+    END.
+  }
+}
+

@@ -1,0 +1,497 @@
+OBJECT Page 5231120 BNH Item
+{
+  OBJECT-PROPERTIES
+  {
+    Date=23.11.17;
+    Time=10:19:30;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    SourceTable=Table5231124;
+    PageType=List;
+    ActionList=ACTIONS
+    {
+      { 1101103079;  ;ActionContainer;
+                      ActionContainerType=ActionItems }
+      { 1101103067;1 ;Action    ;
+                      Name=Evaluate Inventory;
+                      CaptionML=[ENU=Evaluate Inventory;
+                                 NOR=Evaluer beholdning];
+                      Image=Calculate;
+                      PromotedCategory=Process;
+                      OnAction=BEGIN
+                                 EvaluateInventory;
+                               END;
+                                }
+      { 1101103063;1 ;Action    ;
+                      Name=Delete All Records;
+                      CaptionML=[ENU=Delete All Records;
+                                 NOR=Slett alle poster];
+                      Image=DeleteXML;
+                      PromotedCategory=Process;
+                      OnAction=BEGIN
+                                 DeleteAllRecords;
+                               END;
+                                }
+      { 1101103061;1 ;Action    ;
+                      Name=Import Data;
+                      CaptionML=[ENU=Import Data;
+                                 NOR=Importer data];
+                      RunObject=XMLport 5231122;
+                      Image=Import;
+                      PromotedCategory=Process }
+      { 1101103080;1 ;Action    ;
+                      Name=Create Items;
+                      CaptionML=[ENU=Create Items;
+                                 NOR=Opprett varer];
+                      Promoted=Yes;
+                      PromotedIsBig=Yes;
+                      Image=TransferOrder;
+                      PromotedCategory=Process;
+                      OnAction=BEGIN
+                                 CreateItems;
+                               END;
+                                }
+      { 1101103068;1 ;Action    ;
+                      Name=Delete Items;
+                      CaptionML=[ENU=Delete Items;
+                                 NOR=Slett varer];
+                      Image=DeleteXML;
+                      PromotedCategory=Process;
+                      OnAction=BEGIN
+                                 DeleteItems;
+                               END;
+                                }
+      { 1101103069;1 ;Action    ;
+                      Name=Product Group Make;
+                      CaptionML=[ENU=Product Group Make;
+                                 NOR=Produktgruppe Merkekode];
+                      RunObject=Page 5231121;
+                      Image=List;
+                      PromotedCategory=New }
+      { 1101103070;1 ;Action    ;
+                      Name=Create Journal;
+                      CaptionML=[ENU=To Journal;
+                                 NOR=Til journal];
+                      Promoted=Yes;
+                      PromotedIsBig=Yes;
+                      Image=Journal;
+                      PromotedCategory=Process;
+                      OnAction=BEGIN
+                                 CreateJournal;
+                               END;
+                                }
+      { 1101103073;1 ;Action    ;
+                      Name=Ignore;
+                      CaptionML=[ENU=Status Ignore;
+                                 NOR=Status ignorer];
+                      Image=Reject;
+                      PromotedCategory=Process;
+                      OnAction=BEGIN
+                                 StatusIgnore;
+                               END;
+                                }
+      { 1101103074;1 ;Action    ;
+                      Name=Reset;
+                      CaptionML=[ENU=Reset Status;
+                                 NOR=Tilbakestill status];
+                      Image=ResetStatus;
+                      PromotedCategory=Process;
+                      OnAction=BEGIN
+                                 StatusReset;
+                               END;
+                                }
+    }
+  }
+  CONTROLS
+  {
+    { 1101103000;0;Container;
+                ContainerType=ContentArea }
+
+    { 1101103001;1;Group  ;
+                Name=Group;
+                GroupType=Repeater }
+
+    { 1101103002;2;Field  ;
+                SourceExpr="Primary Key" }
+
+    { 1101103081;2;Field  ;
+                SourceExpr=Status;
+                Editable=TRUE }
+
+    { 1101103082;2;Field  ;
+                SourceExpr=Datetime }
+
+    { 1101103083;2;Field  ;
+                SourceExpr="Update message" }
+
+    { 1101103084;2;Field  ;
+                AssistEdit=Yes;
+                SourceExpr="No.";
+                OnAssistEdit=VAR
+                               CustomerL@1101103000 : Record 18;
+                             BEGIN
+                               IF ItemG.GET( "No." ) THEN
+                                 PAGE.RUN( PAGE::"Item Card", ItemG );
+                             END;
+                              }
+
+    { 1101103062;2;Field  ;
+                SourceExpr="Location Code" }
+
+    { 1101103064;2;Field  ;
+                SourceExpr="Location Name" }
+
+    { 1101103065;2;Field  ;
+                SourceExpr=Inventory }
+
+    { 1101103066;2;Field  ;
+                SourceExpr="Max Inventory" }
+
+    { 1101103071;2;Field  ;
+                SourceExpr="Journal Entries" }
+
+    { 1101103072;2;Field  ;
+                SourceExpr="Positive Adjustments" }
+
+    { 1101103003;2;Field  ;
+                SourceExpr="PROD-GRP" }
+
+    { 1101103004;2;Field  ;
+                AssistEdit=Yes;
+                SourceExpr="PROD-CODE";
+                OnAssistEdit=VAR
+                               ItemMasterL@1101103000 : Record 5029101;
+                               ItemMasterListL@1101103001 : Page 5029100;
+                             BEGIN
+                               WITH ItemMasterL DO BEGIN
+                                 RESET;
+                                 SETRANGE( "No.", "PROD-CODE" );
+                                 IF ISEMPTY THEN
+                                   EXIT
+                                 ELSE
+                                   FINDFIRST;
+                               END;
+
+                               WITH ItemMasterListL DO BEGIN
+                                 SETRECORD( ItemMasterL );
+                                 RUN;
+                               END;
+                             END;
+                              }
+
+    { 1101103075;2;Field  ;
+                SourceExpr="PROD-CODE2" }
+
+    { 1101103005;2;Field  ;
+                SourceExpr="PRODS-NAME" }
+
+    { 1101103006;2;Field  ;
+                SourceExpr="FOREIGN-NAME" }
+
+    { 1101103007;2;Field  ;
+                SourceExpr="TAX-CODE" }
+
+    { 1101103008;2;Field  ;
+                SourceExpr="RE-PURCHASE-PRICE" }
+
+    { 1101103009;2;Field  ;
+                SourceExpr="LATEST-PURCH-PRICE" }
+
+    { 1101103010;2;Field  ;
+                SourceExpr="AVERAGE-PRICE" }
+
+    { 1101103011;2;Field  ;
+                SourceExpr="PRICE-A" }
+
+    { 1101103012;2;Field  ;
+                SourceExpr="PRICE-B" }
+
+    { 1101103013;2;Field  ;
+                SourceExpr="REPLACING-PROD" }
+
+    { 1101103014;2;Field  ;
+                SourceExpr="REPLACE-CODE" }
+
+    { 1101103015;2;Field  ;
+                SourceExpr="PART-TYPE" }
+
+    { 1101103016;2;Field  ;
+                SourceExpr="PROD-TYPE" }
+
+    { 1101103017;2;Field  ;
+                SourceExpr="DISCOUNT-CODE" }
+
+    { 1101103018;2;Field  ;
+                SourceExpr="DISCOUNT-CODE1" }
+
+    { 1101103019;2;Field  ;
+                SourceExpr="CALCULATION-CODE" }
+
+    { 1101103020;2;Field  ;
+                SourceExpr="SALES-PRICE" }
+
+    { 1101103021;2;Field  ;
+                SourceExpr="PRICE-CHANGE-DATE" }
+
+    { 1101103022;2;Field  ;
+                SourceExpr=SUPPLIER }
+
+    { 1101103023;2;Field  ;
+                SourceExpr="CREATION-DATE" }
+
+    { 1101103024;2;Field  ;
+                SourceExpr="MISC-1" }
+
+    { 1101103025;2;Field  ;
+                SourceExpr="MISC-2" }
+
+    { 1101103026;2;Field  ;
+                SourceExpr="MISC-3" }
+
+    { 1101103027;2;Field  ;
+                SourceExpr="STOCK-ADDR" }
+
+    { 1101103028;2;Field  ;
+                SourceExpr="STOCK-AMOUNT" }
+
+    { 1101103029;2;Field  ;
+                SourceExpr="INVENTORY-DATE" }
+
+    { 1101103030;2;Field  ;
+                SourceExpr="AGE-CODE" }
+
+    { 1101103031;2;Field  ;
+                SourceExpr="DEPR-CODE" }
+
+    { 1101103032;2;Field  ;
+                SourceExpr="REORDER-CODE" }
+
+    { 1101103033;2;Field  ;
+                SourceExpr="MIN-ORDER-POINT" }
+
+    { 1101103034;2;Field  ;
+                SourceExpr="ORDER-POINT" }
+
+    { 1101103035;2;Field  ;
+                SourceExpr="ECON-ORDER-QTY" }
+
+    { 1101103036;2;Field  ;
+                SourceExpr="EXPECTED-DEMAND" }
+
+    { 1101103037;2;Field  ;
+                SourceExpr="ORDER-PROPOSAL" }
+
+    { 1101103038;2;Field  ;
+                SourceExpr="ON-STOCK" }
+
+    { 1101103039;2;Field  ;
+                SourceExpr=REALISATION }
+
+    { 1101103040;2;Field  ;
+                SourceExpr="LAST-BUYING-DTE" }
+
+    { 1101103041;2;Field  ;
+                SourceExpr="PURCHASES-PCS-MONTH" }
+
+    { 1101103042;2;Field  ;
+                SourceExpr="PURCHASES-PCS-THIS-Y" }
+
+    { 1101103043;2;Field  ;
+                SourceExpr="PURCHASES-PCS-PREV-Y" }
+
+    { 1101103044;2;Field  ;
+                SourceExpr="LAST-SALES-DTE" }
+
+    { 1101103045;2;Field  ;
+                SourceExpr="DELIVERY-AMOUNT 1" }
+
+    { 1101103046;2;Field  ;
+                SourceExpr="DELIVERY-AMOUNT 2" }
+
+    { 1101103047;2;Field  ;
+                SourceExpr="DELIVERY-AMOUNT 3" }
+
+    { 1101103048;2;Field  ;
+                SourceExpr="DELIVERY-AMOUNT 4" }
+
+    { 1101103049;2;Field  ;
+                SourceExpr="DELIVERY-AMOUNT 5" }
+
+    { 1101103050;2;Field  ;
+                SourceExpr="DELIVERY-AMOUNT 6" }
+
+    { 1101103051;2;Field  ;
+                SourceExpr="DELIVERY-AMOUNT 7" }
+
+    { 1101103052;2;Field  ;
+                SourceExpr="DELIVERY-AMOUNT 8" }
+
+    { 1101103053;2;Field  ;
+                SourceExpr="DELIVERY-AMOUNT 9" }
+
+    { 1101103054;2;Field  ;
+                SourceExpr="DELIVERY-AMOUNT 10" }
+
+    { 1101103055;2;Field  ;
+                SourceExpr="DELIVERY-AMOUNT 11" }
+
+    { 1101103056;2;Field  ;
+                SourceExpr="DELIVERY-AMOUNT 12" }
+
+    { 1101103057;2;Field  ;
+                SourceExpr="SALES-PCS-THIS-YEAR" }
+
+    { 1101103058;2;Field  ;
+                SourceExpr="SALES-PCS-PREV-YEAR" }
+
+    { 1101103059;2;Field  ;
+                SourceExpr="ADD-COST-CODE" }
+
+    { 1101103060;2;Field  ;
+                SourceExpr=PACKAGE }
+
+  }
+  CODE
+  {
+    VAR
+      C_DeleteAllRecords@1101103000 : TextConst 'ENU=Delete All Records?;NOR=Slett alle poster?';
+      C_Sure@1101103002 : TextConst 'ENU=Sure?;NOR=Sikker?';
+      ItemG@1101103005 : Record 27;
+      C_StatusIgnore@1101103001 : TextConst 'ENU=Status Ignore;NOR=Status ignorer';
+
+    PROCEDURE DeleteItems@1101103002();
+    VAR
+      BnHItemL@1101103000 : Record 5231124;
+    BEGIN
+      CurrPage.SETSELECTIONFILTER( BnHItemL );
+      CODEUNIT.RUN( CODEUNIT::"BNH Delete Items", BnHItemL );
+      CurrPage.UPDATE( FALSE );
+    END;
+
+    PROCEDURE CreateItems@1101103003();
+    VAR
+      BnHItemL@1101103000 : Record 5231124;
+    BEGIN
+      CurrPage.SETSELECTIONFILTER( BnHItemL );
+      CODEUNIT.RUN( CODEUNIT::"BNH Item", BnHItemL );
+      CurrPage.UPDATE( FALSE );
+    END;
+
+    PROCEDURE DeleteAllRecords@1101103001();
+    VAR
+      BnHItemL@1101103000 : Record 5231124;
+    BEGIN
+      IF CONFIRM( C_DeleteAllRecords, FALSE ) THEN
+        IF CONFIRM( C_Sure, FALSE ) THEN
+          BnHItemL.DELETEALL( FALSE );
+      CurrPage.UPDATE( FALSE );
+    END;
+
+    PROCEDURE EvaluateInventory@1101103000();
+    VAR
+      BnHItemL@1101103001 : Record 5231124;
+      PDMProgressL@1101103000 : Codeunit 50009;
+      RecordCount@1101103002 : ARRAY [2] OF Integer;
+      C_ProgressTitle@1101103003 : TextConst 'ENU=Evaluating inventory;NOR=Evaluerer beholdning';
+      C_InventoryResults@1101103004 : TextConst 'ENU=Evaluated inventory for %1 out of %2 records.;NOR=Evaluert beholdning for %1 av %2 poster.';
+    BEGIN
+      CurrPage.SETSELECTIONFILTER( BnHItemL );
+      WITH BnHItemL DO BEGIN
+        RecordCount[1] := COUNT;
+        PDMProgressL.Start( C_ProgressTitle, RecordCount[1] );
+        IF FINDSET THEN
+          REPEAT
+            PDMProgressL.Increment( 1 );
+            IF EVALUATE( Inventory, CONVERTSTR( "STOCK-AMOUNT", '.', ',' )) THEN BEGIN
+              IF Inventory <> 0 THEN
+                RecordCount[2] += 1;
+              MODIFY;
+            END;
+          UNTIL NEXT = 0;
+        PDMProgressL.Stop;
+      END;
+      IF GUIALLOWED THEN
+        MESSAGE( C_InventoryResults, RecordCount[2], RecordCount[1] );
+
+      CurrPage.UPDATE( FALSE );
+    END;
+
+    PROCEDURE CreateJournal@1101103004();
+    VAR
+      BnHItemL@1101103000 : Record 5231124;
+    BEGIN
+      CurrPage.SETSELECTIONFILTER( BnHItemL );
+      CODEUNIT.RUN( CODEUNIT::"BNH Create Item Journals", BnHItemL );
+      CurrPage.UPDATE( FALSE );
+    END;
+
+    PROCEDURE StatusIgnore@1101103005();
+    VAR
+      BnHItemL@1101103002 : Record 5231124;
+      PDMProgressL@1101103001 : Codeunit 50009;
+      RecordCount@1101103000 : ARRAY [2] OF Integer;
+      C_ProgressTitle@1101103004 : TextConst 'ENU=Ignore Items;NOR=Ignorerer varer';
+      C_Results@1101103003 : TextConst 'ENU=%1 out of %2 items ignored.;NOR=%1 av %2 varer ignorert.';
+    BEGIN
+      CurrPage.SETSELECTIONFILTER( BnHItemL );
+      WITH BnHItemL DO BEGIN
+        RecordCount[1] := COUNT;
+        PDMProgressL.Start( C_ProgressTitle, RecordCount[1] );
+        IF FINDSET THEN
+          REPEAT
+            PDMProgressL.Increment( 1 );
+            IF Status <> Status::Ignore THEN BEGIN
+              Status := Status::Ignore;
+              "Update message" := C_StatusIgnore;
+              Datetime := CURRENTDATETIME;
+              IF MODIFY THEN
+                RecordCount[2] += 1;
+            END;
+          UNTIL NEXT = 0;
+        PDMProgressL.Stop;
+      END;
+      IF GUIALLOWED THEN
+        MESSAGE( C_Results, RecordCount[2], RecordCount[1] );
+
+      CurrPage.UPDATE( FALSE );
+    END;
+
+    PROCEDURE StatusReset@1101103007();
+    VAR
+      BnHItemL@1101103002 : Record 5231124;
+      PDMProgressL@1101103001 : Codeunit 50009;
+      RecordCount@1101103000 : ARRAY [2] OF Integer;
+      C_ProgressTitle@1101103004 : TextConst 'ENU=Ignore Items;NOR=Ignorerer varer';
+      C_Results@1101103003 : TextConst 'ENU=Status reset for %1 out of %2 records.;NOR=Tilbakestilt status for %1 av %2 poster.';
+    BEGIN
+      CurrPage.SETSELECTIONFILTER( BnHItemL );
+      WITH BnHItemL DO BEGIN
+        RecordCount[1] := COUNT;
+        PDMProgressL.Start( C_ProgressTitle, RecordCount[1] );
+        IF FINDSET THEN
+          REPEAT
+            PDMProgressL.Increment( 1 );
+            IF Status <> Status::" " THEN BEGIN
+              Status := Status::" ";
+              "Update message" := '';
+              Datetime := 0DT;
+              IF MODIFY THEN
+                RecordCount[2] += 1;
+            END;
+          UNTIL NEXT = 0;
+        PDMProgressL.Stop;
+      END;
+      IF GUIALLOWED THEN
+        MESSAGE( C_Results, RecordCount[2], RecordCount[1] );
+
+      CurrPage.UPDATE( FALSE );
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

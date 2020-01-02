@@ -1,0 +1,560 @@
+OBJECT Page 5231051 Blanket Sales Order SubBNH
+{
+  OBJECT-PROPERTIES
+  {
+    Date=07.11.17;
+    Time=13:28:48;
+    Modified=Yes;
+    Version List=BlanketOrderBNH;
+  }
+  PROPERTIES
+  {
+    CaptionML=[DAN=Linjer;
+               ENU=Lines;
+               NOR=Linjer;
+               SVE=Rader];
+    MultipleNewLines=Yes;
+    SourceTable=Table37;
+    DelayedInsert=Yes;
+    SourceTableView=WHERE(Document Type=FILTER(Blanket Order));
+    PageType=ListPart;
+    AutoSplitKey=Yes;
+    OnAfterGetRecord=BEGIN
+                       // Start PA035597
+                       ShowShortcutDimCode(ShortcutDimCode);
+                       // Stop PA035597
+                     END;
+
+    OnNewRecord=BEGIN
+                  Type := xRec.Type;
+                  // Start PA035597
+                  CLEAR(ShortcutDimCode);
+                  // Stop PA035597
+                END;
+
+    ActionList=ACTIONS
+    {
+      { 1900000004;0 ;ActionContainer;
+                      ActionContainerType=ActionItems }
+      { 1906587504;1 ;ActionGroup;
+                      CaptionML=[DAN=F&unktioner;
+                                 DEU=F&unktionen;
+                                 ENU=F&unctions;
+                                 NOR=F&unksjoner;
+                                 SVE=Funktioner] }
+      { 1901991404;2 ;Action    ;
+                      CaptionML=[DAN=&Beregn fakturarabat;
+                                 DEU=&Rechnungsrabatt Berechnen;
+                                 ENU=Calculate &Invoice Discount;
+                                 SVE=BerÑkna &fakturarabatt];
+                      Image=CalculateInvoiceDiscount;
+                      OnAction=BEGIN
+                                 //This functionality was copied from page #507. Unsupported part was commented. Please check it.
+                                 {CurrPage.SalesLines.PAGE.}
+                                 ApproveCalcInvDisc;
+                               END;
+                                }
+      { 1901741804;2 ;Action    ;
+                      CaptionML=[DAN=&Udfold stykliste;
+                                 DEU=St&Åckliste Entfalten;
+                                 ENU=E&xplode BOM;
+                                 NOR=U&tfold stykkliste;
+                                 SVE=E&xpandera struktur];
+                      Image=ExplodeBOM;
+                      OnAction=BEGIN
+                                 //This functionality was copied from page #507. Unsupported part was commented. Please check it.
+                                 {CurrPage.SalesLines.PAGE.}
+                                 ExplodeBOM;
+                               END;
+                                }
+      { 1903099004;2 ;Action    ;
+                      CaptionML=[DAN=&Indsët udv. tekster;
+                                 DEU=Textbausteine &einfÅgen;
+                                 ENU=Insert &Ext. Texts;
+                                 NOR=S&ett inn utv. tekster;
+                                 SVE=Infoga e&xtratexter];
+                      Image=Note;
+                      OnAction=BEGIN
+                                 //This functionality was copied from page #507. Unsupported part was commented. Please check it.
+                                 {CurrPage.SalesLines.PAGE.}
+                                 _InsertExtendedText(TRUE);
+                               END;
+                                }
+      { 1905427604;2 ;Action    ;
+                      Ellipsis=Yes;
+                      CaptionML=[DAN=&Reserver;
+                                 DEU=Re&servieren;
+                                 ENU=&Reserve;
+                                 NOR=Reserver;
+                                 SVE=&Reservera];
+                      Image=AutoReserve;
+                      OnAction=BEGIN
+                                 //This functionality was copied from page #507. Unsupported part was commented. Please check it.
+                                 {CurrPage.SalesLines.PAGE.}
+                                 _ShowReservation;
+                               END;
+                                }
+      { 1907935204;1 ;ActionGroup;
+                      CaptionML=[DAN=&Linje;
+                                 DEU=&Zeile;
+                                 ENU=&Line;
+                                 NOR=Linje;
+                                 SVE=Ra&d] }
+      { 1903866504;2 ;ActionGroup;
+                      CaptionML=[DAN=&Varedisponering pr.;
+                                 DEU=ArtikelverfÅ&gbarkeit nach;
+                                 ENU=&Item Availability by;
+                                 NOR=Disponibelt per;
+                                 SVE=Artikel&dispo. per] }
+      { 1900544904;3 ;Action    ;
+                      CaptionML=[DAN=Periode;
+                                 DEU=Periode;
+                                 ENU=Period;
+                                 NOR=Periode;
+                                 SVE=Period];
+                      Image=CloseYear;
+                      OnAction=BEGIN
+                                 //This functionality was copied from page #507. Unsupported part was commented. Please check it.
+                                 {CurrPage.SalesLines.PAGE.}
+                                 _ItemAvailability(0);
+                               END;
+                                }
+      { 1901991304;3 ;Action    ;
+                      CaptionML=[DAN=Variant;
+                                 DEU=Variante;
+                                 ENU=Variant;
+                                 NOR=Variant;
+                                 SVE=Variant];
+                      Description=PA032651;
+                      Visible=FALSE;
+                      Image=NewSparkle;
+                      OnAction=BEGIN
+                                 //This functionality was copied from page #507. Unsupported part was commented. Please check it.
+                                 {CurrPage.SalesLines.PAGE.}
+                                 _ItemAvailability(1);
+                               END;
+                                }
+      { 1901652204;3 ;Action    ;
+                      CaptionML=[DAN=Lokation;
+                                 DEU=Lagerort;
+                                 ENU=Location;
+                                 NOR=Lokasjon;
+                                 SVE=Lagerort];
+                      Image=NewBranch;
+                      OnAction=BEGIN
+                                 //This functionality was copied from page #507. Unsupported part was commented. Please check it.
+                                 {CurrPage.SalesLines.PAGE.}
+                                 _ItemAvailability(2);
+                               END;
+                                }
+      { 1903134404;3 ;Action    ;
+                      CaptionML=[DAN=&Placering;
+                                 DEU=&Lagerplatz;
+                                 ENU=&Bin;
+                                 SVE=&Lagerplats];
+                      Image=Bins;
+                      OnAction=BEGIN
+                                 //This functionality was copied from page #507. Unsupported part was commented. Please check it.
+                                 {CurrPage.SalesLines.PAGE.}
+                                 _ItemAvailability(3);
+                               END;
+                                }
+      { 1901312904;2 ;Action    ;
+                      CaptionML=[DAN=&Reservationsposter;
+                                 DEU=Reservierungsposten;
+                                 ENU=&Reservation Entries;
+                                 NOR=Reservasjonsposter;
+                                 SVE=&Reservationstransaktioner];
+                      Image=ReservationLedger;
+                      OnAction=BEGIN
+                                 //This functionality was copied from page #507. Unsupported part was commented. Please check it.
+                                 {CurrPage.SalesLines.PAGE.}
+                                 _ShowReservationEntries;
+                               END;
+                                }
+      { 1900186704;2 ;Action    ;
+                      ShortCutKey=Shift+Ctrl+D;
+                      CaptionML=[DAN=Dimensioner;
+                                 ENU=Dimensions;
+                                 NOR=Dimensjoner;
+                                 SVE=Dimensioner];
+                      Description=PA035597;
+                      Image=Dimensions;
+                      OnAction=BEGIN
+                                 ShowDimensions;
+                               END;
+                                }
+      { 1109400000;2 ;Action    ;
+                      CaptionML=[DAN=Bem&ërkning;
+                                 ENU=Co&mments;
+                                 NOR=&Bemerkninger;
+                                 SVE=Ko&mmentarer];
+                      Image=ViewComments;
+                      OnAction=BEGIN
+                                 ShowLineComments;
+                               END;
+                                }
+    }
+  }
+  CONTROLS
+  {
+    { 1900000001;0;Container;
+                ContainerType=ContentArea }
+
+    { 1   ;1   ;Group     ;
+                GroupType=Repeater }
+
+    { 2   ;2   ;Field     ;
+                SourceExpr=Type }
+
+    { 4   ;2   ;Field     ;
+                SourceExpr="No.";
+                OnValidate=BEGIN
+                             // Start PA035597
+                             ShowShortcutDimCode(ShortcutDimCode);
+                             // Stop PA035597
+                             NoOnAfterValidate;
+                           END;
+                            }
+
+    { 22  ;2   ;Field     ;
+                SourceExpr="Variant Code";
+                AutoFormatExpr='JMD';
+                Visible=FALSE }
+
+    { 6   ;2   ;Field     ;
+                SourceExpr=Description }
+
+    { 1101103003;2;Field  ;
+                SourceExpr="Description 2" }
+
+    { 32  ;2   ;Field     ;
+                SourceExpr="Shortcut Dimension 1 Code";
+                AutoFormatExpr='JMD';
+                Visible=FALSE }
+
+    { 34  ;2   ;Field     ;
+                SourceExpr="Shortcut Dimension 2 Code";
+                AutoFormatExpr='JMD';
+                Visible=FALSE }
+
+    { 300 ;2   ;Field     ;
+                Description=PA035597;
+                SourceExpr=ShortcutDimCode[3];
+                CaptionClass='1,2,3';
+                Visible=FALSE;
+                OnValidate=BEGIN
+                             ValidateShortcutDimCode(3,ShortcutDimCode[3]);
+                           END;
+
+                OnLookup=BEGIN
+                           LookupShortcutDimCode(3,ShortcutDimCode[3]);
+                         END;
+                          }
+
+    { 302 ;2   ;Field     ;
+                Description=PA035597;
+                SourceExpr=ShortcutDimCode[4];
+                CaptionClass='1,2,4';
+                Visible=FALSE;
+                OnValidate=BEGIN
+                             ValidateShortcutDimCode(4,ShortcutDimCode[4]);
+                           END;
+
+                OnLookup=BEGIN
+                           LookupShortcutDimCode(4,ShortcutDimCode[4]);
+                         END;
+                          }
+
+    { 304 ;2   ;Field     ;
+                Description=PA035597;
+                SourceExpr=ShortcutDimCode[5];
+                CaptionClass='1,2,5';
+                Visible=FALSE;
+                OnValidate=BEGIN
+                             ValidateShortcutDimCode(5,ShortcutDimCode[5]);
+                           END;
+
+                OnLookup=BEGIN
+                           LookupShortcutDimCode(5,ShortcutDimCode[5]);
+                         END;
+                          }
+
+    { 306 ;2   ;Field     ;
+                Description=PA035597;
+                SourceExpr=ShortcutDimCode[6];
+                CaptionClass='1,2,6';
+                Visible=FALSE;
+                OnValidate=BEGIN
+                             ValidateShortcutDimCode(6,ShortcutDimCode[6]);
+                           END;
+
+                OnLookup=BEGIN
+                           LookupShortcutDimCode(6,ShortcutDimCode[6]);
+                         END;
+                          }
+
+    { 308 ;2   ;Field     ;
+                Description=PA035597;
+                SourceExpr=ShortcutDimCode[7];
+                CaptionClass='1,2,7';
+                Visible=FALSE;
+                OnValidate=BEGIN
+                             ValidateShortcutDimCode(7,ShortcutDimCode[7]);
+                           END;
+
+                OnLookup=BEGIN
+                           LookupShortcutDimCode(7,ShortcutDimCode[7]);
+                         END;
+                          }
+
+    { 310 ;2   ;Field     ;
+                Description=PA035597;
+                SourceExpr=ShortcutDimCode[8];
+                CaptionClass='1,2,8';
+                Visible=FALSE;
+                OnValidate=BEGIN
+                             ValidateShortcutDimCode(8,ShortcutDimCode[8]);
+                           END;
+
+                OnLookup=BEGIN
+                           LookupShortcutDimCode(8,ShortcutDimCode[8]);
+                         END;
+                          }
+
+    { 36  ;2   ;Field     ;
+                SourceExpr="Location Code";
+                AutoFormatExpr='JMD';
+                Visible=TRUE }
+
+    { 44  ;2   ;Field     ;
+                SourceExpr="Bin Code";
+                AutoFormatExpr='JMD';
+                Visible=FALSE }
+
+    { 42  ;2   ;Field     ;
+                SourceExpr=Reserve;
+                OnValidate=BEGIN
+                             ReserveOnAfterValidate;
+                           END;
+                            }
+
+    { 8   ;2   ;Field     ;
+                BlankZero=Yes;
+                SourceExpr=Quantity;
+                OnValidate=BEGIN
+                             QuantityOnAfterValidate;
+                           END;
+                            }
+
+    { 30  ;2   ;Field     ;
+                BlankZero=Yes;
+                SourceExpr="Reserved Quantity";
+                OnDrillDown=BEGIN
+                              CurrPage.SAVERECORD;
+                              COMMIT;
+                              ShowReservationEntries(TRUE);
+                              CurrPage.UPDATE;
+                            END;
+                             }
+
+    { 1101103002;2;Field  ;
+                CaptionML=[DAN=UdestÜende antal;
+                           DEU=Restauftragsmenge;
+                           ENU=Outstanding Quantity;
+                           NOR=Gjenvërende antall;
+                           SVE=UtestÜende kvantitet];
+                SourceExpr="Outstanding Quantity" }
+
+    { 10  ;2   ;Field     ;
+                SourceExpr="Unit of Measure Code";
+                AutoFormatExpr='JMD';
+                OnValidate=BEGIN
+                             UnitofMeasureCodeOnAfterValida;
+                           END;
+                            }
+
+    { 46  ;2   ;Field     ;
+                SourceExpr="Unit of Measure";
+                Visible=FALSE }
+
+    { 12  ;2   ;Field     ;
+                BlankZero=Yes;
+                SourceExpr="Unit Price" }
+
+    { 38  ;2   ;Field     ;
+                SourceExpr="Unit Cost (LCY)";
+                Visible=FALSE }
+
+    { 14  ;2   ;Field     ;
+                BlankZero=Yes;
+                SourceExpr=Amount }
+
+    { 40  ;2   ;Field     ;
+                SourceExpr="Amount Including VAT";
+                Visible=FALSE }
+
+    { 16  ;2   ;Field     ;
+                BlankZero=Yes;
+                SourceExpr="Line Discount %" }
+
+    { 52  ;2   ;Field     ;
+                SourceExpr="Line Discount Amount";
+                Visible=FALSE }
+
+    { 54  ;2   ;Field     ;
+                SourceExpr="Allow Invoice Disc.";
+                Visible=FALSE }
+
+    { 58  ;2   ;Field     ;
+                SourceExpr="Serial No.";
+                Visible=FALSE }
+
+    { 1101103000;2;Field  ;
+                SourceExpr="VAT Bus. Posting Group" }
+
+    { 1101103001;2;Field  ;
+                SourceExpr="VAT Prod. Posting Group" }
+
+    { 48  ;2   ;Field     ;
+                SourceExpr="Book No.";
+                AutoFormatExpr='JMD';
+                Visible=FALSE }
+
+    { 90  ;2   ;Field     ;
+                SourceExpr="Shipment Date";
+                Visible=FALSE }
+
+    { 18  ;2   ;Field     ;
+                BlankZero=Yes;
+                SourceExpr="Qty. to Ship" }
+
+    { 20  ;2   ;Field     ;
+                BlankZero=Yes;
+                SourceExpr="Quantity Shipped" }
+
+    { 24  ;2   ;Field     ;
+                BlankZero=Yes;
+                SourceExpr="Quantity Invoiced" }
+
+  }
+  CODE
+  {
+    VAR
+      TransferExtendedText@1000 : Codeunit 378;
+      ShortcutDimCode@1003 : ARRAY [8] OF Code[20];
+
+    PROCEDURE ApproveCalcInvDisc@6();
+    BEGIN
+      CODEUNIT.RUN(CODEUNIT::"Sales-Disc. (Yes/No)",Rec);
+    END;
+
+    PROCEDURE CalcInvDisc@1();
+    BEGIN
+      CODEUNIT.RUN(CODEUNIT::"Sales-Calc. Discount",Rec);
+    END;
+
+    PROCEDURE ExplodeBOM@3();
+    BEGIN
+      CODEUNIT.RUN(CODEUNIT::"Sales-Explode BOM",Rec);
+    END;
+
+    PROCEDURE _InsertExtendedText@19065029(Unconditionally@1109400000 : Boolean);
+    BEGIN
+      IF TransferExtendedText.SalesCheckIfAnyExtText(Rec,Unconditionally) THEN BEGIN
+        CurrPage.SAVERECORD;
+        TransferExtendedText.InsertSalesExtText(Rec);
+      END;
+      IF TransferExtendedText.MakeUpdate THEN
+        CurrPage.UPDATE;
+    END;
+
+    PROCEDURE InsertExtendedText@5(Unconditionally@1109400000 : Boolean);
+    BEGIN
+      IF TransferExtendedText.SalesCheckIfAnyExtText(Rec,Unconditionally) THEN BEGIN
+        CurrPage.SAVERECORD;
+        TransferExtendedText.InsertSalesExtText(Rec);
+      END;
+      IF TransferExtendedText.MakeUpdate THEN
+        CurrPage.UPDATE;
+    END;
+
+    PROCEDURE _ShowReservation@19004172();
+    BEGIN
+      FIND;
+      Rec.ShowReservation;
+    END;
+
+    PROCEDURE ShowReservation@2();
+    BEGIN
+      FIND;
+      Rec.ShowReservation;
+    END;
+
+    PROCEDURE _ItemAvailability@19008035(AvailabilityType@1109400000 : 'Date,Variant,Location,Bin');
+    BEGIN
+      Rec.ItemAvailability(AvailabilityType);
+    END;
+
+    PROCEDURE ItemAvailability@7(AvailabilityType@1109400000 : 'Date,Variant,Location,Bin');
+    BEGIN
+      Rec.ItemAvailability(AvailabilityType);
+    END;
+
+    PROCEDURE _ShowReservationEntries@19040018();
+    BEGIN
+      Rec.ShowReservationEntries(TRUE);
+    END;
+
+    PROCEDURE ShowReservationEntries@9();
+    BEGIN
+      Rec.ShowReservationEntries(TRUE);
+    END;
+
+    LOCAL PROCEDURE NoOnAfterValidate@19066594();
+    BEGIN
+      InsertExtendedText(FALSE);
+    END;
+
+    LOCAL PROCEDURE ReserveOnAfterValidate@19004502();
+    BEGIN
+      IF (Reserve = Reserve::Always) AND ("Outstanding Qty. (Base)" <> 0) THEN BEGIN
+        CurrPage.SAVERECORD;
+        AutoReserve(TRUE);
+      END;
+    END;
+
+    LOCAL PROCEDURE QuantityOnAfterValidate@19032465();
+    BEGIN
+      IF Reserve = Reserve::Always THEN BEGIN
+        CurrPage.SAVERECORD;
+        AutoReserve(TRUE);
+      END;
+    END;
+
+    LOCAL PROCEDURE UnitofMeasureCodeOnAfterValida@19057939();
+    BEGIN
+      IF Reserve = Reserve::Always THEN BEGIN
+        CurrPage.SAVERECORD;
+        AutoReserve(TRUE);
+      END;
+    END;
+
+    PROCEDURE UpdateForm@12(SetSaveRecord@1000 : Boolean);
+    BEGIN
+      CurrPage.UPDATE(SetSaveRecord);
+    END;
+
+    BEGIN
+    {
+      PA-Number  Date
+      ------------------------------------------------
+      PA033067   12.04.12 DR DE Captions implemented
+      PA033259   18.09.12 DR Variable names changed according to incadea styleguide
+      PA035597   10.02.14 GC NAV 2013 R2 Technical Upgrade
+      PA035901   14.11.14 CH NAV 2013 R2 General Ledger Integration.
+    }
+    END.
+  }
+}
+

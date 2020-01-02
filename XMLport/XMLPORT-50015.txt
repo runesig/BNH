@@ -1,0 +1,88 @@
+OBJECT XMLport 50015 BNH CSI Used Carsales
+{
+  OBJECT-PROPERTIES
+  {
+    Date=11.09.18;
+    Time=13:16:53;
+    Modified=Yes;
+    Version List=BNH.01;
+  }
+  PROPERTIES
+  {
+    CaptionML=[ENU=Nissan Aftersales;
+               NOR=Nissan ettermarked];
+    Direction=Export;
+    TextEncoding=UTF-8;
+    Format=Variable Text;
+    FieldDelimiter=<None>;
+    FieldSeparator=<TAB>;
+  }
+  ELEMENTS
+  {
+    { [{5660E5D2-1308-4516-BF55-B7CF68887DDB}];  ;Export              ;Element ;Text     }
+
+    { [{658A924E-CB58-4A93-9E8D-191D4E31996A}];1 ;BNHCSIUsedCarsales  ;Element ;Table   ;
+                                                  SourceTable=Table50015;
+                                                  Temporary=Yes }
+
+    { [{5505AB68-80A4-4167-A757-D17A108D6175}];2 ;PostingDate         ;Element ;Field   ;
+                                                  DataType=Code;
+                                                  SourceField=BNH CSI Data::Posting Date }
+
+    { [{E5C828F9-FE86-40E9-9FC9-A96AF962A428}];2 ;EventID             ;Element ;Field   ;
+                                                  DataType=Code;
+                                                  SourceField=BNH CSI Data::Event ID }
+
+    { [{88150DDE-950F-45DF-9C88-DCFD6B8986C9}];2 ;ExternalID          ;Element ;Field   ;
+                                                  DataType=Code;
+                                                  SourceField=BNH CSI Data::External ID }
+
+    { [{6A863CD0-14CC-415F-A711-E2006C032DB5}];2 ;Respondent          ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH CSI Data::Respondent }
+
+    { [{42ED0931-C3EF-43F5-903D-D366B291D88A}];2 ;ExtRef              ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH CSI Data::ExtRef }
+
+  }
+  EVENTS
+  {
+  }
+  REQUESTPAGE
+  {
+    PROPERTIES
+    {
+    }
+    CONTROLS
+    {
+    }
+  }
+  CODE
+  {
+
+    PROCEDURE PassData@1101103000(VAR TempNissanCSIDataP@1101103000 : TEMPORARY Record 50015);
+    BEGIN
+      WITH TempNissanCSIDataP DO
+        IF FINDSET THEN
+          REPEAT
+            "BNH CSI Data" := TempNissanCSIDataP;
+            "BNH CSI Data".INSERT;
+          UNTIL NEXT = 0;
+    END;
+
+    BEGIN
+    {
+      +----------------------------------------------+
+      | 2009 SI-DATA A/S (SID)                       |
+      +----------------------------------------------+
+      | INCADEA ENGINE                               |
+      +----------------------------------------------+
+      No.  Version  Date      ID      Remark
+      ------------------------------------------------
+      01.  7.1.5    07.06.18  JRO     Initiale version
+    }
+    END.
+  }
+}
+

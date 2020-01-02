@@ -1,0 +1,78 @@
+OBJECT Codeunit 50005 BNH Update Vehicle
+{
+  OBJECT-PROPERTIES
+  {
+    Date=21.11.17;
+    Time=19:37:25;
+    Modified=Yes;
+    Version List=BNH;
+  }
+  PROPERTIES
+  {
+    TableNo=5207300;
+    OnRun=VAR
+            VehicleL@1101103001 : Record 5025400;
+            PurchaseLineL@1101103002 : Record 39;
+          BEGIN
+            EPSetupG := Rec;
+
+            EPUnitG.GetParams(CurrentRecRefP,PreviousRecRefP,CurrExitPointIdP,ExitPointParamP,DecrementLevelP);
+
+            CurrentRecRefP.SETTABLE(VehicleL);
+            CurrentRecRefP.GETTABLE(VehicleL);
+
+            PreviousRecRefP.SETTABLE(PurchaseLineL);
+            PreviousRecRefP.GETTABLE(PurchaseLineL);
+            SetValueOnVehicle(VehicleL, PurchaseLineL);
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      EPSetupG@1101165285 : Record 5207300;
+      EPUnitG@1101165288 : Codeunit 5207300;
+      C_INC001@1101103001 : TextConst 'ENU=Quote No. is not set! Check missing "Inside1" or "Inside2" for the Exit Point setup.';
+      C_INC002@1101103003 : TextConst 'ENU=Copy serial number is not allowed.';
+      C_INC003@1101103004 : TextConst 'ENU=No vehicle is configured for this document.';
+      C_INC004@1101103005 : TextConst 'ENU=Another Sales Order already exists for this reference number.';
+      CurrentRecRefP@1101103000 : RecordRef;
+      PreviousRecRefP@1101103006 : RecordRef;
+      CurrExitPointIdP@1101103007 : Text;
+      ExitPointParamP@1101103008 : Record 5207301;
+      DecrementLevelP@1101103009 : Boolean;
+
+    PROCEDURE SetValueOnVehicle@1101103002(VehicleP@1101103000 : Record 5025400;PurchaseLineP@1101103001 : Record 39);
+    VAR
+      PurchaseHeaderL@1101103002 : Record 38;
+      VehicleL@1101103003 : Record 5025400;
+    BEGIN
+      IF PurchaseHeaderL.GET(PurchaseLineP."Document Type", PurchaseLineP."Document No.") THEN
+        IF VehicleL.GET(VehicleP.VIN) THEN
+          IF VehicleL."Vehicle Status" = VehicleL."Vehicle Status"::"New Vehicle" THEN
+            BEGIN
+            VehicleL."Text 1" := PurchaseHeaderL."Vendor Order No.";
+            VehicleL."Text 2" := PurchaseHeaderL."Text 2";
+            VehicleL."Text 4" := PurchaseHeaderL."Text 4";
+            VehicleL."Extra Code 1" := PurchaseHeaderL."Extra Code 1";
+            VehicleL."Date 1" := PurchaseHeaderL."Date 1";
+            VehicleL.MODIFY;
+            END;
+    END;
+
+    BEGIN
+    {
+      ---------------------------------------------+
+      | Copyright ¸ 2016 SI-DATA SID                 |
+      +----------------------------------------------+
+      | MYENGINE@INCADEA                             |
+      +----------------------------------------------+
+      No.  Version  Date      ID  Remark
+      ------------------------------------------------
+
+      SID.01  23.08.2016  Had to modify the code to include if get, otherwise the system crash is the VehicleSetupExt does not contain a record
+    }
+    END.
+  }
+}
+

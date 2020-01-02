@@ -1,0 +1,57 @@
+OBJECT Table 5231122 BNH Bevegelser 2016
+{
+  OBJECT-PROPERTIES
+  {
+    Date=17.11.17;
+    Time=14:09:46;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+  }
+  FIELDS
+  {
+    { 1   ;   ;Konto               ;Code10         }
+    { 2   ;   ;Filial              ;Code10         }
+    { 3   ;   ;Avdeling            ;Code10         }
+    { 5   ;   ;Periode             ;Integer        }
+    { 6   ;   ;Status              ;Option        ;OptionCaptionML=[ENU=" ,Ignore,OK,Error";
+                                                                    NOR=" ,Ignorer,OK,Feil"];
+                                                   OptionString=[ ,Ignore,OK,Error] }
+    { 7   ;   ;Datetime            ;DateTime      ;CaptionML=[ENU=Time;
+                                                              NOR=Tidspunkt] }
+    { 8   ;   ;Update message      ;Text250       ;CaptionML=[ENU=Message;
+                                                              NOR=Melding] }
+    { 9   ;   ;No.                 ;Code20        ;CaptionML=[ENU=Item No.;
+                                                              NOR=Varenr.] }
+    { 10  ;   ;Bel›p               ;Decimal       ;FieldClass=FlowField;
+                                                   CalcFormula=Sum("BNH Regnskapsposter"."Dec Bel›p" WHERE (Kontonr=FIELD(Konto),
+                                                                                                            Filial=FIELD(Filial),
+                                                                                                            Avd=FIELD(Avdeling),
+                                                                                                            Int M†ned=FIELD(Periode),
+                                                                                                            Bilagsdato=FILTER(01.01.16..31.12.16)));
+                                                   Description=BNH;
+                                                   Editable=No }
+    { 100 ;   ;Incadea konto       ;Code10        ;FieldClass=FlowField;
+                                                   CalcFormula=Lookup("BNH Konvertering kontonr."."Incadea kontonr." WHERE (Dracar kontonr.=FIELD(Konto)));
+                                                   Editable=No }
+    { 101 ;   ;Incadea merke       ;Code10        ;FieldClass=FlowField;
+                                                   CalcFormula=Lookup("BNH Konvertering kontonr."."Incadea merkekode" WHERE (Dracar kontonr.=FIELD(Konto)));
+                                                   Editable=No }
+  }
+  KEYS
+  {
+    {    ;Konto,Filial,Avdeling,Periode           ;Clustered=Yes }
+  }
+  FIELDGROUPS
+  {
+  }
+  CODE
+  {
+
+    BEGIN
+    END.
+  }
+}
+

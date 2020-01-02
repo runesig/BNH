@@ -1,0 +1,94 @@
+OBJECT Table 5231050 Blanket Order Setup
+{
+  OBJECT-PROPERTIES
+  {
+    Date=01.11.17;
+    Time=09:58:11;
+    Modified=Yes;
+    Version List=BlanketOrderBNH;
+  }
+  PROPERTIES
+  {
+    CaptionML=[ENU=Blanket Order Setup;
+               NOR=Rammerodre oppsett];
+    LookupPageID=Page5231054;
+  }
+  FIELDS
+  {
+    { 1   ;   ;Code                ;Code10        ;CaptionML=[DAN=Kode;
+                                                              ENU=Code;
+                                                              NOR=Kode;
+                                                              SVE=Kod];
+                                                   NotBlank=Yes }
+    { 2   ;   ;Description         ;Text50        ;CaptionML=[DAN=Beskrivelse;
+                                                              ENU=Description;
+                                                              NOR=Beskrivelse;
+                                                              SVE=Beskrivelse] }
+    { 3   ;   ;Date Formula        ;DateFormula   ;CaptionML=[DAN=Datoformel;
+                                                              ENU=Date Formula;
+                                                              NOR=Datoformel;
+                                                              SVE=Datumformel] }
+    { 4   ;   ;Create only latest  ;Boolean       ;CaptionML=[DAN=Kun oprette seneste;
+                                                              ENU=Create only latest;
+                                                              NOR=Opprette bare seneste;
+                                                              SVE=Uppr„tta endast senaste] }
+    { 5   ;   ;Start Date          ;Date          ;CaptionML=[DAN=Startdato;
+                                                              ENU=Start Date;
+                                                              NOR=Startdato;
+                                                              SVE=Startdatum] }
+    { 6   ;   ;End Date            ;Date          ;CaptionML=[DAN=Slutdato;
+                                                              ENU=End Date;
+                                                              NOR=Sluttdato;
+                                                              SVE=Sluttdatum] }
+    { 10  ;   ;Order Nos.          ;Code10        ;TableRelation="No. Series".Code;
+                                                   CaptionML=[DAN=Ordrenr. serie;
+                                                              ENU=Order Nos.;
+                                                              NOR=Ordrenr. serie;
+                                                              SVE=Ordernr. serie] }
+    { 11  ;   ;Invoice Nos.        ;Code10        ;TableRelation="No. Series".Code;
+                                                   CaptionML=[DAN=Bogf›ringsnr.serie;
+                                                              NOR=Bokf›ringsnr.serie;
+                                                              SVE=Bokf”ringsnr.serie] }
+    { 20  ;   ;Update Postingdate  ;Option        ;CaptionML=[DAN=Opdatering af bilagsdato;
+                                                              ENU=Update Postingdate;
+                                                              NOR=Oppdatering av bilagsdato;
+                                                              SVE=Uppdatering av bilagsdatum];
+                                                   OptionString=Bokf›ringsdato,Behandlingsdato }
+    { 22  ;   ;Postingdate Formula ;Code10        ;CaptionML=[DAN=Bilagsdato formel;
+                                                              ENU=Postingdate Formula;
+                                                              NOR=Bilagsdato formel;
+                                                              SVE=Bilagsdatum formel] }
+    { 24  ;   ;Delivery Date Formula;Code10       ;CaptionML=[DAN=Leveringsdato formel;
+                                                              ENU=Delivery Date Formula;
+                                                              NOR=Leveringsdato formel;
+                                                              SVE=Levereringsdatum formel] }
+    { 25  ;   ;Update Price        ;Option        ;CaptionML=[DAN=Opdatering af pris;
+                                                              ENU=Update Pirce;
+                                                              NOR=Oppdatering av pris;
+                                                              SVE=Uppdatering av pris];
+                                                   OptionString=Fast,Gjenberegne,Nullstille }
+    { 26  ;   ;Update Quantity     ;Option        ;CaptionML=[DAN=Opdatering af antal;
+                                                              ENU=Update Quantity;
+                                                              NOR=Oppdatering av antall;
+                                                              SVE=Uppdatering av antal];
+                                                   OptionString=Konstant,Redusere }
+    { 27  ;   ;Reset Delivery      ;Boolean       ;CaptionML=[DAN=Nulstille levering;
+                                                              ENU=Reset Delivery;
+                                                              NOR=Nullstille levering;
+                                                              SVE=Nollst„ll leverering] }
+  }
+  KEYS
+  {
+    {    ;Code                                    ;Clustered=Yes }
+  }
+  FIELDGROUPS
+  {
+  }
+  CODE
+  {
+
+    BEGIN
+    END.
+  }
+}
+

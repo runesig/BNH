@@ -1,0 +1,55 @@
+OBJECT Codeunit 5231145 Update Purch Lines Dimension
+{
+  OBJECT-PROPERTIES
+  {
+    Date=06.12.17;
+    Time=22:01:16;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+            IF CONFIRM('Start jobb %1',TRUE,COMPANYNAME) THEN
+              UpdatePurchOrder();
+          END;
+
+  }
+  CODE
+  {
+
+    PROCEDURE UpdatePurchOrder@1101103001();
+    VAR
+      PurchLineL@1101103001 : Record 39;
+      DimensionSetEntry@1101103002 : Record 480;
+      i@1101103000 : Integer;
+    BEGIN
+      PurchLineL.SETRANGE("Document Type",PurchLineL."Document Type"::Order);
+      PurchLineL.SETRANGE("Document No.",'KKO00205');
+      PurchLineL.SETRANGE(Type,PurchLineL.Type::Item);
+      IF PurchLineL.FIND('-') THEN REPEAT
+        PurchLineL.TESTFIELD("Shortcut Dimension 1 Code");
+        PurchLineL.TESTFIELD("Shortcut Dimension 2 Code");
+        IF NOT DimensionSetEntry.GET(PurchLineL."Dimension Set ID",'AVDELING') THEN BEGIN
+          PurchLineL.ValidateShortcutDimCode(1,PurchLineL."Shortcut Dimension 1 Code");
+          PurchLineL.MODIFY;
+        END;
+        IF NOT DimensionSetEntry.GET(PurchLineL."Dimension Set ID",'MERKE') THEN BEGIN
+          PurchLineL.ValidateShortcutDimCode(2,PurchLineL."Shortcut Dimension 2 Code");
+          PurchLineL.MODIFY;
+        END;
+        i += 1;
+      UNTIL PurchLineL.NEXT = 0;
+
+
+      MESSAGE('%1',i);
+    END;
+
+    BEGIN
+    {
+      KKO00205
+    }
+    END.
+  }
+}
+

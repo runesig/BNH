@@ -1,0 +1,53 @@
+OBJECT Table 5231052 Blanket Order Data
+{
+  OBJECT-PROPERTIES
+  {
+    Date=01.11.17;
+    Time=10:02:54;
+    Modified=Yes;
+    Version List=BlanketOrderBNH;
+  }
+  PROPERTIES
+  {
+    CaptionML=[ENU=Blanket Order Data;
+               NOR=Rammeordre data];
+  }
+  FIELDS
+  {
+    { 1   ;   ;Blanket Order No.   ;Code20        ;CaptionML=[ENU=Blanket Order No.;
+                                                              NOR=Rammeordrenr.] }
+    { 10  ;   ;Repeating Group Code;Code10        ;TableRelation="Blanket Order Setup".Code;
+                                                   CaptionML=[ENU=Repeating Group Code;
+                                                              NOR=Gjentagelsesgruppekode] }
+    { 11  ;   ;Agreement Type      ;Option        ;CaptionML=[ENU=Agreement Type;
+                                                              NOR=Avtaletype];
+                                                   OptionString=[ ,Utleie,Service] }
+    { 12  ;   ;Start Date          ;Date          ;CaptionML=[ENU=Start Date;
+                                                              NOR=Startdato] }
+    { 13  ;   ;End Date            ;Date          ;CaptionML=[ENU=End Date;
+                                                              NOR=Sluttdato] }
+    { 14  ;   ;Selling Location    ;Code20        ;TableRelation=Location.Code;
+                                                   CaptionML=[ENU=Selling Location;
+                                                              NOR=Selgende lokasjon] }
+    { 58541;  ;Disable repeat      ;Boolean       ;CaptionML=[ENU=Disable repeat;
+                                                              NOR=Deaktivere gjentakelse] }
+    { 58542;  ;Blanket Ordre to Posting;Boolean   ;CaptionML=[ENU=Blanket Ordre to Posting;
+                                                              NOR=Rammeordre til bokf›ring] }
+    { 70000;  ;Rental Agreement No.;Code20        ;CaptionML=[ENU=Rental Agreement No.;
+                                                              NOR=Utleieavtalenr.] }
+  }
+  KEYS
+  {
+    {    ;Blanket Order No.                       ;Clustered=Yes }
+  }
+  FIELDGROUPS
+  {
+  }
+  CODE
+  {
+
+    BEGIN
+    END.
+  }
+}
+

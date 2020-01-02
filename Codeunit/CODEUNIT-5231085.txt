@@ -1,0 +1,98 @@
+OBJECT Codeunit 5231085 Vehicle Contract Exit Point
+{
+  OBJECT-PROPERTIES
+  {
+    Date=25.09.17;
+    Time=14:25:58;
+    Modified=Yes;
+    Version List=BNH;
+  }
+  PROPERTIES
+  {
+    TableNo=5207300;
+    OnRun=VAR
+            ExitPointSetupL@1101103005 : Record 5207300;
+            ExitPointUnitL@1101103004 : Codeunit 5207300;
+            ExitPointParameterL@1101103003 : Record 5207301;
+            CurrentRecordRefL@1101103002 : RecordRef;
+            PreviousRecordRefL@1101103001 : RecordRef;
+            CurrentFieldNameL@1101103000 : Text[50];
+            QuoteHeaderL@1101103008 : Record 36;
+            OrderHeaderL@1101103007 : Record 36;
+          BEGIN
+            ExitPointSetupL := Rec;
+            ExitPointUnitL.GetParams(CurrentRecordRefL, PreviousRecordRefL, CurrentFieldNameL, ExitPointParameterL, FALSE);
+            CurrentRecordRefL.SETTABLE(OrderHeaderL);
+            IF USERID = C_Admin THEN
+              MESSAGE('New Order No.(%1) Exit point', OrderHeaderL."No.");
+
+            PreviousRecordRefL.SETTABLE(QuoteHeaderL);
+            IF USERID = C_Admin THEN
+              MESSAGE('Original Quote No.(%1) Exit point', QuoteHeaderL."No.");
+
+            ValidateDocumentNo(QuoteHeaderL, OrderHeaderL);
+            UpdateContract(QuoteHeaderL, OrderHeaderL);
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      VinG@1101103001 : Code[20];
+      C_Admin@1101103003 : TextConst 'ENU=BNH\INCADEA.DNO;NOR=BNH\INCADEA.DHO';
+
+    PROCEDURE ValidateDocumentNo@1101103008(QuoteHeaderP@1101103000 : Record 36;OrderHeaderP@1101103003 : Record 36) ResultR : Boolean;
+    VAR
+      SalesLineL@1101103002 : Record 37;
+    BEGIN
+      IF USERID = C_Admin THEN
+        MESSAGE('ValidateDocumentNo(%1 -> %2) Exit point', QuoteHeaderP."No.", OrderHeaderP."No.");
+
+      SalesLineL.RESET;
+      SalesLineL.SETRANGE("Document Type", QuoteHeaderP."Document Type");
+      SalesLineL.SETRANGE("Document No.", QuoteHeaderP."No.");
+      SalesLineL.SETRANGE(Type, SalesLineL.Type::Item);
+      SalesLineL.SETRANGE("Item Type", SalesLineL."Item Type"::Vehicle);
+      IF NOT SalesLineL.FINDFIRST THEN
+        EXIT;
+
+      SalesLineL.RESET;
+      SalesLineL.SETRANGE("Document Type", OrderHeaderP."Document Type");
+      SalesLineL.SETRANGE("Document No.", OrderHeaderP."No.");
+      SalesLineL.SETRANGE(Type, SalesLineL.Type::Item);
+      SalesLineL.SETRANGE("Item Type", SalesLineL."Item Type"::Vehicle);
+      IF NOT SalesLineL.FINDFIRST THEN
+        EXIT;
+    END;
+
+    PROCEDURE UpdateContract@1101103000(QuoteHeaderP@1101103000 : Record 36;OrderHeaderP@1101103003 : Record 36) ResultR : Boolean;
+    VAR
+      VehicleContractL@1101103001 : Record 5231084;
+    BEGIN
+      IF USERID = C_Admin THEN
+        MESSAGE('UpdateContract(%1 -> %2) Exit point', QuoteHeaderP."No.", OrderHeaderP."No.");
+
+      VehicleContractL.RESET;
+      VehicleContractL.SETRANGE("Document Type", QuoteHeaderP."Document Type");
+      VehicleContractL.SETRANGE("No.", QuoteHeaderP."No.");
+      IF VehicleContractL.FINDFIRST THEN BEGIN
+        VehicleContractL."Document Type" := OrderHeaderP."Document Type";
+        VehicleContractL."No." := OrderHeaderP."No.";
+        VehicleContractL.MODIFY;
+      END;
+    END;
+
+    BEGIN
+    {
+      +----------------------------------------------+
+      | Copyright ¸ 2016 Incadea SID                 |
+      +----------------------------------------------+
+      No.     Version  Date      ID     Remark
+      ------------------------------------------------
+                                        Initiated from Codeunit 83 OnRun Post
+      SID.01  7.1.5    25.09.17  DHO    Initial version
+    }
+    END.
+  }
+}
+

@@ -1,0 +1,140 @@
+OBJECT Page 5231104 BB Bevegelse 2016
+{
+  OBJECT-PROPERTIES
+  {
+    Date=18.11.17;
+    Time=19:26:35;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    SourceTable=Table5231102;
+    PageType=List;
+    ActionList=ACTIONS
+    {
+      { 1101103015;  ;ActionContainer;
+                      ActionContainerType=ActionItems }
+      { 1101103016;1 ;Action    ;
+                      Name=Fyll opp tabell;
+                      Image=Calculate;
+                      OnAction=VAR
+                                 BBFinansL@1101103000 : Record 5231101;
+                                 BBBevegelser2016L@1101103001 : Record 5231102;
+                               BEGIN
+                                 IF BBFinansL.FINDFIRST THEN
+                                   REPEAT
+                                   IF NOT BBBevegelser2016L.GET(BBFinansL."G/L Account No.", BBFinansL.M†ned, BBFinansL."Branch Code", BBFinansL."Department Code",  BBFinansL."Make Code" ) THEN
+                                     BEGIN
+                                     BBBevegelser2016L.INIT;
+                                     BBBevegelser2016L.Konto       := BBFinansL."G/L Account No.";
+                                     BBBevegelser2016L.Periode     := BBFinansL.M†ned;
+                                     BBBevegelser2016L.Filial      := BBFinansL."Branch Code";
+                                     BBBevegelser2016L.Avdeling    := BBFinansL."Department Code";
+                                     BBBevegelser2016L."Make Code" := BBFinansL."Make Code";
+                                     BBBevegelser2016L."Opprinnelig system" := "Opprinnelig system"::Engine;
+                                     BBBevegelser2016L.INSERT;
+                                     END;
+                                   UNTIL BBFinansL.NEXT = 0;
+
+                                 CurrPage.UPDATE;
+                               END;
+                                }
+      { 1101103017;1 ;Action    ;
+                      Name=Slett tabell;
+                      Image=Delete;
+                      OnAction=VAR
+                                 BBBevegelser2016L@1101103000 : Record 5231102;
+                               BEGIN
+                                 IF BBBevegelser2016L.FINDFIRST THEN
+                                   BBBevegelser2016L.DELETEALL;
+
+                                 CurrPage.UPDATE;
+                               END;
+                                }
+      { 1101103011;1 ;Action    ;
+                      Name=Create Journal;
+                      Promoted=Yes;
+                      PromotedIsBig=Yes;
+                      Image=CreateLedgerBudget;
+                      PromotedCategory=Process;
+                      OnAction=VAR
+                                 BBBevegelser2016L@1101103000 : Record 5231102;
+                               BEGIN
+                                 CurrPage.SETSELECTIONFILTER(BBBevegelser2016L);
+                                 CODEUNIT.RUN( CODEUNIT::"BB Regnskapsposter 2016", BBBevegelser2016L);
+                               END;
+                                }
+      { 1101103012;1 ;Action    ;
+                      Name=Journal;
+                      RunObject=Page 39;
+                      Promoted=Yes;
+                      PromotedIsBig=Yes;
+                      Image=Journal;
+                      PromotedCategory=Process }
+      { 1101103019;1 ;Action    ;
+                      Name=Delete all Record;
+                      OnAction=VAR
+                                 BBBevegelser2016L@1101103000 : Record 5231102;
+                               BEGIN
+                                 BBBevegelser2016L.DELETEALL;
+
+                                 CurrPage.UPDATE;
+                               END;
+                                }
+    }
+  }
+  CONTROLS
+  {
+    { 1101103000;0;Container;
+                ContainerType=ContentArea }
+
+    { 1101103001;1;Group  ;
+                Name=Group;
+                GroupType=Repeater }
+
+    { 1101103002;2;Field  ;
+                SourceExpr=Konto }
+
+    { 1101103003;2;Field  ;
+                SourceExpr=Periode }
+
+    { 1101103004;2;Field  ;
+                SourceExpr=Filial }
+
+    { 1101103005;2;Field  ;
+                SourceExpr=Avdeling }
+
+    { 1101103006;2;Field  ;
+                SourceExpr="Make Code" }
+
+    { 1101103007;2;Field  ;
+                SourceExpr="Incadea konto" }
+
+    { 1101103008;2;Field  ;
+                SourceExpr="Bel›p" }
+
+    { 1101103009;2;Field  ;
+                SourceExpr=Status }
+
+    { 1101103010;2;Field  ;
+                SourceExpr=Datetime }
+
+    { 1101103013;2;Field  ;
+                SourceExpr="Update message" }
+
+    { 1101103014;2;Field  ;
+                SourceExpr="No." }
+
+    { 1101103018;2;Field  ;
+                SourceExpr="Opprinnelig system" }
+
+  }
+  CODE
+  {
+
+    BEGIN
+    END.
+  }
+}
+

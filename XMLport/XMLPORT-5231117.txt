@@ -1,0 +1,483 @@
+OBJECT XMLport 5231117 4754 uttrekk 8100_Biler
+{
+  OBJECT-PROPERTIES
+  {
+    Date=06.11.17;
+    Time=20:31:29;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    Direction=Import;
+    TextEncoding=WINDOWS;
+    OnPreXMLport=BEGIN
+                   IF GUIALLOWED THEN
+                     DialogG.OPEN( C_INC_Progress );
+
+                   WITH "4754_uttrekk_8100_Biler" DO
+                     IF FINDLAST THEN
+                       RecordNoG := "4754_uttrekk_8100_Biler"."Primary Key";
+                 END;
+
+    OnPostXMLport=BEGIN
+                    IF GUIALLOWED THEN
+                      DialogG.CLOSE;
+                  END;
+
+    Format=Variable Text;
+    FieldDelimiter=<">;
+    FieldSeparator=[;];
+  }
+  ELEMENTS
+  {
+    { [{E9FACFE1-B962-4B45-93E1-A8A28CCF17B0}];  ;XML                 ;Element ;Text     }
+
+    { [{F72913C8-A8A8-48E7-8D14-C8D44B3CF410}];1 ;Table               ;Element ;Table   ;
+                                                  SourceTable=Table5231117;
+                                                  Import::OnBeforeInsertRecord=BEGIN
+                                                                                 RecordNoG += 1;
+                                                                                 "4754_uttrekk_8100_Biler"."Primary Key" := RecordNoG;
+
+                                                                                 IF RecordNoG MOD 100 = 0 THEN
+                                                                                   DialogG.UPDATE( 1, RecordNoG );
+                                                                               END;
+                                                                                }
+
+    { [{95A4B89A-6F01-451A-B5F3-BAB005C29977}];2 ;UNIT_NUMBER         ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::UNIT_NUMBER }
+
+    { [{4CADC636-091A-43F6-8B5C-ED2ADB4B1D23}];2 ;Enhetsnr            ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::Enhetsnr;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{8DB41545-C6D2-475F-BD82-D98593951C92}];2 ;Enhetstype          ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::Enhetstype;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{F67245F2-7DBF-4422-BF1E-70551F049395}];2 ;Merke               ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::Merke;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{00C02344-D225-4BDA-9AC8-2F57DC139071}];2 ;Modellinje          ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::Modellinje;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{3AA182A0-BBCD-4ECB-AAEC-748F380BADF1}];2 ;Status              ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::Status2;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{7DE249FC-E996-4045-A756-6D54A517A55F}];2 ;Chassisnummer       ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::Chassisnummer;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{3625DC4A-8FD2-4E6C-A4C9-2D6D39341F3B}];2 ;Reg.nr              ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::Reg.nr;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{705144FB-F6D4-490A-A603-A9BF0725AE9C}];2 ;F._reg              ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::1. reg;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{9B10FD34-3762-441C-A600-022D64869672}];2 ;Enhetsgruppe        ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::Enhetsgruppe;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{88FA5F96-80EC-45F0-B38A-88C0C0357C1A}];2 ;Verkstedsmodellkode ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::Verkstedsmodellkode;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{5B4E02C6-F75C-45A8-AF40-890349F0E48B}];2 ;Kategori            ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::Kategori;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{CBBAAD73-76EE-4D64-8656-1D6B0BAC8E44}];2 ;Modelltekst         ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::Modelltekst;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{C8670028-9628-4E65-93D9-05CE3C7C5021}];2 ;Bokf.kode           ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::Bokf.kode;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{C107C3B6-3E25-48E4-A859-37E0FAB74E4F}];2 ;Avd                 ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::Avd;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{D1A2537D-E09E-4E65-B2E1-0776F67C26FC}];2 ;Lokasjon            ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::Lokasjon;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{B9D24B83-A975-4B22-B288-2C35FF4EF249}];2 ;Fabrik.fargekode    ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::Fabrik.fargekode;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{3413BB74-C2D1-489A-A6E6-4851748837F6}];2 ;Fabrikantens_fargena;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::Fabrikantens fargena;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{E3B49D87-5207-4E71-B3A2-80318FAB47E3}];2 ;Interi›r_type       ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::Interi›rtype;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{CDAE6652-78FA-4A7F-B42E-B41408236B67}];2 ;Motorkode           ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::Motorkode;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{D8BB1676-48B5-4C05-9E3B-8A9030A7E014}];2 ;Motornummer         ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::Motornummer;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{08CA787B-25F7-4248-B3D0-604CC46EAFC9}];2 ;Girkassenummer      ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::Girkassenummer;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{36A2816A-FA7F-4A78-9C60-3DB79EBACBBD}];2 ;Utstyr_I            ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::Utstyr 1;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{D1A7FC11-82E6-4197-AE97-4060340E7EB7}];2 ;Utstyr_II           ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::Utstyr 2;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{25C2D7B1-0FAE-49D2-8E8D-CABCDB60557F}];2 ;Utstyr_III          ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::Utstyr 3;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{8F374EBC-1055-4AB3-AE12-D39000E3B8A7}];2 ;Utstyr_IV           ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::Utstyr 4;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{A59E8287-9F6E-47CD-8FB6-788233554A8A}];2 ;N›kkelnummer        ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::N›kkelnummer;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{19FA8929-FA5F-495B-8448-9FB5647F82DF}];2 ;Radio               ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::Radio;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{596937AA-5B46-4DED-96F2-FB77FBE51448}];2 ;Drivstoff_type      ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::Drivstoff type;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{A95B9210-2FA7-42B1-B71A-A0EEDB0CA8DB}];2 ;Sti_for_foto        ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::Sti for foto;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{3AE0B596-2C61-450A-B6A2-A1882FA0A031}];2 ;Kj›pt_av            ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::Kj›pt av;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{ED16FE47-6E6C-4CE3-8565-6703288C7F5F}];2 ;Innkj›psavd         ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::Innkj›psavd;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{B5936A87-D30D-4B0D-A584-8BF526899B83}];2 ;Forventet_ankomst   ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::Forventet ankomst;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{185E599F-3A5E-4B96-AB35-F90B68C60F3C}];2 ;Ank.dato            ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::Ank.dato;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{D117C869-6C4E-4C54-A510-87AD148BDCFC}];2 ;Kj›psdato           ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::Kj›psdato;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{24EE0BB2-5B11-40CF-92E4-05C2B810D23B}];2 ;Fakturanummer       ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::Fakturanummer;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{28847EF2-ED48-48DA-91CD-E8906DDCC93D}];2 ;Solgt_av            ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::Solgt av;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{E2546A80-9B45-4D3B-A4D1-12DDD717FDF0}];2 ;Salgsavd            ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::Salgsavd;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{EB184D1B-3449-4BBB-99D2-4D7358B96434}];2 ;Kundenr             ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::Kundenr;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{295EBAED-D44A-4429-B4DC-2A7D7882578A}];2 ;Fakturanummer       ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::Fakturanummer2;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{6A36A75B-56BD-4E62-87B6-8DF5BF4F890F}];2 ;Salgsordrenr        ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::Salgsordrenr;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{EFD63913-5B3A-4CAC-A106-32174A5E7DCA}];2 ;Enhet_innbytte      ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::Enhet innbytte;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{E3D52504-7CBF-4B77-94BE-048536819DEE}];2 ;Reservert           ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::Reservert;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{4BF0917C-55C9-4062-B28E-0C6B4B58DC74}];2 ;Reservert_til_dato  ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::Reservert til dato;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{6CEEE415-FAA1-4030-828A-591173CC7EF3}];2 ;Reservert_av        ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::Reservert av;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{7A98C392-3057-41B1-A1C8-FD11B44FE130}];2 ;Ordrebekr_dato      ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::Ordrebekr dato;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{31D31680-1865-4024-B789-FCA9BE5315C8}];2 ;LevDat              ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::LevDat;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{F570A5D0-3B48-40D5-9D46-013051AD8C8C}];2 ;Enhetsdestinasjon   ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::Enhetsdestinasjon;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{85E8584C-0EF9-471F-B54E-E14E1DC224C2}];2 ;Salgsdato           ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::Salgsdato;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{E6D27ED0-BED8-4B0E-AFED-67976D60E739}];2 ;Budsj_salgspris     ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::Budsj salgspris;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{1559B4D9-33F7-4AB4-A240-8D9B803AB4AD}];2 ;Budsj_kj›pspris     ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::Budsj kj›pspris;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{48E21DA9-FECC-4EE4-A145-55FF06FEB25E}];2 ;MISC_1_CF           ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::MISC_1_CF }
+
+    { [{5E93BC33-F5B0-48EF-A9BA-2C0135C126B3}];2 ;MISC_2_CF           ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::MISC_2_CF }
+
+    { [{E97CD592-445B-4F15-BB2C-F4D7E35F1591}];2 ;Diverse_III         ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::Diverse 3;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{64BF5430-6001-4465-A085-AF261E4C6A23}];2 ;Diverse_X           ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::Diverse 10;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{C591B90A-8A86-4559-ABDF-7A02FC80712A}];2 ;Underforhandler     ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::Underforhandler;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{AC0D9750-5685-4027-9DAC-A3FBBFD98780}];2 ;Forsikringspolisenr.;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::Forsikringspolisenr.;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{3D46EA5F-0D9F-4F28-9D07-592FB0009836}];2 ;Forsikringsselskap  ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::Forsikringsselskap;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{14BEEFE3-D5CB-406E-B580-FE35E5569EF8}];2 ;EXP_KM_PER_YEAR     ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::EXP_KM_PER_YEAR }
+
+    { [{A11E535A-83C7-46AC-83E3-49B825DA29C0}];2 ;N†v.eier            ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::N†v.eier;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{CFC9E696-B928-4C06-90D8-FEEC05637565}];2 ;Tidligere_eier      ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::Tidligere eier;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{79EECBF1-4A95-48D6-88AA-101EA84826A7}];2 ;Opprettet           ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::Opprettet;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{5E662BD8-945D-44DE-A304-8B56AB3B198E}];2 ;Valgfri_dato_I      ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::Valgfri dato 1;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{F2A6A008-D6BB-4510-A357-09F495838917}];2 ;Valgfri_dato_II     ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::Valgfri dato 2;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{5ED8FBA1-0585-4A05-A9DD-7891682FA3C8}];2 ;Internettekst_-_till;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::Internettekst - till;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{32942008-4EDA-44D9-96EC-45F815767164}];2 ;Rabattmatrise_varer ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::Rabattmatrise varer;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{433A625B-D4D3-46BC-A40D-87E01ECE136B}];2 ;Rabatt_Service      ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::Rabatt % Service;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{E30193B1-5B87-4F8B-A3F0-D115A796C527}];2 ;EngangAvg           ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::EngangAvg;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{A3B46AF4-1E9B-4021-A9C1-170790BDB183}];2 ;Kommisjonsnr        ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::Kommisjonsnr;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{803E7B91-5827-42F6-A811-61AD3DC73C62}];2 ;Priskort            ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=4754_uttrekk_8100_Biler::Priskort;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+  }
+  EVENTS
+  {
+  }
+  REQUESTPAGE
+  {
+    PROPERTIES
+    {
+    }
+    CONTROLS
+    {
+    }
+  }
+  CODE
+  {
+    VAR
+      C_INC_Progress@1101103000 : TextConst 'ENU=Import in progress...\ \Record No. #1#####;NOR=Import kj›rer...\ \Post nummer #1#####';
+      DialogG@1101103001 : Dialog;
+      RecordNoG@1101103002 : Integer;
+
+    BEGIN
+    END.
+  }
+}
+

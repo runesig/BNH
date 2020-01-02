@@ -1,0 +1,564 @@
+OBJECT Page 5231050 Blanket Sales OrderBNH
+{
+  OBJECT-PROPERTIES
+  {
+    Date=20.03.18;
+    Time=14:59:56;
+    Modified=Yes;
+    Version List=BlanketOrderBNH;
+  }
+  PROPERTIES
+  {
+    CaptionML=[DAN=Rammesalgsordre;
+               DEU=Rahmenauftrag;
+               ENU=Blanket Sales Order;
+               NOR=Rammeordre;
+               SVE=Avropsorder, f”rs„ljning];
+    SourceTable=Table36;
+    SourceTableView=WHERE(Document Type=FILTER(Blanket Order));
+    PageType=Document;
+    RefreshOnActivate=Yes;
+    OnDeleteRecord=BEGIN
+                     CurrPage.SAVERECORD;
+                     EXIT(ConfirmDeletion);
+                   END;
+
+    ActionList=ACTIONS
+    {
+      { 1900000003;0 ;ActionContainer;
+                      ActionContainerType=RelatedInformation }
+      { 59      ;1   ;ActionGroup;
+                      CaptionML=[DAN=O&rdre;
+                                 DEU=Auf&trag;
+                                 ENU=O&rder;
+                                 SVE=Ord&er] }
+      { 61      ;2   ;Action    ;
+                      ShortCutKey=F7;
+                      CaptionML=[DAN=&Statistik;
+                                 DEU=&Statistik;
+                                 ENU=&Statistics;
+                                 NOR=&Statistikk;
+                                 SVE=&Statistik];
+                      RunObject=Page 402;
+                      RunPageLink=Document Type=FIELD(Document Type),
+                                  No.=FIELD(No.);
+                      Promoted=Yes;
+                      Image=Statistics;
+                      PromotedCategory=Process;
+                      OnAction=BEGIN
+                                 SalesSetup.GET;
+                                 IF SalesSetup."Calc. Inv. Discount" THEN
+                                   CurrPage.SalesLines.PAGE.CalcInvDisc;
+                               END;
+                                }
+      { 62      ;2   ;Action    ;
+                      ShortCutKey=Shift+F7;
+                      CaptionML=[DAN=&Kort;
+                                 DEU=&Karte;
+                                 ENU=&Card;
+                                 NOR=&Kort;
+                                 SVE=&Kort];
+                      RunObject=Page 21;
+                      RunPageLink=No.=FIELD(Sell-to Customer No.);
+                      Image=EditLines }
+      { 63      ;2   ;Action    ;
+                      CaptionML=[DAN=Bem&‘rkning;
+                                 DEU=Be&merkungen;
+                                 ENU=Co&mments;
+                                 NOR=&Bemerkninger;
+                                 SVE=Ko&mmentarer];
+                      RunObject=Page 67;
+                      RunPageLink=Document Type=CONST(Blanket Order),
+                                  No.=FIELD(No.),
+                                  Document Line No.=CONST(0);
+                      Image=ViewComments }
+      { 115     ;2   ;Action    ;
+                      ShortCutKey=Shift+Ctrl+D;
+                      CaptionML=[DAN=Dimensioner;
+                                 ENU=Dimensions;
+                                 NOR=Dimensjoner;
+                                 SVE=Dimensioner];
+                      Description=PA035597;
+                      Image=Dimensions;
+                      OnAction=BEGIN
+                                 ShowDocDim;
+                               END;
+                                }
+      { 65      ;1   ;ActionGroup;
+                      CaptionML=[DAN=&Linje;
+                                 DEU=&Zeile;
+                                 ENU=&Line;
+                                 NOR=Linje;
+                                 SVE=Ra&d] }
+      { 106     ;2   ;ActionGroup;
+                      CaptionML=[DAN=Ikkebogf›rte linjer;
+                                 DEU=Nicht gebuchte Zeilen;
+                                 ENU=Unposted Lines;
+                                 NOR=Ikke-bokf›rte linjer;
+                                 SVE=Ej bokf”rda rader] }
+      { 107     ;3   ;Action    ;
+                      CaptionML=[DAN=Ordrer;
+                                 DEU=Auftr„ge;
+                                 ENU=Orders;
+                                 NOR=Bestillinger;
+                                 SVE=Order];
+                      Image=Document;
+                      OnAction=BEGIN
+                                 CurrPage.SalesLines.PAGE.GETRECORD(CurrSalesLine);
+                                 SalesLine.RESET;
+                                 SalesLine.SETCURRENTKEY("Document Type","Blanket Order No.","Blanket Order Line No.");
+                                 SalesLine.SETRANGE("Document Type",SalesLine."Document Type"::Order);
+                                 SalesLine.SETRANGE("Blanket Order No.",CurrSalesLine."Document No.");
+                                 SalesLine.SETRANGE("Blanket Order Line No.",CurrSalesLine."Line No.");
+                                 PAGE.RUNMODAL(PAGE::"Sales Lines",SalesLine);
+                               END;
+                                }
+      { 113     ;3   ;Action    ;
+                      CaptionML=[DAN=Fakturaer;
+                                 DEU=Rechnungen;
+                                 ENU=Invoices;
+                                 NOR=Fakturaer;
+                                 SVE=Fakturor];
+                      Image=Invoice;
+                      OnAction=BEGIN
+                                 CurrPage.SalesLines.PAGE.GETRECORD(CurrSalesLine);
+                                 SalesLine.RESET;
+                                 SalesLine.SETCURRENTKEY("Document Type","Blanket Order No.","Blanket Order Line No.");
+                                 SalesLine.SETRANGE("Document Type",SalesLine."Document Type"::Invoice);
+                                 SalesLine.SETRANGE("Blanket Order No.",CurrSalesLine."Document No.");
+                                 SalesLine.SETRANGE("Blanket Order Line No.",CurrSalesLine."Line No.");
+                                 PAGE.RUNMODAL(PAGE::"Sales Lines",SalesLine);
+                               END;
+                                }
+      { 108     ;3   ;Action    ;
+                      CaptionML=[DAN=Kreditnotaer;
+                                 DEU=Gutschriften;
+                                 ENU=Credit Memos;
+                                 NOR=Kreditnotaer;
+                                 SVE=Kreditnotor];
+                      Image=CreditMemo;
+                      OnAction=BEGIN
+                                 CurrPage.SalesLines.PAGE.GETRECORD(CurrSalesLine);
+                                 SalesLine.RESET;
+                                 SalesLine.SETCURRENTKEY("Document Type","Blanket Order No.","Blanket Order Line No.");
+                                 SalesLine.SETRANGE("Document Type",SalesLine."Document Type"::"Credit Memo");
+                                 SalesLine.SETRANGE("Blanket Order No.",CurrSalesLine."Document No.");
+                                 SalesLine.SETRANGE("Blanket Order Line No.",CurrSalesLine."Line No.");
+                                 PAGE.RUNMODAL(PAGE::"Sales Lines",SalesLine);
+                               END;
+                                }
+      { 114     ;2   ;ActionGroup;
+                      CaptionML=[DAN=Bogf›rte linjer;
+                                 DEU=Gebuchte Zeilen;
+                                 ENU=Posted Lines;
+                                 NOR=Bokf›rte linjer;
+                                 SVE=Bokf”rda rader] }
+      { 109     ;3   ;Action    ;
+                      CaptionML=[DAN=Leverancer;
+                                 DEU=Lieferungen;
+                                 ENU=Shipments;
+                                 SVE=Utleveranser];
+                      Image=NewWarehouseShipment;
+                      OnAction=BEGIN
+                                 CurrPage.SalesLines.PAGE.GETRECORD(CurrSalesLine);
+                                 SalesShipmentLine.RESET;
+                                 SalesShipmentLine.SETCURRENTKEY("Blanket Order No.","Blanket Order Line No.");
+                                 SalesShipmentLine.SETRANGE("Blanket Order No.",CurrSalesLine."Document No.");
+                                 SalesShipmentLine.SETRANGE("Blanket Order Line No.",CurrSalesLine."Line No.");
+                                 // Start PA035597
+                                 PAGE.RUNMODAL(PAGE::"Posted Sales Shipment Lines",SalesShipmentLine);
+                                 // Stop PA035597
+                               END;
+                                }
+      { 110     ;3   ;Action    ;
+                      CaptionML=[DAN=Fakturaer;
+                                 DEU=Rechnungen;
+                                 ENU=Invoices;
+                                 NOR=Fakturaer;
+                                 SVE=Fakturor];
+                      Image=Invoice;
+                      OnAction=BEGIN
+                                 CurrPage.SalesLines.PAGE.GETRECORD(CurrSalesLine);
+                                 SalesInvoiceLine.RESET;
+                                 SalesInvoiceLine.SETCURRENTKEY("Blanket Order No.","Blanket Order Line No.");
+                                 SalesInvoiceLine.SETRANGE("Blanket Order No.",CurrSalesLine."Document No.");
+                                 SalesInvoiceLine.SETRANGE("Blanket Order Line No.",CurrSalesLine."Line No.");
+                                 // Start PA035597
+                                 PAGE.RUNMODAL(PAGE::"Posted Sales Invoice Lines",SalesInvoiceLine);
+                                 // Stop PA035597
+                               END;
+                                }
+      { 112     ;3   ;Action    ;
+                      CaptionML=[DAN=Kreditnotaer;
+                                 DEU=Gutschriften;
+                                 ENU=Credit Memos;
+                                 NOR=Kreditnotaer;
+                                 SVE=Kreditnotor];
+                      Image=CreditMemo;
+                      OnAction=BEGIN
+                                 CurrPage.SalesLines.PAGE.GETRECORD(CurrSalesLine);
+                                 SalesCrMemoLine.RESET;
+                                 SalesCrMemoLine.SETCURRENTKEY("Blanket Order No.","Blanket Order Line No.");
+                                 SalesCrMemoLine.SETRANGE("Blanket Order No.",CurrSalesLine."Document No.");
+                                 SalesCrMemoLine.SETRANGE("Blanket Order Line No.",CurrSalesLine."Line No.");
+                                 // Start PA035597
+                                 PAGE.RUNMODAL(PAGE::"Posted Sales Credit Memo Lines",SalesCrMemoLine);
+                                 // Stop PA035597
+                               END;
+                                }
+      { 1900000004;0 ;ActionContainer;
+                      ActionContainerType=ActionItems }
+      { 66      ;1   ;ActionGroup;
+                      CaptionML=[DAN=F&unktioner;
+                                 DEU=F&unktionen;
+                                 ENU=F&unctions;
+                                 NOR=F&unksjoner;
+                                 SVE=Funktioner] }
+      { 68      ;2   ;Action    ;
+                      Ellipsis=Yes;
+                      CaptionML=[DAN=&Kopier dokument;
+                                 DEU=Beleg &kopieren;
+                                 ENU=&Copy Document;
+                                 SVE=&Kopiera dokument];
+                      Promoted=Yes;
+                      Image=CopyDocument;
+                      PromotedCategory=Process;
+                      OnAction=BEGIN
+                                 CopySalesDoc.SetSalesHeader(Rec);
+                                 CopySalesDoc.RUNMODAL;
+                                 CLEAR(CopySalesDoc);
+                               END;
+                                }
+      { 73      ;1   ;Action    ;
+                      CaptionML=[DAN=Opret &ordre;
+                                 DEU=&Auftrag Erstellen;
+                                 ENU=Create &Order;
+                                 NOR=Opprett &ordre;
+                                 SVE=Skapa &order];
+                      RunObject=Codeunit 84;
+                      Promoted=Yes;
+                      PromotedIsBig=Yes;
+                      Image=MakeOrder;
+                      PromotedCategory=Process }
+      { 78      ;1   ;Action    ;
+                      Ellipsis=Yes;
+                      CaptionML=[DAN=Udsk&riv;
+                                 DEU=D&rucken;
+                                 ENU=&Print;
+                                 NOR=&Skriv ut;
+                                 SVE=Skriv &ut];
+                      Promoted=Yes;
+                      PromotedIsBig=Yes;
+                      Image=Print;
+                      PromotedCategory=Process;
+                      OnAction=BEGIN
+                                 DocPrint.PrintSalesHeader(Rec);
+                               END;
+                                }
+    }
+  }
+  CONTROLS
+  {
+    { 1900000001;0;Container;
+                ContainerType=ContentArea }
+
+    { 1   ;1   ;Group     ;
+                CaptionML=[DAN=Generelt;
+                           DEU=Allgemein;
+                           ENU=General;
+                           NOR=Generelt;
+                           SVE=Allm„nt] }
+
+    { 2   ;2   ;Field     ;
+                SourceExpr="No.";
+                OnAssistEdit=BEGIN
+                               IF AssistEdit(xRec) THEN
+                                 CurrPage.UPDATE;
+                             END;
+                              }
+
+    { 4   ;2   ;Field     ;
+                SourceExpr="Sell-to Customer No.";
+                OnValidate=VAR
+                             rGjentakelsesordreDataL@1101103000 : Record 5231052;
+                           BEGIN
+                             rGjentakelsesordreDataL.INIT;
+                             rGjentakelsesordreDataL."Blanket Order No." := "No.";
+                             rGjentakelsesordreDataL.INSERT(TRUE);
+                           END;
+                            }
+
+    { 6   ;2   ;Field     ;
+                SourceExpr="Sell-to Customer Name" }
+
+    { 81  ;2   ;Field     ;
+                SourceExpr="Sell-to Address" }
+
+    { 83  ;2   ;Field     ;
+                SourceExpr="Sell-to Address 2" }
+
+    { 72  ;2   ;Field     ;
+                CaptionML=[DAN=Kundepostnr./by;
+                           DEU=Verk. an PLZ/Ort;
+                           ENU=Sell-to Post Code/City;
+                           NOR=Salg-til postnr./sted;
+                           SVE=F”rs.postnr/ort];
+                SourceExpr="Sell-to Post Code";
+                AutoFormatExpr='JMD' }
+
+    { 86  ;2   ;Field     ;
+                SourceExpr="Sell-to City" }
+
+    { 8   ;2   ;Field     ;
+                SourceExpr="Sell-to Contact" }
+
+    { 14  ;2   ;Field     ;
+                SourceExpr="Order Date" }
+
+    { 45  ;2   ;Field     ;
+                SourceExpr="Document Date" }
+
+    { 10  ;2   ;Field     ;
+                SourceExpr="Salesperson Code";
+                AutoFormatExpr='JMD' }
+
+    { 1101103000;1;Part   ;
+                CaptionML=[ENU=Blanket Order Parameters;
+                           NOR=Rammeordre - Parameter];
+                SubPageView=SORTING(Blanket Order No.);
+                SubPageLink=Blanket Order No.=FIELD(No.);
+                PagePartID=Page5231058;
+                PartType=Page;
+                ShowFilter=No }
+
+    { 58  ;1   ;Part      ;
+                Name=SalesLines;
+                SubPageLink=Document No.=FIELD(No.);
+                PagePartID=Page5231051 }
+
+    { 1905885101;1;Group  ;
+                CaptionML=[DAN=Fakturering;
+                           DEU=Fakturierung;
+                           ENU=Invoicing;
+                           NOR=Fakturering;
+                           SVE=Fakturering] }
+
+    { 16  ;2   ;Field     ;
+                SourceExpr="Bill-to Customer No." }
+
+    { 18  ;2   ;Field     ;
+                SourceExpr="Bill-to Name" }
+
+    { 1101103004;2;Field  ;
+                SourceExpr="Bill-to Name 2" }
+
+    { 20  ;2   ;Field     ;
+                SourceExpr="Bill-to Address" }
+
+    { 22  ;2   ;Field     ;
+                SourceExpr="Bill-to Address 2" }
+
+    { 89  ;2   ;Field     ;
+                CaptionML=[DAN=Post n/By;
+                           DEU=PLZ/Ort;
+                           ENU=Post Code/City;
+                           NOR=Postnr./sted;
+                           SVE=Postnr/ort];
+                SourceExpr="Bill-to Post Code";
+                AutoFormatExpr='JMD' }
+
+    { 24  ;2   ;Field     ;
+                SourceExpr="Bill-to City" }
+
+    { 26  ;2   ;Field     ;
+                SourceExpr="Bill-to Contact" }
+
+    { 1000000001;2;Field  ;
+                SourceExpr="Branch Code" }
+
+    { 1000000002;2;Field  ;
+                SourceExpr="Location Code" }
+
+    { 84  ;2   ;Field     ;
+                SourceExpr="Shortcut Dimension 1 Code";
+                AutoFormatExpr='JMD';
+                OnValidate=BEGIN
+                             // Start PA035597
+                             ShortcutDimension1CodeOnAfterV;
+                             // Stop PA035597
+                           END;
+                            }
+
+    { 92  ;2   ;Field     ;
+                SourceExpr="Shortcut Dimension 2 Code";
+                AutoFormatExpr='JMD';
+                OnValidate=BEGIN
+                             // Start PA035597
+                             ShortcutDimension2CodeOnAfterV;
+                             // Stop PA035597
+                           END;
+                            }
+
+    { 28  ;2   ;Field     ;
+                SourceExpr="Payment Terms Code";
+                AutoFormatExpr='JMD' }
+
+    { 30  ;2   ;Field     ;
+                SourceExpr="Due Date" }
+
+    { 32  ;2   ;Field     ;
+                SourceExpr="Payment Discount %" }
+
+    { 34  ;2   ;Field     ;
+                SourceExpr="Pmt. Discount Date" }
+
+    { 74  ;2   ;Field     ;
+                SourceExpr="Payment Method Code";
+                AutoFormatExpr='JMD' }
+
+    { 1906801201;1;Group  ;
+                CaptionML=[DAN=Levering;
+                           DEU=Lieferung;
+                           ENU=Shipping;
+                           SVE=Leverans] }
+
+    { 36  ;2   ;Field     ;
+                SourceExpr="Ship-to Code";
+                AutoFormatExpr='JMD' }
+
+    { 38  ;2   ;Field     ;
+                SourceExpr="Ship-to Name" }
+
+    { 40  ;2   ;Field     ;
+                SourceExpr="Ship-to Address" }
+
+    { 97  ;2   ;Field     ;
+                CaptionML=[DAN=Leveringspostnr./by;
+                           DEU=Lief. an PLZ/Ort;
+                           ENU=Ship-to Post Code/City;
+                           NOR=Lever-til postnr./sted;
+                           SVE=Leverans postnr/ort];
+                SourceExpr="Ship-to Post Code";
+                AutoFormatExpr='JMD' }
+
+    { 44  ;2   ;Field     ;
+                SourceExpr="Ship-to City" }
+
+    { 46  ;2   ;Field     ;
+                SourceExpr="Ship-to Contact" }
+
+    { 48  ;2   ;Field     ;
+                SourceExpr="Shipment Method Code";
+                AutoFormatExpr='JMD' }
+
+    { 50  ;2   ;Field     ;
+                SourceExpr="Shipment Date" }
+
+    { 1101103001;1;Group  ;
+                CaptionML=[ENU=Vehicle;
+                           NOR=Kj›ret›y];
+                GroupType=Group }
+
+    { 1101103002;2;Field  ;
+                SourceExpr="Supply VIN" }
+
+    { 1101103003;2;Field  ;
+                SourceExpr="Reference License No." }
+
+    { 1907468901;1;Group  ;
+                CaptionML=[DAN=Udenrigshandel;
+                           DEU=Auáenhandel;
+                           ENU=Foreign Trade;
+                           NOR=Utenrikshandel;
+                           SVE=Utlandshandel] }
+
+    { 12  ;2   ;Field     ;
+                SourceExpr="Currency Code";
+                AutoFormatExpr='JMD';
+                OnAssistEdit=BEGIN
+                               ChangeExchRate.SetParameter("Currency Code","Currency Factor","Posting Date");
+                               IF ChangeExchRate.RUNMODAL = ACTION::OK THEN BEGIN
+                                 VALIDATE("Currency Factor",ChangeExchRate.GetParameter);
+                                 CurrPage.UPDATE;
+                               END;
+                               CLEAR(ChangeExchRate);
+                             END;
+                              }
+
+    { 52  ;2   ;Field     ;
+                SourceExpr="EU 3-Party Trade" }
+
+    { 54  ;2   ;Field     ;
+                SourceExpr="Transaction Type" }
+
+    { 103 ;2   ;Field     ;
+                SourceExpr="Transaction Specification" }
+
+    { 56  ;2   ;Field     ;
+                SourceExpr="Transport Method" }
+
+    { 99  ;2   ;Field     ;
+                SourceExpr="Exit Point" }
+
+    { 101 ;2   ;Field     ;
+                SourceExpr=Area }
+
+    { 1900000007;0;Container;
+                ContainerType=FactBoxArea }
+
+    { 1900383207;1;Part   ;
+                Visible=FALSE;
+                PartType=System;
+                SystemPartID=RecordLinks }
+
+    { 1905767507;1;Part   ;
+                Visible=TRUE;
+                PartType=System;
+                SystemPartID=Notes }
+
+  }
+  CODE
+  {
+    VAR
+      CurrSalesLine@1000 : Record 37;
+      SalesLine@1001 : Record 37;
+      SalesShipmentLine@1002 : Record 111;
+      SalesInvoiceLine@1003 : Record 113;
+      SalesCrMemoLine@1004 : Record 115;
+      ChangeExchRate@1005 : Page 511;
+      CopySalesDoc@1006 : Report 292;
+      DocPrint@1007 : Codeunit 229;
+      SalesSetup@1008 : Record 311;
+
+    LOCAL PROCEDURE ShortcutDimension1CodeOnAfterV@19029405();
+    BEGIN
+      // Start PA035597
+      CurrPage.SalesLines.PAGE.UpdateForm(TRUE);
+      // Stop PA035597
+    END;
+
+    LOCAL PROCEDURE ShortcutDimension2CodeOnAfterV@19008725();
+    BEGIN
+      // Start PA035597
+      CurrPage.SalesLines.PAGE.UpdateForm(TRUE);
+      // Stop PA035597
+    END;
+
+    BEGIN
+    {
+      // @ Area Sales
+      PA-Number  Date
+      ------------------------------------------------
+      PA032651   20.12.11 SS 1808921
+                             - Variant MenuItem made Invisible in Item-->"Item Availability by" MenuButton.
+      PA033067   12.04.12 DR DE Captions implemented
+      PA032651   25.04.12 DR 6012646: DEU and ENU Captions corrected
+      PA033019   29.05.12 DR 7275374: DEU and ENU Captions corrected
+      PA033259   18.09.12 DR Variable names changed according to incadea styleguide
+      PA035597   10.02.14 GC NAV 2013 R2 Technical Upgrade
+      PA035901   13.11.14 CH NAV 2013 R2 General Ledger Integration.
+    }
+    END.
+  }
+}
+

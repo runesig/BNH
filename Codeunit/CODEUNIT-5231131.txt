@@ -1,0 +1,270 @@
+OBJECT Codeunit 5231131 BNH Vendor Update
+{
+  OBJECT-PROPERTIES
+  {
+    Date=22.11.17;
+    Time=18:50:28;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    TableNo=5231126;
+    OnRun=BEGIN
+            BNHmasterdata1levG.COPY( Rec );
+
+            CASE TRUE OF
+              BNHmasterdata1levG.Status = Status::Ignore:
+                EXIT;
+              ( "No." <> '' ) AND VendorG.GET( BNHmasterdata1levG."No." ):
+                ModifyRecord;
+              ELSE
+                InsertRecord;
+            END;
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      C_ConfirmProcess@1101103000 : TextConst 'ENU=Process %1 records?;NOR=Prosesser %1 poster?';
+      BNHmasterdata1levG@1101103001 : Record 5231126;
+      VendorG@1101103002 : Record 23;
+
+    PROCEDURE InsertRecord@1101103000();
+    VAR
+    ;
+    BEGIN
+      CLEAR( VendorG );
+      WITH VendorG DO BEGIN
+        INIT;
+        VALIDATE("No.", BNHmasterdata1levG."Levr.nr");
+        INSERT( TRUE );
+        SetFields;
+        MODIFY( TRUE );
+      END;
+
+      WITH BNHmasterdata1levG DO BEGIN
+        GET( "Primary Key" );
+        "No." := VendorG."No.";
+        MODIFY;
+      END;
+    END;
+
+    PROCEDURE ModifyRecord@1101103001();
+    BEGIN
+      WITH VendorG DO BEGIN
+        SetFields;
+        MODIFY( TRUE );
+      END;
+    END;
+
+    PROCEDURE SetFields@1101103004();
+    VAR
+      ValueL@1101103001 : Text;
+      LastSpacePosL@1101103000 : Integer;
+      AddressManagementL@1101103002 : Codeunit 5029101;
+    BEGIN
+      WITH VendorG DO BEGIN
+        BNHmasterdata1levG.CALCFIELDS(Sted, Betalingsbetingelser, "Bankgironr.", "Organisasjonsnr.", Telefon);
+        VALIDATE("Last Name", BNHmasterdata1levG.Navn);
+        VALIDATE("Name 2", BNHmasterdata1levG."Navn 2");
+        VALIDATE(Address, BNHmasterdata1levG.Adresse);
+        IF STRLEN(BNHmasterdata1levG.Postnummer) = 3 THEN
+          VALIDATE("Post Code", '0' + BNHmasterdata1levG.Postnummer);
+        IF STRLEN(BNHmasterdata1levG.Postnummer) = 2 THEN
+          VALIDATE("Post Code", '00' + BNHmasterdata1levG.Postnummer);
+        IF STRLEN(BNHmasterdata1levG.Postnummer) = 4 THEN
+          VALIDATE("Post Code", BNHmasterdata1levG.Postnummer);
+        VALIDATE(City, BNHmasterdata1levG.Sted);
+        VALIDATE("Payment Terms Code", BNHmasterdata1levG.Betalingsbetingelser);
+        VALIDATE(Remittance, TRUE);
+        VALIDATE("Remittance Account Code", 'INNLAND');
+        VALIDATE("Recipient Bank Account No.", BNHmasterdata1levG."Bankgironr.");
+        VALIDATE("Remittance Agreement Code", 'HANDELSBAN');
+        VALIDATE("VAT Registration No.", BNHmasterdata1levG."Organisasjonsnr.");
+        VALIDATE("Phone No.", BNHmasterdata1levG.Telefon);
+        VendorG."Customer Type" := VendorG."Customer Type"::Business;
+        IF BNHmasterdata1levG."leverand›rgruppe" = '2' THEN
+          BEGIN
+          VALIDATE("Gen. Bus. Posting Group",  'UTLAND');
+          VALIDATE("Vendor Posting Group", 'UTLAND');
+          END;
+        AddressManagementL.UpdateVendorAddress(VendorG);
+      END;
+    END;
+
+    PROCEDURE Propercase@1101103002(TextP@1101103000 : Text) : Text;
+    VAR
+      i@1101103001 : Integer;
+    BEGIN
+      FOR i := 1 TO STRLEN( TextP ) DO BEGIN
+        IF i = 1 THEN
+          EVALUATE( TextP[i], UPPERCASE( FORMAT( TextP[i] )))
+        ELSE
+          IF ( TextP[i-1] = 32 ) OR ( TextP[i-1] = '-' ) THEN
+             EVALUATE( TextP[i], UPPERCASE( FORMAT( TextP[i] )))
+          ELSE
+             EVALUATE( TextP[i], LOWERCASE( FORMAT( TextP[i] )));
+      END;
+      EXIT( TextP );
+    END;
+
+    PROCEDURE LastSpacePos@1101103006(TextP@1101103000 : Text) : Integer;
+    VAR
+      i@1101103001 : Integer;
+    BEGIN
+      i := STRLEN( TextP );
+      CASE i OF
+        0:
+          EXIT( 0 );
+        ELSE
+          BEGIN
+            WHILE ( i > 1 ) AND ( TextP[i] <> ' ' ) DO
+              i -= 1;
+            IF ( i > 1 ) AND ( TextP[i] = ' ' ) THEN
+              EXIT( i )
+            ELSE
+              EXIT( 0 );
+          END;
+      END;
+    END;
+
+    PROCEDURE FormatDatoTekst@5(DatoTekst@1000000000 : Text[30];SkilleTegn@1000000001 : Text[1];"Rekkef›lge"@1000000002 : 'DagMndAar,MndDagAar,AarDagMnd,AarMndDag') : Date;
+    VAR
+      Dato@1000000003 : Record 2000000007;
+      DatoSplitt@1000000004 : ARRAY [250] OF Text[250];
+      Dag@1000000005 : Integer;
+      Mnd@1000000006 : Integer;
+      Aar@1000000007 : Integer;
+      TestDato@1000000008 : Date;
+    BEGIN
+      // Splitter opp datoen
+      SplitSeparertTekst(DatoTekst, SkilleTegn, DatoSplitt);
+      // Konverterer
+      CASE "Rekkef›lge" OF
+        "Rekkef›lge"::DagMndAar: BEGIN
+          IF NOT EVALUATE(Dag, DatoSplitt[1]) THEN
+            Dag := 1;
+          IF NOT EVALUATE(Mnd, DatoSplitt[2]) THEN
+            Mnd := 1;
+          IF NOT EVALUATE(Aar, DatoSplitt[3]) THEN
+            Aar := 1;
+        END;
+        "Rekkef›lge"::MndDagAar: BEGIN
+          IF NOT EVALUATE(Dag, DatoSplitt[2]) THEN
+            Dag := 1;
+          IF NOT EVALUATE(Mnd, DatoSplitt[1]) THEN
+            Mnd := 1;
+          IF NOT EVALUATE(Aar, DatoSplitt[3]) THEN
+            Aar := 1;
+        END;
+        "Rekkef›lge"::AarDagMnd: BEGIN
+          IF NOT EVALUATE(Dag, DatoSplitt[2]) THEN
+            Dag := 1;
+          IF NOT EVALUATE(Mnd, DatoSplitt[3]) THEN
+            Mnd := 1;
+          IF NOT EVALUATE(Aar, DatoSplitt[1]) THEN
+            Aar := 1;
+        END;
+        "Rekkef›lge"::AarMndDag: BEGIN
+          IF NOT EVALUATE(Dag, DatoSplitt[3]) THEN
+            Dag := 1;
+          IF NOT EVALUATE(Mnd, DatoSplitt[2]) THEN
+            Mnd := 1;
+          IF NOT EVALUATE(Aar, DatoSplitt[1]) THEN
+            Aar := 1;
+        END;
+      END;
+
+      // Sjekker at datoen er korrekt
+      IF (Dag > 31) THEN
+        Dag := 31;
+      IF (Dag < 1) THEN
+        Dag := 1;
+      IF (Mnd > 12) THEN
+        Mnd := 12;
+      IF (Mnd < 1) THEN
+        Mnd := 1;
+      IF ((Aar <= 99) AND (Aar > 50)) THEN
+        Aar := 1900 + Aar;
+      IF ((Aar <= 99) AND (Aar < 50)) THEN
+        Aar := 2000 + Aar;
+      IF (Aar = 0) THEN
+        Aar := 2000;
+
+      // Siste sjekk f›r konvertering
+      IF Dag >= 28 THEN BEGIN
+        TestDato := 0D;
+        TestDato := DMY2DATE(1, Mnd, Aar);
+        Dag := DATE2DMY(CALCDATE('+1M-1D', TestDato), 1);
+      END;
+
+      EXIT(DMY2DATE(Dag, Mnd, Aar));
+    END;
+
+    PROCEDURE Str2Date@1117700019(InnDato@1117700000 : Text[30];InnFormat@1117700001 : Integer) UtDato : Date;
+    VAR
+      Dag@1117700002 : Integer;
+      Mnd@1117700003 : Integer;
+      Aar@1117700004 : Integer;
+    BEGIN
+      IF InnDato = '' THEN EXIT(0D);
+
+      CASE InnFormat OF
+        0: // DD-MM-YYYY
+          BEGIN
+            EVALUATE(Dag, COPYSTR(InnDato,1,2));
+            EVALUATE(Mnd, COPYSTR(InnDato,4,2));
+            EVALUATE(Aar, COPYSTR(InnDato,7,4));
+            UtDato := DMY2DATE(Dag, Mnd, Aar);
+          END;
+        1: // MM-DD-YYYY
+          BEGIN
+            EVALUATE(Dag, COPYSTR(InnDato,4,2));
+            EVALUATE(Mnd, COPYSTR(InnDato,1,2));
+            EVALUATE(Aar, COPYSTR(InnDato,7,4));
+            UtDato := DMY2DATE(Dag, Mnd, Aar);
+          END;
+        2: // DDMMYY
+          BEGIN
+            EVALUATE(Dag, COPYSTR(InnDato,1,2));
+            EVALUATE(Mnd, COPYSTR(InnDato,3,2));
+            EVALUATE(Aar, COPYSTR(InnDato,5,2));
+            UtDato := DMY2DATE(Dag, Mnd, Aar+2000);
+          END;
+        3: // YYYYMMDD
+          BEGIN
+            EVALUATE(Dag, COPYSTR(InnDato,7,2));
+            EVALUATE(Mnd, COPYSTR(InnDato,5,2));
+            EVALUATE(Aar, COPYSTR(InnDato,1,4));
+            UtDato := DMY2DATE(Dag, Mnd, Aar);
+          END;
+      END;
+    END;
+
+    PROCEDURE SplitSeparertTekst@4(Tekst@1000000000 : Text[250];Skilletegn@1000000001 : Text[1];VAR SplittetFelt@1000000002 : ARRAY [250] OF Text[250]);
+    VAR
+      Felt@1000000003 : Text[250];
+      Pos@1000000004 : Integer;
+      I@1000000005 : Integer;
+    BEGIN
+      Pos := STRPOS(Tekst, Skilletegn);
+      I := 0;
+      WHILE Pos > 0 DO BEGIN
+        I += 1;
+        Pos := STRPOS(Tekst, Skilletegn);
+        IF Pos > 0 THEN
+          Felt := COPYSTR(Tekst, 1, Pos - 1)
+        ELSE
+          Felt := COPYSTR(Tekst, 1);
+        Tekst := COPYSTR(Tekst, Pos + 1);
+        SplittetFelt[I] := Felt;
+      END;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

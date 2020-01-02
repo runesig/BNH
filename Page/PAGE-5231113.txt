@@ -1,0 +1,480 @@
+OBJECT Page 5231113 BnH Vehicle
+{
+  OBJECT-PROPERTIES
+  {
+    Date=06.11.17;
+    Time=21:14:47;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    SourceTable=Table5231115;
+    PageType=List;
+    ActionList=ACTIONS
+    {
+      { 1101103079;  ;ActionContainer;
+                      ActionContainerType=ActionItems }
+      { 1101103063;1 ;Action    ;
+                      Name=Delete All Records;
+                      CaptionML=[ENU=Delete All Records;
+                                 NOR=Slett alle poster];
+                      Image=DeleteXML;
+                      PromotedCategory=Process;
+                      OnAction=BEGIN
+                                 DeleteAllRecords;
+                               END;
+                                }
+      { 1101103061;1 ;Action    ;
+                      Name=Import Data;
+                      CaptionML=[ENU=Import Data;
+                                 NOR=Importer data];
+                      RunObject=XMLport 5231115;
+                      Image=Import;
+                      PromotedCategory=Process }
+      { 1101103080;1 ;Action    ;
+                      Name=Create Vehicles;
+                      CaptionML=[ENU=Create Vehicles;
+                                 NOR=Opprett kj›ret›y];
+                      Promoted=Yes;
+                      PromotedIsBig=Yes;
+                      Image=TransferOrder;
+                      PromotedCategory=Process;
+                      OnAction=BEGIN
+                                 CreateItems;
+                               END;
+                                }
+      { 1101103067;1 ;Action    ;
+                      Name=[Vehicle ];
+                      CaptionML=[ENU=Vehicle Card;
+                                 NOR=Kj›ret›ykort];
+                      Promoted=Yes;
+                      PromotedIsBig=Yes;
+                      Image=Card;
+                      PromotedCategory=Process;
+                      OnAction=BEGIN
+                                 ShowVehicleCard;
+                               END;
+                                }
+      { 1101103068;1 ;Action    ;
+                      Name=Delete Vehicles;
+                      CaptionML=[ENU=Delete Vehicles;
+                                 NOR=Slett kj›ret›y];
+                      Image=DeleteXML;
+                      PromotedCategory=Process;
+                      OnAction=BEGIN
+                                 DeleteItems;
+                               END;
+                                }
+      { 1101103073;1 ;Action    ;
+                      Name=Ignore;
+                      CaptionML=[ENU=Status Ignore;
+                                 NOR=Status ignorer];
+                      Image=Reject;
+                      PromotedCategory=Process;
+                      OnAction=BEGIN
+                                 StatusIgnore;
+                               END;
+                                }
+      { 1101103074;1 ;Action    ;
+                      Name=Reset;
+                      CaptionML=[ENU=Reset Status;
+                                 NOR=Tilbakestill status];
+                      Image=ResetStatus;
+                      PromotedCategory=Process;
+                      OnAction=BEGIN
+                                 StatusReset;
+                               END;
+                                }
+    }
+  }
+  CONTROLS
+  {
+    { 1101103000;0;Container;
+                ContainerType=ContentArea }
+
+    { 1101103001;1;Group  ;
+                Name=Group;
+                GroupType=Repeater }
+
+    { 1101103002;2;Field  ;
+                CaptionML=[ENU=Primary Key;
+                           NOR=Prim‘rn›kkel];
+                SourceExpr="Q Primary Key" }
+
+    { 1101103003;2;Field  ;
+                CaptionML=[ENU=Status;
+                           NOR=Status];
+                SourceExpr="Q Status" }
+
+    { 1101103004;2;Field  ;
+                SourceExpr="Q Datetime" }
+
+    { 1101103005;2;Field  ;
+                SourceExpr="Q Update message" }
+
+    { 1101103006;2;Field  ;
+                SourceExpr=VIN }
+
+    { 1101103007;2;Field  ;
+                SourceExpr=KEY }
+
+    { 1101103008;2;Field  ;
+                SourceExpr="STATE-CODE" }
+
+    { 1101103009;2;Field  ;
+                SourceExpr="TRANSACT-DATE" }
+
+    { 1101103010;2;Field  ;
+                SourceExpr=HANDLER }
+
+    { 1101103011;2;Field  ;
+                SourceExpr="DEBIT-CUSTOMER" }
+
+    { 1101103012;2;Field  ;
+                SourceExpr="REGISTER-NUMBER" }
+
+    { 1101103013;2;Field  ;
+                SourceExpr="CAR-GROUP" }
+
+    { 1101103014;2;Field  ;
+                SourceExpr=STATUS }
+
+    { 1101103015;2;Field  ;
+                SourceExpr="CHASSIS-NUMBER" }
+
+    { 1101103016;2;Field  ;
+                SourceExpr="USER-CODE" }
+
+    { 1101103017;2;Field  ;
+                SourceExpr="OWNER-CODE" }
+
+    { 1101103018;2;Field  ;
+                SourceExpr="UNIT-ACCOUNTING" }
+
+    { 1101103019;2;Field  ;
+                SourceExpr="CONTACT-PERSON" }
+
+    { 1101103020;2;Field  ;
+                SourceExpr="FIRST-REG-DATE" }
+
+    { 1101103021;2;Field  ;
+                SourceExpr="LATEST-REG-DATE" }
+
+    { 1101103022;2;Field  ;
+                SourceExpr="FIRST-OCCURRENCE-DAT" }
+
+    { 1101103023;2;Field  ;
+                SourceExpr="EXPECTED-ARIVAL-DATE" }
+
+    { 1101103024;2;Field  ;
+                SourceExpr="ARIVAL-DATE" }
+
+    { 1101103025;2;Field  ;
+                SourceExpr="LAST-OWNER-CHANGE" }
+
+    { 1101103026;2;Field  ;
+                SourceExpr="SALESMAN-BUY" }
+
+    { 1101103027;2;Field  ;
+                SourceExpr="SALESMAN-SALE" }
+
+    { 1101103028;2;Field  ;
+                SourceExpr="RESERVATION-DATE" }
+
+    { 1101103029;2;Field  ;
+                SourceExpr=RESERVATION }
+
+    { 1101103030;2;Field  ;
+                SourceExpr="MODEL-TEXT" }
+
+    { 1101103031;2;Field  ;
+                SourceExpr="ORIG-MODEL-CODE1" }
+
+    { 1101103032;2;Field  ;
+                SourceExpr="ORIG-MODEL-CODE2" }
+
+    { 1101103033;2;Field  ;
+                SourceExpr=COLOUR }
+
+    { 1101103034;2;Field  ;
+                SourceExpr="MODEL-CODE" }
+
+    { 1101103035;2;Field  ;
+                SourceExpr=CLASSIFICATION }
+
+    { 1101103036;2;Field  ;
+                SourceExpr="MOTOR-NUMBER" }
+
+    { 1101103037;2;Field  ;
+                SourceExpr="KEY-CODE" }
+
+    { 1101103038;2;Field  ;
+                SourceExpr="YEAR-MODEL" }
+
+    { 1101103039;2;Field  ;
+                SourceExpr="CYLINDER-VOLUME" }
+
+    { 1101103040;2;Field  ;
+                SourceExpr=SEATS }
+
+    { 1101103041;2;Field  ;
+                SourceExpr="DECLARATION-DATE" }
+
+    { 1101103042;2;Field  ;
+                SourceExpr="DECLARATION-PLACE" }
+
+    { 1101103043;2;Field  ;
+                SourceExpr="DECLARATION-NUMBER" }
+
+    { 1101103044;2;Field  ;
+                SourceExpr="ARRIVAL-SHIP" }
+
+    { 1101103045;2;Field  ;
+                SourceExpr="ARRIVAL-NUMBER" }
+
+    { 1101103046;2;Field  ;
+                SourceExpr="BIL-OF-LANDING" }
+
+    { 1101103047;2;Field  ;
+                SourceExpr="SCRUTINEERING-DATE" }
+
+    { 1101103048;2;Field  ;
+                SourceExpr="EQUIPMENT-1" }
+
+    { 1101103049;2;Field  ;
+                SourceExpr="EQUIPMENT-2" }
+
+    { 1101103050;2;Field  ;
+                SourceExpr="EQUIPMENT-3" }
+
+    { 1101103051;2;Field  ;
+                SourceExpr="EQUIPMENT-4" }
+
+    { 1101103052;2;Field  ;
+                SourceExpr=INSURANCE }
+
+    { 1101103053;2;Field  ;
+                SourceExpr=MILEAGE }
+
+    { 1101103054;2;Field  ;
+                SourceExpr="MISC-1" }
+
+    { 1101103055;2;Field  ;
+                SourceExpr="MISC-2" }
+
+    { 1101103056;2;Field  ;
+                SourceExpr="MISC-3" }
+
+    { 1101103057;2;Field  ;
+                SourceExpr="MISC-4" }
+
+    { 1101103058;2;Field  ;
+                SourceExpr="MISC-5" }
+
+    { 1101103059;2;Field  ;
+                SourceExpr="MISC-6" }
+
+    { 1101103060;2;Field  ;
+                SourceExpr="MISC-7" }
+
+    { 1101103062;2;Field  ;
+                SourceExpr="MISC-8" }
+
+    { 1101103064;2;Field  ;
+                SourceExpr="MISC-9" }
+
+    { 1101103065;2;Field  ;
+                SourceExpr="MISC-10" }
+
+    { 1101103066;2;Field  ;
+                SourceExpr="LAST-INVOICE-DTE" }
+
+    { 1101103071;2;Field  ;
+                SourceExpr="CONTACT-DATE" }
+
+    { 1101103072;2;Field  ;
+                SourceExpr="MAIL-CODE-1" }
+
+    { 1101103075;2;Field  ;
+                SourceExpr="MAIL-CODE-2" }
+
+    { 1101103076;2;Field  ;
+                SourceExpr="MAIL-CODE-3" }
+
+    { 1101103077;2;Field  ;
+                SourceExpr="MAIL-CODE-4" }
+
+    { 1101103078;2;Field  ;
+                SourceExpr="MAIL-CODE-5" }
+
+    { 1101103081;2;Field  ;
+                SourceExpr="MAIL-CODE-6" }
+
+    { 1101103082;2;Field  ;
+                SourceExpr="MAIL-CODE-7" }
+
+    { 1101103083;2;Field  ;
+                SourceExpr="MAIL-CODE-8" }
+
+    { 1101103084;2;Field  ;
+                SourceExpr="MAIL-CODE-9" }
+
+    { 1101103085;2;Field  ;
+                SourceExpr="SALE-THIS-YR" }
+
+    { 1101103086;2;Field  ;
+                SourceExpr="SALE-LAST-YR" }
+
+    { 1101103087;2;Field  ;
+                SourceExpr="SALE-LAST-YR-1" }
+
+    { 1101103088;2;Field  ;
+                SourceExpr="DELETE-PROPOSAL" }
+
+    { 1101103089;2;Field  ;
+                SourceExpr=LEASING }
+
+    { 1101103069;2;Field  ;
+                SourceExpr="Fabrik. fargekode" }
+
+    { 1101103070;2;Field  ;
+                SourceExpr="Fabrikantens fargenavn" }
+
+    { 1101103090;2;Field  ;
+                SourceExpr="Interi›rkode" }
+
+    { 1101103091;2;Field  ;
+                SourceExpr="N›kkelnumer" }
+
+    { 1101103092;2;Field  ;
+                SourceExpr=Radio }
+
+    { 1101103093;2;Field  ;
+                SourceExpr=Modellkode }
+
+    { 1101103094;2;Field  ;
+                SourceExpr="Interi›r" }
+
+  }
+  CODE
+  {
+    VAR
+      C_DeleteAllRecords@1101103000 : TextConst 'ENU=Delete All Records?;NOR=Slett alle poster?';
+      C_Sure@1101103002 : TextConst 'ENU=Sure?;NOR=Sikker?';
+      ItemG@1101103005 : Record 27;
+      C_StatusIgnore@1101103001 : TextConst 'ENU=Status Ignore;NOR=Status ignorer';
+
+    PROCEDURE DeleteItems@1101103002();
+    VAR
+      BNHVehicleL@1101103000 : Record 5231115;
+    BEGIN
+      CurrPage.SETSELECTIONFILTER( BNHVehicleL );
+      CODEUNIT.RUN( CODEUNIT::"BNH Delete Vehicles", BNHVehicleL );
+      CurrPage.UPDATE( FALSE );
+    END;
+
+    PROCEDURE CreateItems@1101103003();
+    VAR
+      BNHVehicleL@1101103000 : Record 5231115;
+    BEGIN
+      CurrPage.SETSELECTIONFILTER( BNHVehicleL );
+      CODEUNIT.RUN( CODEUNIT::"BNH Vehicle", BNHVehicleL );
+      CurrPage.UPDATE( FALSE );
+    END;
+
+    PROCEDURE DeleteAllRecords@1101103001();
+    VAR
+      BNHVehicleL@1101103001 : Record 5231115;
+    BEGIN
+      IF CONFIRM( C_DeleteAllRecords, FALSE ) THEN
+        IF CONFIRM( C_Sure, FALSE ) THEN
+          BNHVehicleL.DELETEALL( FALSE );
+      CurrPage.UPDATE( FALSE );
+    END;
+
+    PROCEDURE StatusIgnore@1101103005();
+    VAR
+      BNHVehicleL@1101103002 : Record 5231115;
+      PDMProgressL@1101103001 : Codeunit 60000;
+      RecordCount@1101103000 : ARRAY [2] OF Integer;
+      C_ProgressTitle@1101103004 : TextConst 'ENU=Ignore Items;NOR=Ignorerer varer';
+      C_Results@1101103003 : TextConst 'ENU=%1 out of %2 items ignored.;NOR=%1 av %2 varer ignorert.';
+    BEGIN
+      CurrPage.SETSELECTIONFILTER( BNHVehicleL );
+      WITH BNHVehicleL DO BEGIN
+        RecordCount[1] := COUNT;
+        PDMProgressL.Start( C_ProgressTitle, RecordCount[1] );
+        IF FINDSET THEN
+          REPEAT
+            PDMProgressL.Increment( 1 );
+            IF "Q Status" <> "Q Status"::Ignore THEN BEGIN
+              "Q Status" := "Q Status"::Ignore;
+              "Q Update message" := C_StatusIgnore;
+              "Q Datetime" := CURRENTDATETIME;
+              IF MODIFY THEN
+                RecordCount[2] += 1;
+            END;
+          UNTIL NEXT = 0;
+        PDMProgressL.Stop;
+      END;
+      IF GUIALLOWED THEN
+        MESSAGE( C_Results, RecordCount[2], RecordCount[1] );
+
+      CurrPage.UPDATE( FALSE );
+    END;
+
+    PROCEDURE StatusReset@1101103007();
+    VAR
+      BNHVehicleL@1101103002 : Record 5231115;
+      PDMProgressL@1101103001 : Codeunit 60000;
+      RecordCount@1101103000 : ARRAY [2] OF Integer;
+      C_ProgressTitle@1101103004 : TextConst 'ENU=Ignore Items;NOR=Ignorerer varer';
+      C_Results@1101103003 : TextConst 'ENU=Status reset for %1 out of %2 records.;NOR=Tilbakestilt status for %1 av %2 poster.';
+    BEGIN
+      CurrPage.SETSELECTIONFILTER( BNHVehicleL );
+      WITH BNHVehicleL DO BEGIN
+        RecordCount[1] := COUNT;
+        PDMProgressL.Start( C_ProgressTitle, RecordCount[1] );
+        IF FINDSET THEN
+          REPEAT
+            PDMProgressL.Increment( 1 );
+            IF "Q Status" <> "Q Status"::" " THEN BEGIN
+              "Q Status" := "Q Status"::" ";
+              "Q Update message" := '';
+              "Q Datetime" := 0DT;
+              IF MODIFY THEN
+                RecordCount[2] += 1;
+            END;
+          UNTIL NEXT = 0;
+        PDMProgressL.Stop;
+      END;
+      IF GUIALLOWED THEN
+        MESSAGE( C_Results, RecordCount[2], RecordCount[1] );
+
+      CurrPage.UPDATE( FALSE );
+    END;
+
+    PROCEDURE ShowVehicleCard@1101103004();
+    VAR
+      VehicleL@1101103000 : Record 5025400;
+    BEGIN
+      WITH VehicleL DO BEGIN
+        RESET;
+        SETRANGE( "License No.", "REGISTER-NUMBER" );
+        CASE TRUE OF
+          VehicleL.GET( Rec.VIN ),
+          VehicleL.GET( Rec."CHASSIS-NUMBER" ),
+          FINDFIRST:
+            PAGE.RUN( PAGE::"Vehicle Card", VehicleL )
+        END;
+      END;
+
+      CurrPage.UPDATE( FALSE );
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

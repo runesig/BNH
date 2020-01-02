@@ -1,0 +1,405 @@
+OBJECT XMLport 5231101 BB Vehicle
+{
+  OBJECT-PROPERTIES
+  {
+    Date=19.11.17;
+    Time=17:11:44;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    Direction=Import;
+    TextEncoding=WINDOWS;
+    OnPreXMLport=BEGIN
+                   IF GUIALLOWED THEN
+                     DialogG.OPEN( C_INC_Progress );
+
+                   WITH "BB Vehicle" DO
+                     IF FINDLAST THEN
+                       RecordNoG := "Primary Key";
+                 END;
+
+    OnPostXMLport=BEGIN
+                    IF GUIALLOWED THEN
+                      DialogG.CLOSE;
+                  END;
+
+    Format=Variable Text;
+    FieldDelimiter=";
+    FieldSeparator=|;
+  }
+  ELEMENTS
+  {
+    { [{9BEBC624-4C2D-4014-ADD1-1D1A3777D662}];  ;XML                 ;Element ;Text     }
+
+    { [{0851E9B8-6D67-42BC-966B-E306EB890257}];1 ;Table               ;Element ;Table   ;
+                                                  SourceTable=Table5231103;
+                                                  Import::OnBeforeInsertRecord=BEGIN
+                                                                                 RecordNoG += 1;
+                                                                                 "BB Vehicle"."Primary Key" := RecordNoG;
+
+                                                                                 IF RecordNoG MOD 100 = 0 THEN
+                                                                                   DialogG.UPDATE( 1, RecordNoG );
+                                                                               END;
+                                                                                }
+
+    { [{65FD7044-23C0-4A89-838E-D850E23516E6}];2 ;codeVin             ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Vehicle::codeVin;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{97CB84C5-979E-4B54-891D-0E10A0883257}];2 ;Model               ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Vehicle::Model;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{7B670186-52C6-4F4B-8152-40B0031545CF}];2 ;Type                ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Vehicle::Type;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{458CAF0D-FEF5-41CA-A12F-E81F0F29A541}];2 ;Class               ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Vehicle::Class;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{8E8713EB-3854-41B2-8B77-0E430A63E970}];2 ;Model_No.           ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Vehicle::Model No.;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{F7028702-B8D9-4C86-B1AA-DE9DB5D682D4}];2 ;Make_Code           ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Vehicle::Make Code;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{6D12A94D-5337-498E-9ABD-10E351C0B077}];2 ;Variant_Code        ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Vehicle::Variant Code;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{868CDB7E-8757-427E-863E-7CC5085F85A3}];2 ;Customer_No.        ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Vehicle::Customer No.;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{5A5AF151-4C6F-4036-95E5-26B4E6496820}];2 ;License_No.         ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Vehicle::License No.;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{4899BB1E-6B69-4041-80D6-9AE792A3316B}];2 ;Mileage             ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Vehicle::Mileage;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{336D9A13-FCD3-4C06-95C2-BF19CA93F3B8}];2 ;Annual_Mileage      ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Vehicle::Annual Mileage;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{32131738-D347-4114-B3B8-3EA81BCC747D}];2 ;Prod._Year          ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Vehicle::Prod. Year;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{F753927A-0E8B-4F98-A113-089A090F2A7D}];2 ;Initial_Registration;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Vehicle::Initial Registration;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{40C4DF15-ADB3-4F4D-8AC0-2F190FC9834D}];2 ;Power_kW            ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Vehicle::Power (kW);
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{3051AD45-B5FD-42AF-AB6A-9814520A1C7E}];2 ;Power_hp            ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Vehicle::Power (hp);
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{2CC6D087-A996-4C98-8FF4-A2AA4F60D7F2}];2 ;Tires               ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Vehicle::Tires;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{498E1609-AE9B-49CD-926A-F0294AB80963}];2 ;Empty_Weight_kg     ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Vehicle::Empty Weight (kg);
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{4E0E8E1A-0E62-4B72-A64D-E5DF9B199C17}];2 ;Total_Weight_kg     ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Vehicle::Total Weight (kg);
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{EF5D3837-0615-49A9-ADC8-5063D855E402}];2 ;Roof_Load_kg        ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Vehicle::Roof Load (kg);
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{0130B336-CC59-44CF-90DD-769AED9F0163}];2 ;Data_Processing_No. ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Vehicle::Data Processing No.;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{340B8C60-DC39-49CE-916B-423A7217CA42}];2 ;Engine_Code         ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Vehicle::Engine Code;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{5AA7B669-5D6A-4CF8-83C3-DE3139977FC7}];2 ;Engine_No.          ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Vehicle::Engine No.;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{F1C99C76-9006-4852-8115-62E37C0866F1}];2 ;Key_No.             ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Vehicle::Key No.;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{F8E14248-FF86-40D8-AE70-57388DF5739E}];2 ;Vehicle_Category_Cod;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Vehicle::Vehicle Category Cod;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{38E91EB7-9DC1-4270-B9E2-B789584C7953}];2 ;Emissions_Test_Categ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Vehicle::Emissions Test Categ;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{19899EDA-98A6-43D4-AB84-D917A20A0860}];2 ;Cylinder_Capacity_cc;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Vehicle::Cylinder Capacity (c;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{5B179303-8D44-4B5B-BF4F-3F974B3277A5}];2 ;Customer_Registratio;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Vehicle::Customer Registratio;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{0D900A29-E16F-4378-A2A9-7D876E7EB3D9}];2 ;Model_Code          ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Vehicle::Model Code;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{38AE055E-E758-4904-A56F-BF89344C8021}];2 ;Transmission_Type_Co;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Vehicle::Transmission Type Co;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{F06104CE-69E8-428C-8C8C-2C8B769D5DC6}];2 ;Engine_Type_Code    ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Vehicle::Engine Type Code;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{456106B0-0C49-4F14-B9CE-54DA7C740F8C}];2 ;No._of_Cylinders    ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Vehicle::No. of Cylinders;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{87334279-4F8D-428F-9C45-68289718A93A}];2 ;Trailer_Load_kg     ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Vehicle::Trailer Load (kg);
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{805C7BE2-883E-424C-96C8-818BE94FA6BD}];2 ;Trailer_Tongue_Load_;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Vehicle::Trailer Tongue Load;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{74C86C55-4973-4538-A996-716F623AD469}];2 ;FourWD              ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Vehicle::4WD;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{DA17856F-0402-451C-A529-728A37DE3A3C}];2 ;No._of_Axles        ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Vehicle::No. of Axles;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{63A27BCB-9549-468F-8C6A-A3D1209DD763}];2 ;Wheel_Distance_mm   ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Vehicle::Wheel Distance (mm);
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{7B81F4D5-01B7-4BC7-84AA-93D403908BA9}];2 ;Front_Axle_Load_kg  ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Vehicle::Front Axle Load (kg);
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{5B1B2F27-718E-49CB-B32A-D67B5909D861}];2 ;Rear_Axle_Load_kg   ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Vehicle::Rear Axle Load (kg);
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{993AE1D0-FB51-4024-BBAE-EA4DDF567D0B}];2 ;No._of_Doors        ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Vehicle::No. of Doors;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{C531D265-A875-44D8-9720-B10AC982AF0A}];2 ;Purchase_Invoice_Dat;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Vehicle::Purchase Invoice Dat;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{0ABC56E3-C1DD-4BC0-B144-E6603F8B71AF}];2 ;Old_Customer_No.    ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Vehicle::Old Customer No.;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{E6F95880-A4D1-4FDB-A9CD-78CDAC393BD9}];2 ;Purchase_Receipt_Dat;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Vehicle::Purchase Receipt Dat;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{5DA14F55-098A-430E-8033-87D30EF4B519}];2 ;Current_Book_No.    ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Vehicle::Current Book No.;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{053C202A-9ACB-4854-905B-7421496FFA8E}];2 ;Date_of_Sale        ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Vehicle::Date of Sale;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{E4356DA9-7432-47F0-B27D-DA40DCE93A8B}];2 ;Color_Description   ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Vehicle::Color Description;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{0C75C094-DD92-4DF6-BF05-19941C2B22B1}];2 ;Color_Class         ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Vehicle::Color Class;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{B9984442-CBD1-442A-89F6-045AB5D48E82}];2 ;Upholstery_Descripti;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Vehicle::Upholstery Descripti;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{525BF415-5CB0-415B-AF62-F73CA9ED3B78}];2 ;Upholstery_Class    ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Vehicle::Upholstery Class;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{BE4BEF71-EF46-498C-9DE8-06934B44FCDA}];2 ;Maned_Serviceinnkall;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Vehicle::M†ned Serviceinnkall;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{EE1B6F87-2BAF-4928-AFDF-5ECADF05F019}];2 ;Forrige_kilometersta;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Vehicle::Forrige kilometersta;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{C65FB890-A3BE-4690-84DF-C40B3CE7260A}];2 ;Serviceintervall_lin;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Vehicle::Serviceintervall lin;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{0BCF3654-40B2-4255-889E-FAA82ED23E0E}];2 ;Innkallingskriterie ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Vehicle::Innkallingskriterie;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{EBB021EC-A2DB-42DD-9452-146C01BE3E9C}];2 ;Serviceintervall    ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Vehicle::Serviceintervall;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{BD943F2C-B9E6-4426-9D67-1417C73D679F}];2 ;Antall_innkallinger ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Vehicle::Antall innkallinger;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{D2074899-D793-4344-9AA0-EE2F2DEA30DF}];2 ;Antall_utforte_innka;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Vehicle::Antall utf›rte innka;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{90DF9F3F-5F96-407E-B0D3-954FB110F50B}];2 ;Datosiste_bevegelse ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Vehicle::Dato siste bevegelse }
+
+  }
+  EVENTS
+  {
+  }
+  REQUESTPAGE
+  {
+    PROPERTIES
+    {
+    }
+    CONTROLS
+    {
+    }
+  }
+  CODE
+  {
+    VAR
+      C_INC_Progress@1101103000 : TextConst 'ENU=Import in progress...\ \Record No. #1#####;NOR=Import kj›rer...\ \Post nummer #1#####';
+      DialogG@1101103001 : Dialog;
+      RecordNoG@1101103002 : Integer;
+
+    BEGIN
+    END.
+  }
+}
+

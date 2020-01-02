@@ -1,0 +1,158 @@
+OBJECT XMLport 5231083 Portrait Dialog V.Extra Export
+{
+  OBJECT-PROPERTIES
+  {
+    Date=20.12.17;
+    Time=08:51:30;
+    Modified=Yes;
+    Version List=BNH Portrait;
+  }
+  PROPERTIES
+  {
+    CaptionML=ENU=Portrait Dialog V.Extra Export;
+    Direction=Export;
+    TextEncoding=WINDOWS;
+    Format=Variable Text;
+    FieldDelimiter=<None>;
+    FieldSeparator=<TAB>;
+    TableSeparator=<NewLine>;
+    UseRequestPage=Yes;
+  }
+  ELEMENTS
+  {
+    { [{C19D763B-C1F1-473D-8D3E-3640AD129D95}];  ;root                ;Element ;Text    ;
+                                                  MinOccurs=Zero }
+
+    { [{8F54409F-2CFD-4B9D-BC12-00F1533B4F65}];1 ;Header              ;Element ;Table   ;
+                                                  SourceTable=Table98 }
+
+    { [{4A54734D-1FA1-44DD-8F99-86C75772D8D1}];2 ;VinHeader           ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 VinHeader := 'Vin';
+                                                                               END;
+                                                                                }
+
+    { [{1B1EFD58-F09E-47B5-8546-407DF31C3D53}];2 ;TypeHeader          ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 TypeHeader := 'Type';
+                                                                               END;
+                                                                                }
+
+    { [{56FAD576-FA35-4465-A8CB-E5D09F8BA61D}];2 ;LineNoHeader        ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 LineNoHeader := 'Line_Id';
+                                                                               END;
+                                                                                }
+
+    { [{BDBC8131-70F4-4764-BA61-77E02E8F407C}];2 ;AddressNoHeader     ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 AddressNoHeader := 'Record_Id';
+                                                                               END;
+                                                                                }
+
+    { [{38032AEE-622F-437E-B72D-76F3CD99D087}];2 ;ContractStartHeader ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 ContractStartHeader := 'Contract_Start';
+                                                                               END;
+                                                                                }
+
+    { [{0C9806C0-E7A0-4ECB-9496-B99786983CBE}];2 ;ContractEndHeader   ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 ContractEndHeader := 'Contract_End';
+                                                                               END;
+                                                                                }
+
+    { [{0AFBA860-6BBF-4C5F-843A-B622D02D4BCE}];2 ;ContractorNameHeader;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 ContractorNameHeader := 'Contractor_Name';
+                                                                               END;
+                                                                                }
+
+    { [{F1339C8A-BBD7-4045-81DD-80EC09A64E9C}];2 ;RecordOperationHeader;Element;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 RecordOperationHeader := 'Record_Operation';
+                                                                               END;
+                                                                                }
+
+    { [{EDD810BD-7A8E-47F2-970D-942943F468EB}];1 ;VehicleCustomer     ;Element ;Table   ;
+                                                  SourceTable=Table5025469;
+                                                  SourceTableView=WHERE(Field1=FILTER(<>' '),
+                                                                        Field2=FILTER(<>0));
+                                                  Export::OnAfterGetRecord=BEGIN
+                                                                             IF STRLEN("Vehicle Customer".VIN) < 2 THEN
+                                                                               currXMLport.SKIP;
+                                                                           END;
+                                                                            }
+
+    { [{264D7365-8FC4-4C03-8203-C8A1A7F936C9}];2 ;VIN                 ;Element ;Field   ;
+                                                  DataType=Code;
+                                                  SourceField=Vehicle Customer::VIN }
+
+    { [{472F052D-9B52-4E7E-97C5-3B54AF27D523}];2 ;Type                ;Element ;Field   ;
+                                                  DataType=Option;
+                                                  SourceField=Vehicle Customer::Type }
+
+    { [{B9D31369-2008-4C3C-8BBF-03E914F2D6FF}];2 ;LineNo              ;Element ;Field   ;
+                                                  DataType=Integer;
+                                                  SourceField=Vehicle Customer::Line No. }
+
+    { [{A110A617-83B5-4339-913E-5E4267A84ACA}];2 ;AddressNo           ;Element ;Field   ;
+                                                  DataType=Integer;
+                                                  SourceField=Vehicle Customer::Address No. }
+
+    { [{1BBA44D2-1816-4E3C-8374-5FAAB378A655}];2 ;ContractStart       ;Element ;Text    ;
+                                                  DataType=Date;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 ContractStart := FORMAT("Vehicle Customer"."Beginning of Contract", 0, '<Day,2>.<Month,2>.<Year4>');
+                                                                               END;
+                                                                                }
+
+    { [{4C7FDBCE-470B-486C-BF0D-814647053C5A}];2 ;ContractEnd         ;Element ;Text    ;
+                                                  DataType=Date;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 ContractStart := FORMAT("Vehicle Customer"."Expiration of Contract", 0, '<Day,2>.<Month,2>.<Year4>');
+                                                                               END;
+                                                                                }
+
+    { [{D4353C24-5C5C-479D-876E-ECE664F697D8}];2 ;ContactorName       ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=Vehicle Customer::Name }
+
+    { [{91A4567B-4B8F-46CB-AEF8-EFD66186BB85}];2 ;RecordOperation     ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 RecordOperation := 'U';
+                                                                               END;
+                                                                                }
+
+  }
+  EVENTS
+  {
+  }
+  REQUESTPAGE
+  {
+    PROPERTIES
+    {
+    }
+    CONTROLS
+    {
+    }
+  }
+  CODE
+  {
+    VAR
+      C_NoData@1101103000 : TextConst 'ENU=" ";NOR=" "';
+
+    BEGIN
+    {
+      +----------------------------------------------+
+      | Copyright ¸ 2017   incadea.dms               |
+      +----------------------------------------------+
+      No.   Version Date      ID    Remark
+      ------------------------------------------------
+                    26.09.17  DHO   Initial Version
+                    20.12.17  ALO   VehicleCustomer filter
+    }
+    END.
+  }
+}
+

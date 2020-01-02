@@ -1,0 +1,116 @@
+OBJECT Page 5231122 BNH masterdata1lev
+{
+  OBJECT-PROPERTIES
+  {
+    Date=22.11.17;
+    Time=18:33:50;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    SourceTable=Table5231126;
+    PageType=List;
+    ActionList=ACTIONS
+    {
+      { 1101103014;  ;ActionContainer;
+                      ActionContainerType=ActionItems }
+      { 1101103015;1 ;Action    ;
+                      Name=Import File;
+                      RunObject=XMLport 5231123;
+                      Promoted=Yes;
+                      Image=XMLFile;
+                      OnAction=VAR
+                                 BNHmasterdata1levL@1101103000 : XMLport 5231123;
+                               BEGIN
+                               END;
+                                }
+      { 1101103023;1 ;Action    ;
+                      Name=Create Vendor;
+                      OnAction=VAR
+                                 BNHmasterdata1levL@1101103000 : Record 5231126;
+                               BEGIN
+                                 CurrPage.SETSELECTIONFILTER( BNHmasterdata1levL );
+                                 CODEUNIT.RUN( CODEUNIT::"BNH Vendor", BNHmasterdata1levL );
+                               END;
+                                }
+    }
+  }
+  CONTROLS
+  {
+    { 1101103000;0;Container;
+                ContainerType=ContentArea }
+
+    { 1101103001;1;Group  ;
+                Name=Group;
+                GroupType=Repeater }
+
+    { 1101103002;2;Field  ;
+                SourceExpr="Primary Key" }
+
+    { 1101103003;2;Field  ;
+                SourceExpr=Status }
+
+    { 1101103004;2;Field  ;
+                SourceExpr=Datetime }
+
+    { 1101103005;2;Field  ;
+                SourceExpr="Update message" }
+
+    { 1101103006;2;Field  ;
+                SourceExpr="No." }
+
+    { 1101103007;2;Field  ;
+                SourceExpr="Levr.nr" }
+
+    { 1101103008;2;Field  ;
+                SourceExpr="leverand›rgruppe" }
+
+    { 1101103009;2;Field  ;
+                SourceExpr=Navn }
+
+    { 1101103010;2;Field  ;
+                SourceExpr="Navn 2" }
+
+    { 1101103011;2;Field  ;
+                SourceExpr=Adresse }
+
+    { 1101103012;2;Field  ;
+                SourceExpr=Postnummer }
+
+    { 1101103013;2;Field  ;
+                SourceExpr="sist fakturert" }
+
+    { 1101103016;2;Field  ;
+                SourceExpr=Sted }
+
+    { 1101103017;2;Field  ;
+                SourceExpr=Banknr }
+
+    { 1101103018;2;Field  ;
+                SourceExpr=Betalingsbetingelser }
+
+    { 1101103019;2;Field  ;
+                SourceExpr=Betaligsm†te }
+
+    { 1101103020;2;Field  ;
+                SourceExpr="Bankgironr." }
+
+    { 1101103021;2;Field  ;
+                SourceExpr="Organisasjonsnr." }
+
+    { 1101103022;2;Field  ;
+                SourceExpr=Telefon }
+
+  }
+  CODE
+  {
+
+    BEGIN
+    {
+
+    }
+    END.
+  }
+}
+

@@ -1,0 +1,113 @@
+OBJECT Page 5231124 BNH Vendor Open Balance
+{
+  OBJECT-PROPERTIES
+  {
+    Date=22.11.17;
+    Time=18:57:47;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    SourceTable=Table5231130;
+    PageType=List;
+    ActionList=ACTIONS
+    {
+      { 1101103017;  ;ActionContainer;
+                      ActionContainerType=ActionItems }
+      { 1101103018;1 ;Action    ;
+                      Name=Import File;
+                      OnAction=VAR
+                                 BNHVedorOpenBalanceL@1101103000 : XMLport 5231125;
+                               BEGIN
+                                 BNHVedorOpenBalanceL.RUN;
+                               END;
+                                }
+      { 1101103021;1 ;Action    ;
+                      Name=Create Journal;
+                      Image=Customer;
+                      OnAction=VAR
+                                 BNHVedorOpenBalanceL@1101103001 : Record 5231130;
+                                 BNHOpenBalanceVendorL@1101103000 : Codeunit 5231132;
+                               BEGIN
+                                 CurrPage.SETSELECTIONFILTER(BNHVedorOpenBalanceL);
+                                 BNHOpenBalanceVendorL.RUN(BNHVedorOpenBalanceL);
+                               END;
+                                }
+      { 1101103019;1 ;Action    ;
+                      Name=Journal;
+                      Image=Journal;
+                      OnAction=VAR
+                                 GeneralJournalL@1101103000 : Page 39;
+                               BEGIN
+                                 GeneralJournalL.RUN;
+                               END;
+                                }
+    }
+  }
+  CONTROLS
+  {
+    { 1101103000;0;Container;
+                ContainerType=ContentArea }
+
+    { 1101103001;1;Group  ;
+                Name=oo;
+                GroupType=Repeater }
+
+    { 1101103002;2;Field  ;
+                SourceExpr="Primary Key" }
+
+    { 1101103003;2;Field  ;
+                SourceExpr=Status }
+
+    { 1101103004;2;Field  ;
+                SourceExpr=Datetime }
+
+    { 1101103005;2;Field  ;
+                SourceExpr="Update message" }
+
+    { 1101103006;2;Field  ;
+                SourceExpr="No." }
+
+    { 1101103007;2;Field  ;
+                SourceExpr="lev.nr" }
+
+    { 1101103020;2;Field  ;
+                SourceExpr=Navn }
+
+    { 1101103008;2;Field  ;
+                SourceExpr="fakt.nr" }
+
+    { 1101103009;2;Field  ;
+                SourceExpr="int.bilagsnr" }
+
+    { 1101103010;2;Field  ;
+                SourceExpr=T }
+
+    { 1101103011;2;Field  ;
+                SourceExpr="fakt.dato" }
+
+    { 1101103012;2;Field  ;
+                SourceExpr="netto dato" }
+
+    { 1101103013;2;Field  ;
+                SourceExpr="forf.dato" }
+
+    { 1101103014;2;Field  ;
+                SourceExpr="fakt.bel›p" }
+
+    { 1101103015;2;Field  ;
+                SourceExpr="†pen/restbel›p" }
+
+    { 1101103016;2;Field  ;
+                SourceExpr=tekst }
+
+  }
+  CODE
+  {
+
+    BEGIN
+    END.
+  }
+}
+

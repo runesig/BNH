@@ -1,0 +1,158 @@
+OBJECT XMLport 5231075 Portrait Dialog C.Extra Export
+{
+  OBJECT-PROPERTIES
+  {
+    Date=24.11.17;
+    Time=08:10:21;
+    Modified=Yes;
+    Version List=BNH Portrait;
+  }
+  PROPERTIES
+  {
+    CaptionML=ENU=Portrait Dialog C.Extra Export;
+    Direction=Export;
+    TextEncoding=WINDOWS;
+    Format=Variable Text;
+    FieldDelimiter=<None>;
+    FieldSeparator=<TAB>;
+    TableSeparator=<NewLine>;
+    UseRequestPage=Yes;
+  }
+  ELEMENTS
+  {
+    { [{C19D763B-C1F1-473D-8D3E-3640AD129D95}];  ;root                ;Element ;Text    ;
+                                                  MinOccurs=Zero }
+
+    { [{2F33B595-F471-43E5-8833-FC6437A88452}];1 ;Header              ;Element ;Table   ;
+                                                  SourceTable=Table98 }
+
+    { [{E3A437D4-248C-4017-BA05-8D46CD656A47}];2 ;AddressNoHeader     ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 AddressNoHeader := 'Record_Id';
+                                                                               END;
+                                                                                }
+
+    { [{BFA4185C-E435-479A-AE43-B0541FC357B1}];2 ;CompanyHeader       ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 CompanyHeader := 'Company';
+                                                                               END;
+                                                                                }
+
+    { [{89CD86EE-CC83-4360-9C8D-23D09E0952E8}];2 ;GroupDescHeader     ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 GroupDescHeader := 'Group_Desc';
+                                                                               END;
+                                                                                }
+
+    { [{D1D79DD1-51A3-4E70-808A-3E1B817148DF}];2 ;GroupCodeHeader     ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 GroupCodeHeader := 'Group_Code';
+                                                                               END;
+                                                                                }
+
+    { [{7F042317-8740-43F2-BB26-7BADFC785666}];2 ;ContactNoHeader     ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 ContactNoHeader := 'Contact_No';
+                                                                               END;
+                                                                                }
+
+    { [{75E1A15B-7192-46B7-81E9-B2751EEC25EB}];2 ;RecordOperationHeader;Element;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 RecordOperationHeader := 'Record_Operation';
+                                                                               END;
+                                                                                }
+
+    { [{125F3B85-5B53-4F67-9434-589A04D6DCA1}];1 ;AddressTable        ;Element ;Table   ;
+                                                  SourceTable=Table5029111;
+                                                  SourceTableView=SORTING(Field44)
+                                                                  ORDER(Ascending);
+                                                  AutoSave=No;
+                                                  Export::OnAfterGetRecord=VAR
+                                                                             ContactL@1000000000 : Record 5050;
+                                                                           BEGIN
+                                                                             ContactL.RESET;
+                                                                             ContactL.SETRANGE("Address No.", Address."Address No.");
+                                                                             IF NOT ContactL.FINDFIRST THEN
+                                                                               currXMLport.SKIP;
+
+                                                                             IF CustomerGroupG.GET(Address."Customer Group Code") THEN
+                                                                               GroupDesc := CustomerGroupG.Description
+                                                                             ELSE
+                                                                               GroupDesc := ''
+                                                                           END;
+                                                                            }
+
+    { [{6F6AE99F-6389-4B2C-9E36-F1467E75DF18}];2 ;AddressNo           ;Element ;Field   ;
+                                                  DataType=Integer;
+                                                  SourceField=Address::Address No.;
+                                                  Width=7 }
+
+    { [{8FDCCC3E-43D1-4383-B47D-394C8388B6CA}];2 ;Company             ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 IF Address."Customer Type" = Address."Customer Type"::Business THEN
+                                                                                   Company := '1'
+                                                                                 ELSE
+                                                                                   Company := '0';
+                                                                               END;
+                                                                                }
+
+    { [{F2679F66-2A50-4224-AC53-912960DF6B2D}];2 ;GroupDesc           ;Element ;Text    ;
+                                                  DataType=Code }
+
+    { [{C266086B-1451-4636-965A-A564A08DD0DC}];2 ;GroupCode           ;Element ;Field   ;
+                                                  DataType=Code;
+                                                  SourceField=Address::Customer Group Code }
+
+    { [{1F0678A5-95F5-4107-AF17-E17F088F28B0}];2 ;ContactNo           ;Element ;Text    ;
+                                                  DataType=Text;
+                                                  Export::OnBeforePassVariable=VAR
+                                                                                 ContactL@1101103000 : Record 5050;
+                                                                               BEGIN
+                                                                                 ContactL.RESET;
+                                                                                 ContactL.SETRANGE("Address No.", Address."Address No.");
+                                                                                 IF ContactL.FINDFIRST THEN
+                                                                                   ContactNo := FORMAT(ContactL."No.")
+                                                                                 ELSE
+                                                                                   ContactNo := '';
+                                                                               END;
+                                                                                }
+
+    { [{49F61B04-0FC6-424A-A73D-4CD84CEDB979}];2 ;RecordOperation     ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 //todo - logic for I = Insert, U = Update and D = Delete
+                                                                                 RecordOperation := 'U';
+                                                                               END;
+                                                                                }
+
+  }
+  EVENTS
+  {
+  }
+  REQUESTPAGE
+  {
+    PROPERTIES
+    {
+    }
+    CONTROLS
+    {
+    }
+  }
+  CODE
+  {
+    VAR
+      C_NoData@1101103000 : TextConst 'ENU=" ";NOR=" "';
+      CustomerGroupG@1101103001 : Record 5028669;
+
+    BEGIN
+    {
+      +----------------------------------------------+
+      | Copyright ¸ 2017   incadea.dms               |
+      +----------------------------------------------+
+      No.   Version Date      ID    Remark
+      ------------------------------------------------
+                    01.11.17  DHO   Initial Version
+    }
+    END.
+  }
+}
+

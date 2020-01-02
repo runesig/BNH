@@ -1,0 +1,53 @@
+OBJECT Table 50015 BNH CSI Data
+{
+  OBJECT-PROPERTIES
+  {
+    Date=07.09.18;
+    Time=13:58:37;
+    Modified=Yes;
+    Version List=BNH.01;
+  }
+  PROPERTIES
+  {
+    CaptionML=[ENU=BNH CSI Data;
+               NOR=BNH CSI Data];
+  }
+  FIELDS
+  {
+    { 1   ;   ;No.                 ;Integer        }
+    { 100 ;   ;Posting Date        ;Code10        ;CaptionML=[DAN=Bogf›ringsdato;
+                                                              DEU=Buchungsdatum;
+                                                              ENU=Posting Date;
+                                                              NOR=Bokf›ringsdato;
+                                                              SVE=Bokf”ringsdatum] }
+    { 101 ;   ;Event ID            ;Code10        ;Description=Fixed = 1816 }
+    { 102 ;   ;External ID         ;Code10        ;Description=Salesperson Code }
+    { 103 ;   ;Respondent          ;Text50         }
+    { 104 ;   ;Language            ;Code10         }
+    { 105 ;   ;ExtRef              ;Text80        ;Description=Reg.nr | fakt.nr }
+  }
+  KEYS
+  {
+    {    ;No.                                     ;Clustered=Yes }
+  }
+  FIELDGROUPS
+  {
+  }
+  CODE
+  {
+
+    BEGIN
+    {
+      +----------------------------------------------+
+      | 2009 SI-DATA A/S (SID)                       |
+      +----------------------------------------------+
+      | INCADEA ENGINE                               |
+      +----------------------------------------------+
+      No.  Version  Date      ID      Remark
+      ------------------------------------------------
+      01.  7.1.5    07.06.18  JRO     Initiale version
+    }
+    END.
+  }
+}
+

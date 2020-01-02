@@ -1,0 +1,82 @@
+OBJECT Page 50001 SynkarionVehicle
+{
+  OBJECT-PROPERTIES
+  {
+    Date=05.05.17;
+    Time=10:21:02;
+    Modified=Yes;
+    Version List=BNH - Synkarion;
+  }
+  PROPERTIES
+  {
+    SourceTable=Table5025400;
+    PageType=List;
+    OnAfterGetRecord=BEGIN
+                       paintColor := 'blue';
+                     END;
+
+  }
+  CONTROLS
+  {
+    { 1101103000;0;Container;
+                ContainerType=ContentArea }
+
+    { 1101103001;1;Group  ;
+                Name=Group;
+                GroupType=Repeater }
+
+    { 1101103002;2;Field  ;
+                Name=registrationNumber;
+                SourceExpr="License No." }
+
+    { 1101103003;2;Field  ;
+                Name=chassisNumber;
+                SourceExpr=VIN }
+
+    { 1101103004;2;Field  ;
+                Name=producer;
+                SourceExpr="Make Code" }
+
+    { 1101103005;2;Field  ;
+                Name=model;
+                SourceExpr=Model }
+
+    { 1101103006;2;Field  ;
+                Name=modelYear;
+                SourceExpr="Model Year" }
+
+    { 1101103012;2;Field  ;
+                Name=paintColor;
+                SourceExpr=paintColor }
+
+    { 1101103007;2;Field  ;
+                Name=milleage;
+                SourceExpr=Mileage }
+
+    { 1101103008;2;Field  ;
+                Name=firstRegDate;
+                SourceExpr="Initial Registration" }
+
+    { 1101103009;2;Field  ;
+                Name=keyNumber;
+                SourceExpr="Key No." }
+
+    { 1101103010;2;Field  ;
+                Name=createdDate;
+                SourceExpr="Creation Date" }
+
+    { 1101103011;2;Field  ;
+                Name=updatedDate;
+                SourceExpr="Last Date Modified" }
+
+  }
+  CODE
+  {
+    VAR
+      paintColor@1101103000 : Text;
+
+    BEGIN
+    END.
+  }
+}
+

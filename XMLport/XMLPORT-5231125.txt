@@ -1,0 +1,130 @@
+OBJECT XMLport 5231125 BNH Vedor Open Balance
+{
+  OBJECT-PROPERTIES
+  {
+    Date=22.11.17;
+    Time=18:29:37;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    Direction=Import;
+    TextEncoding=WINDOWS;
+    OnPreXMLport=BEGIN
+                   IF GUIALLOWED THEN
+                     DialogG.OPEN( C_INC_Progress );
+
+                   WITH "BNH Vedor Open Balance" DO
+                     IF FINDLAST THEN
+                       RecordNoG := "BNH Vedor Open Balance"."Primary Key";
+                 END;
+
+    OnPostXMLport=BEGIN
+                    IF GUIALLOWED THEN
+                      DialogG.CLOSE;
+                  END;
+
+    Format=Variable Text;
+    FieldSeparator=[;];
+  }
+  ELEMENTS
+  {
+    { [{D909CC51-5B53-4036-92DC-A21733FE0858}];  ;XML                 ;Element ;Text     }
+
+    { [{5249F234-0601-45C3-A575-3DAEAF6B11EF}];1 ;Table               ;Element ;Table   ;
+                                                  SourceTable=Table5231130;
+                                                  Import::OnBeforeInsertRecord=BEGIN
+                                                                                 RecordNoG += 1;
+                                                                                 "BNH Vedor Open Balance"."Primary Key" := RecordNoG;
+
+                                                                                 IF RecordNoG MOD 100 = 0 THEN
+                                                                                   DialogG.UPDATE( 1, RecordNoG );
+                                                                               END;
+                                                                                }
+
+    { [{264A2D56-A305-46B6-B011-F9ECB34676A1}];2 ;lev.nr              ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vedor Open Balance::lev.nr;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{96F5570D-D23C-4653-99F1-AA051CEA909C}];2 ;fakt.nr             ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vedor Open Balance::fakt.nr;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{B39F4F1A-6574-480D-A5F9-4CBB55F12C4E}];2 ;int.bilagsnr        ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vedor Open Balance::int.bilagsnr;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{B6B9EA9F-6D75-4FD1-A47C-1C3BE37C9804}];2 ;T                   ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vedor Open Balance::T;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{B46C34EC-5B6C-46C8-9EF2-8CE5FF0485D9}];2 ;fakt.dato           ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vedor Open Balance::fakt.dato;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{87A78B74-FC7C-4F8C-806A-D168EFEB3E7B}];2 ;netto-dato          ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vedor Open Balance::netto dato;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{0F43FF9E-9DE4-4CB7-B2DF-BCDED284D9BD}];2 ;forf.dato           ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vedor Open Balance::forf.dato;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{28C15081-327A-4A53-9BE3-91A13BABBE53}];2 ;fakt.bel›p          ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vedor Open Balance::fakt.bel›p;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{E2BD0225-667D-434A-8844-636332641F3C}];2 ;†pen-restbel›p      ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vedor Open Balance::†pen/restbel›p;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{133415F4-04DD-4F1E-BCE4-39DFA468CF57}];2 ;tekst               ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vedor Open Balance::tekst;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+  }
+  EVENTS
+  {
+  }
+  REQUESTPAGE
+  {
+    PROPERTIES
+    {
+    }
+    CONTROLS
+    {
+    }
+  }
+  CODE
+  {
+    VAR
+      C_INC_Progress@1101103000 : TextConst 'ENU=Import in progress...\ \Record No. #1#####;NOR=Import kj›rer...\ \Post nummer #1#####';
+      DialogG@1101103001 : Dialog;
+      RecordNoG@1101103002 : Integer;
+
+    BEGIN
+    END.
+  }
+}
+

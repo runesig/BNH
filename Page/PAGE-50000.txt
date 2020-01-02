@@ -1,0 +1,65 @@
+OBJECT Page 50000 SynkarionCustomer
+{
+  OBJECT-PROPERTIES
+  {
+    Date=24.04.17;
+    Time=14:54:24;
+    Modified=Yes;
+    Version List=BNH - Synkarion;
+  }
+  PROPERTIES
+  {
+    SourceTable=Table18;
+    PageType=List;
+  }
+  CONTROLS
+  {
+    { 1101103000;0;Container;
+                ContainerType=ContentArea }
+
+    { 1101103001;1;Group  ;
+                Name=Group;
+                GroupType=Repeater }
+
+    { 1101103002;2;Field  ;
+                SourceExpr="No." }
+
+    { 1101103003;2;Field  ;
+                SourceExpr="First Name" }
+
+    { 1101103004;2;Field  ;
+                SourceExpr="Last Name" }
+
+    { 1101103005;2;Field  ;
+                SourceExpr=Address }
+
+    { 1101103006;2;Field  ;
+                SourceExpr="Post Code" }
+
+    { 1101103007;2;Field  ;
+                SourceExpr=City }
+
+    { 1101103008;2;Field  ;
+                SourceExpr="Country/Region Code" }
+
+    { 1101103009;2;Field  ;
+                SourceExpr="E-Mail" }
+
+    { 1101103010;2;Field  ;
+                SourceExpr="Mobile Phone No." }
+
+    { 1101103011;2;Field  ;
+                SourceExpr="Creation Date" }
+
+    { 1101103012;2;Field  ;
+                SourceExpr="Last Date Modified" }
+
+  }
+  CODE
+  {
+
+    BEGIN
+    END.
+  }
+}
+

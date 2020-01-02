@@ -1,0 +1,60 @@
+OBJECT Table 5231114 BNH Gule lapper
+{
+  OBJECT-PROPERTIES
+  {
+    Date=05.11.17;
+    Time=20:08:56;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+  }
+  FIELDS
+  {
+    { 1   ;   ;Primary Key         ;Integer        }
+    { 2   ;   ;Status              ;Option        ;OptionCaptionML=[ENU=" ,Ignore,OK,Error";
+                                                                    NOR=" ,Ignorer,OK,Feil"];
+                                                   OptionString=[ ,Ignore,OK,Error] }
+    { 3   ;   ;Datetime            ;DateTime      ;CaptionML=[ENU=Time;
+                                                              NOR=Tidspunkt] }
+    { 4   ;   ;Update message      ;Text250       ;CaptionML=[ENU=Message;
+                                                              NOR=Melding] }
+    { 5   ;   ;No.                 ;Code20        ;CaptionML=[ENU=Item No.;
+                                                              NOR=Varenr.] }
+    { 9   ;   ;Type                ;Option        ;OptionString=Customer,Vehicle }
+    { 10  ;   ;Prio                ;Text50         }
+    { 20  ;   ;Nr.                 ;Text50         }
+    { 40  ;   ;Tekst1              ;Text50         }
+    { 51  ;   ;Notat1              ;Text80         }
+    { 52  ;   ;Notat2              ;Text80         }
+    { 53  ;   ;Notat3              ;Text80         }
+    { 54  ;   ;Notat4              ;Text80         }
+    { 55  ;   ;Notat5              ;Text80         }
+    { 56  ;   ;Notat6              ;Text80         }
+    { 57  ;   ;Notat7              ;Text80         }
+    { 58  ;   ;Notat8              ;Text80         }
+    { 59  ;   ;Notat9              ;Text80         }
+    { 60  ;   ;Notat10             ;Text80         }
+    { 61  ;   ;Notat11             ;Text80         }
+    { 62  ;   ;Notat12             ;Text80         }
+    { 63  ;   ;Notat13             ;Text80         }
+    { 64  ;   ;Notat14             ;Text80         }
+    { 500 ;   ;Kundenr             ;Code20        ;FieldClass=FlowField;
+                                                   CalcFormula=Lookup("BNH Customer".No. WHERE (CUSTOMER-NUMBER=FIELD(Nr.))) }
+  }
+  KEYS
+  {
+    {    ;Primary Key                             ;Clustered=Yes }
+  }
+  FIELDGROUPS
+  {
+  }
+  CODE
+  {
+
+    BEGIN
+    END.
+  }
+}
+

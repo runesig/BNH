@@ -1,0 +1,112 @@
+OBJECT Page 5231129 BB Historic Line
+{
+  OBJECT-PROPERTIES
+  {
+    Date=14.12.17;
+    Time=20:15:36;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    SourceTable=Table5231136;
+    PageType=List;
+    ActionList=ACTIONS
+    {
+      { 1101103017;  ;ActionContainer;
+                      ActionContainerType=ActionItems }
+      { 1101103018;1 ;Action    ;
+                      Name=Import Invoice;
+                      RunObject=XMLport 5231129 }
+      { 1101103020;1 ;Action    ;
+                      Name=Import Credit Memo;
+                      RunObject=XMLport 5231131 }
+      { 1101103021;1 ;Action    ;
+                      Name=Create Record;
+                      OnAction=VAR
+                                 QHistoryLineL@1101103000 : Record 5231136;
+                               BEGIN
+                                 CurrPage.SETSELECTIONFILTER( QHistoryLineL );
+                                 CODEUNIT.RUN( CODEUNIT::"BB History Line", QHistoryLineL );
+                               END;
+                                }
+      { 1101103022;1 ;Action    ;
+                      Name=Recalc Serv. Order No.;
+                      OnAction=VAR
+                                 BBHistoryLineL@1101103000 : Record 5231136;
+                               BEGIN
+                                 BBHistoryLineL.FINDFIRST;
+                                   REPEAT
+                                   BBHistoryLineL.txtOrdrenr := DELCHR(BBHistoryLineL.txtOrdrenr, '=', '|');
+                                   BBHistoryLineL.MODIFY;
+                                   UNTIL BBHistoryLineL.NEXT = 0;
+                               END;
+                                }
+    }
+  }
+  CONTROLS
+  {
+    { 1101103000;0;Container;
+                ContainerType=ContentArea }
+
+    { 1101103001;1;Group  ;
+                Name=Group;
+                GroupType=Repeater }
+
+    { 1101103002;2;Field  ;
+                SourceExpr="Q Primary Key" }
+
+    { 1101103003;2;Field  ;
+                SourceExpr="Q Status" }
+
+    { 1101103004;2;Field  ;
+                SourceExpr="Q Datetime" }
+
+    { 1101103005;2;Field  ;
+                SourceExpr="Q Update message" }
+
+    { 1101103006;2;Field  ;
+                SourceExpr="Q Record ID" }
+
+    { 1101103019;2;Field  ;
+                SourceExpr=Type }
+
+    { 1101103007;2;Field  ;
+                SourceExpr=Headers }
+
+    { 1101103008;2;Field  ;
+                SourceExpr=regnr }
+
+    { 1101103009;2;Field  ;
+                SourceExpr=txtOrdrenr }
+
+    { 1101103010;2;Field  ;
+                SourceExpr="Document No." }
+
+    { 1101103011;2;Field  ;
+                SourceExpr="Lt (Linjetype)" }
+
+    { 1101103012;2;Field  ;
+                SourceExpr=Nr }
+
+    { 1101103013;2;Field  ;
+                SourceExpr=Description }
+
+    { 1101103014;2;Field  ;
+                SourceExpr="Posting Date" }
+
+    { 1101103015;2;Field  ;
+                SourceExpr=Amount }
+
+    { 1101103016;2;Field  ;
+                SourceExpr=Quantity }
+
+  }
+  CODE
+  {
+
+    BEGIN
+    END.
+  }
+}
+

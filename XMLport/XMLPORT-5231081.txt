@@ -1,0 +1,126 @@
+OBJECT XMLport 5231081 Portrait Dialog Options Export
+{
+  OBJECT-PROPERTIES
+  {
+    Date=20.11.17;
+    Time=09:53:01;
+    Modified=Yes;
+    Version List=BNH Portrait;
+  }
+  PROPERTIES
+  {
+    CaptionML=ENU=Portrait Dialog Options Export;
+    Direction=Export;
+    TextEncoding=WINDOWS;
+    Format=Variable Text;
+    FieldDelimiter=<None>;
+    FieldSeparator=<TAB>;
+    TableSeparator=<NewLine>;
+    UseRequestPage=Yes;
+  }
+  ELEMENTS
+  {
+    { [{C19D763B-C1F1-473D-8D3E-3640AD129D95}];  ;root                ;Element ;Text    ;
+                                                  MinOccurs=Zero }
+
+    { [{81B82F2C-CB05-41E2-8925-E5AD58B43EC2}];1 ;Header              ;Element ;Table   ;
+                                                  SourceTable=Table98 }
+
+    { [{0738E8FA-D803-487F-8429-BA1CE1D0AD0D}];2 ;VinHeader           ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 VinHeader := 'VIN';
+                                                                               END;
+                                                                                }
+
+    { [{F2E8C37A-EA02-4AD8-9485-7E65C467C2A8}];2 ;LineNoHeader        ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 LineNoHeader := 'Line_No';
+                                                                               END;
+                                                                                }
+
+    { [{D6B2E50C-B383-4954-B197-9F02703A43A9}];2 ;TypeHeader          ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 TypeHeader := 'Type';
+                                                                               END;
+                                                                                }
+
+    { [{7A52B0B3-9B35-4A9D-B390-D8159B49F66A}];2 ;OptionTypeHeader    ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 OptionTypeHeader := 'Option_Type';
+                                                                               END;
+                                                                                }
+
+    { [{2D90AAB0-D718-4210-8502-EADD3A36D955}];2 ;DescHeader          ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 DescHeader := 'Description';
+                                                                               END;
+                                                                                }
+
+    { [{146B0D6B-6BC4-4FC9-9E8E-FDD8621D876B}];2 ;RecordOperationHeader;Element;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 RecordOperationHeader := 'Record_Operation';
+                                                                               END;
+                                                                                }
+
+    { [{8269B823-3137-4145-BB91-369522AEC16F}];1 ;VehicleOptions      ;Element ;Table   ;
+                                                  SourceTable=Table5025422;
+                                                  SourceTableView=SORTING(Field1,Field14,Field12,Field13)
+                                                                  ORDER(Descending) }
+
+    { [{8EE9D0CE-FB11-40C8-86C0-DA1012DBBF22}];2 ;VIN                 ;Element ;Field   ;
+                                                  DataType=Code;
+                                                  SourceField=Vehicle Option::VIN }
+
+    { [{3AC671BB-69CB-4AA9-BD5B-C309E8260864}];2 ;LineNo              ;Element ;Field   ;
+                                                  DataType=Integer;
+                                                  SourceField=Vehicle Option::Line No. }
+
+    { [{56B48582-E6C5-4D9C-AD03-502369233C64}];2 ;Type                ;Element ;Field   ;
+                                                  DataType=Option;
+                                                  SourceField=Vehicle Option::Type }
+
+    { [{06D7B03D-27A3-49B8-B471-6712BDF539F3}];2 ;OptionType          ;Element ;Field   ;
+                                                  DataType=Option;
+                                                  SourceField=Vehicle Option::Option Type }
+
+    { [{1C5E7CFC-E646-4001-888D-0675DD704FDE}];2 ;Description         ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=Vehicle Option::Description }
+
+    { [{3B49F34E-64BD-40F8-9701-A2DE6DFBA23F}];2 ;RecordOperation     ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 RecordOperation := 'U';
+                                                                               END;
+                                                                                }
+
+  }
+  EVENTS
+  {
+  }
+  REQUESTPAGE
+  {
+    PROPERTIES
+    {
+    }
+    CONTROLS
+    {
+    }
+  }
+  CODE
+  {
+    VAR
+      C_NoData@1101103000 : TextConst 'ENU=" ";NOR=" "';
+
+    BEGIN
+    {
+      +----------------------------------------------+
+      | Copyright ¸ 2017   incadea.dms               |
+      +----------------------------------------------+
+      No.   Version Date      ID    Remark
+      ------------------------------------------------
+                    03.10.17  DHO   Initial Version
+    }
+    END.
+  }
+}
+

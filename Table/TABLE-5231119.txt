@@ -1,0 +1,38 @@
+OBJECT Table 5231119 BNH Salesperson
+{
+  OBJECT-PROPERTIES
+  {
+    Date=11.04.18;
+    Time=15:36:24;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+  }
+  FIELDS
+  {
+    { 1   ;   ;Salesperson Code    ;Code10         }
+    { 5   ;   ;Name                ;Text50         }
+    { 10  ;   ;CDK Code            ;Code10        ;FieldClass=FlowField;
+                                                   CalcFormula=Lookup("BNH User code"."EMSelger kode" WHERE (BNH User=FIELD(Salesperson Code))) }
+    { 20  ;   ;Antall kunder       ;Integer       ;FieldClass=FlowField;
+                                                   CalcFormula=Count("BNH Customer" WHERE (SALESMAN=FIELD(CDK Code))) }
+    { 30  ;   ;CDK Navn            ;Text50        ;FieldClass=FlowField;
+                                                   CalcFormula=Lookup("BNH User code".Navn WHERE (BNH User=FIELD(Salesperson Code))) }
+  }
+  KEYS
+  {
+    {    ;Salesperson Code                        ;Clustered=Yes }
+  }
+  FIELDGROUPS
+  {
+  }
+  CODE
+  {
+
+    BEGIN
+    END.
+  }
+}
+

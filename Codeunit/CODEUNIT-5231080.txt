@@ -1,0 +1,235 @@
+OBJECT Codeunit 5231080 Remove Control Chars
+{
+  OBJECT-PROPERTIES
+  {
+    Date=29.11.18;
+    Time=09:53:55;
+    Modified=Yes;
+    Version List=BNH Portrait;
+  }
+  PROPERTIES
+  {
+    OnRun=VAR
+            RecordRefL@1101103000 : RecordRef;
+            AddressL@1101103002 : Record 5029111;
+          BEGIN
+            AddressL.SETFILTER( Name, 'A*' );
+            RecordRefL.OPEN( DATABASE::Address );
+            RecordRefL.GETTABLE( AddressL );
+            SetUserInterface( GUIALLOWED );
+            RemoveControlCharsFromTable( RecordRefL );
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      C_ProgressTitle@1101103000 : TextConst 'ENU=Processing %1;NOR=Prosesserer %1';
+      C_Confirm@1101103004 : TextConst 'ENU=Process %1 records in table %2?;NOR=Prosesser %1 poster i tabellen %2?';
+      C_ModifyCount@1101103001 : TextConst 'ENU=%1 records modified in table %2.;NOR=%1 poster endret i tabellen %2.';
+      ProgressBarG@1101103003 : TextConst 'NOR=@1@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@';
+      ProgressTimeG@1101103002 : TextConst 'NOR=#2##############################';
+      ProgressTitleG@1101103009 : Text[250];
+      ProgressDialogG@1101103008 : Dialog;
+      ProgressStatusG@1101103007 : ARRAY [4] OF Decimal;
+      ProgressStartG@1101103006 : DateTime;
+      ProgressDurationG@1101103005 : Duration;
+      UserInterfaceG@1101103010 : Boolean;
+
+    PROCEDURE RemoveControlCharsFromTable@1101103000(RecordRefP@1101103001 : RecordRef);
+    VAR
+      FieldRefL@1101103000 : FieldRef;
+      KeyRefL@1101103007 : KeyRef;
+      FieldIndexL@1101103002 : Integer;
+      FieldClassL@1101103003 : 'Normal,FlowField,FlowFilter';
+      FieldTypeL@1101103004 : Text;
+      ModifyL@1101103005 : Boolean;
+      ModifyCountL@1101103006 : Integer;
+    BEGIN
+      WITH RecordRefP DO BEGIN
+        IF GUIALLOWED AND UserInterfaceG THEN BEGIN
+          IF NOT CONFIRM( C_Confirm, TRUE, COUNT, CAPTION ) THEN
+            EXIT;
+          Start( STRSUBSTNO( C_ProgressTitle, CAPTION ), COUNT );
+        END;
+        IF FINDSET THEN
+          REPEAT
+            ModifyL := FALSE;
+            IF UserInterfaceG THEN
+              Increment( 1 );
+            // do not process primary key fields - primary key fields always indexed from 1 regardless of field order in table
+            KeyRefL := KEYINDEX( 1 );
+            FOR FieldIndexL := KeyRefL.FIELDCOUNT + 1 TO RecordRefP.FIELDCOUNT DO BEGIN
+              FieldRefL := FIELDINDEX( FieldIndexL );
+              EVALUATE( FieldClassL, FORMAT( FieldRefL.CLASS ));
+              EVALUATE( FieldTypeL, FORMAT( FieldRefL.TYPE ));
+              // process active text or code fields only - omit flowfields, flowfilters and field types other than text and code
+              CASE TRUE OF
+                FieldRefL.ACTIVE = FALSE,
+                FieldClassL <> FieldClassL::Normal:
+                  ;
+                FieldTypeL IN [ 'Text', 'Code' ]:
+                  ModifyL := RemoveControlCharsFromField( FieldRefL ) OR ModifyL;
+              END;
+            END;
+            IF ModifyL THEN BEGIN
+              MODIFY;
+              COMMIT;
+              ModifyCountL += 1;
+            END;
+          UNTIL NEXT = 0;
+        IF UserInterfaceG THEN BEGIN
+          Stop;
+          MESSAGE( C_ModifyCount, ModifyCountL, CAPTION );
+        END;
+      END;
+    END;
+
+    PROCEDURE RemoveControlCharsFromField@1101103004(VAR FieldRefP@1101103000 : FieldRef) : Boolean;
+    VAR
+      InputL@1101103001 : Text;
+      OutputL@1101103002 : Text;
+      PosL@1101103003 : Integer;
+      CharValueL@1101103004 : Integer;
+    BEGIN
+      InputL := FieldRefP.VALUE;
+      IF InputL = '' THEN
+        EXIT( FALSE );
+      FOR PosL := 1 TO STRLEN( InputL ) DO BEGIN
+        CharValueL := InputL[PosL];
+        IF CharValueL >= 32 THEN
+          OutputL += FORMAT( InputL[PosL] );
+      END;
+      FieldRefP.VALUE( OutputL );
+      EXIT( OutputL <> InputL );
+    END;
+
+    PROCEDURE RemoveControlCharsFromText@1101103005(VAR TextP@1101103000 : Text) : Boolean;
+    VAR
+      InputL@1101103001 : Text;
+      OutputL@1101103002 : Text;
+      PosL@1101103003 : Integer;
+      CharValueL@1101103004 : Integer;
+    BEGIN
+      InputL := TextP;
+      IF InputL = '' THEN
+        EXIT( FALSE );
+      FOR PosL := 1 TO STRLEN( InputL ) DO BEGIN
+        CharValueL := InputL[PosL];
+        IF CharValueL >= 32 THEN
+          OutputL += FORMAT( InputL[PosL] );
+      END;
+      TextP := OutputL;
+      EXIT( OutputL <> InputL );
+    END;
+
+    PROCEDURE RemoveControlCharsFromCode@1101103012(VAR CodeP@1101103000 : Code[1024]) : Boolean;
+    VAR
+      InputL@1101103001 : Text;
+      OutputL@1101103002 : Text;
+      PosL@1101103003 : Integer;
+      CharValueL@1101103004 : Integer;
+    BEGIN
+      InputL := CodeP;
+      IF InputL = '' THEN
+        EXIT( FALSE );
+      FOR PosL := 1 TO STRLEN( InputL ) DO BEGIN
+        CharValueL := InputL[PosL];
+        IF CharValueL >= 32 THEN
+          OutputL += FORMAT( InputL[PosL] );
+      END;
+      CodeP := OutputL;
+      EXIT( OutputL <> InputL );
+    END;
+
+    PROCEDURE "---"@1101103001();
+    BEGIN
+    END;
+
+    PROCEDURE SetUserInterface@1101103010(UserInterfaceP@1101103000 : Boolean);
+    BEGIN
+      UserInterfaceG := UserInterfaceP;
+    END;
+
+    LOCAL PROCEDURE SetTitle@1101103009(ProgressTitleP@1101103000 : Text[250]);
+    BEGIN
+      ProgressTitleG := ProgressTitleP;
+    END;
+
+    LOCAL PROCEDURE OpenDialog@1101103008();
+    BEGIN
+      ProgressDialogG.OPEN( STRSUBSTNO( '%1\%2\%3', ProgressTitleG, ProgressBarG, ProgressTimeG ));
+    END;
+
+    LOCAL PROCEDURE SetTargetValue@1101103006(ValueP@1000000003 : Decimal);
+    BEGIN
+      ProgressStatusG[1] := ValueP;
+    END;
+
+    LOCAL PROCEDURE UpdateDialog@1101103007();
+    BEGIN
+      ProgressStatusG[3] := ROUND( ProgressStatusG[2] / ProgressStatusG[1] * 10000, 1 );
+      IF ProgressStatusG[3] DIV 100 <> ProgressStatusG[4] DIV 100 THEN BEGIN
+        ProgressStatusG[4] := ProgressStatusG[3];
+        ProgressDialogG.UPDATE( 1, ProgressStatusG[3] );
+        ProgressDurationG := ROUNDDATETIME( CURRENTDATETIME ) - ROUNDDATETIME( ProgressStartG );
+        ProgressDialogG.UPDATE( 2, FORMAT( ProgressDurationG ));
+      END;
+    END;
+
+    LOCAL PROCEDURE CloseDialog@1101103014();
+    BEGIN
+      ProgressDialogG.CLOSE;
+    END;
+
+    LOCAL PROCEDURE Start@1101103011(TitleP@1101103000 : Text[250];TargetValueP@1101103001 : Decimal);
+    BEGIN
+      IF NOT GUIALLOWED THEN
+        EXIT;
+      CLEAR( ProgressStatusG );
+      ProgressStartG := CURRENTDATETIME;
+      SetTitle( TitleP );
+      SetTargetValue( TargetValueP );
+      OpenDialog;
+      UpdateDialog;
+    END;
+
+    LOCAL PROCEDURE Increment@1101103002(ValueP@1000000003 : Decimal);
+    BEGIN
+      IF NOT GUIALLOWED THEN
+        EXIT;
+      ProgressStatusG[2] += ValueP;
+      UpdateDialog;
+    END;
+
+    LOCAL PROCEDURE Fix@1101103003(ValueP@1000000003 : Decimal);
+    BEGIN
+      IF NOT GUIALLOWED THEN
+        EXIT;
+      ProgressStatusG[2] := ValueP;
+      UpdateDialog;
+    END;
+
+    LOCAL PROCEDURE Stop@1101103013();
+    BEGIN
+      IF NOT GUIALLOWED THEN
+        EXIT;
+      CloseDialog;
+    END;
+
+    BEGIN
+    {
+      +----------------------------------------------+
+      | Copyright ¸ 2018 incadea.dms                 |
+      +----------------------------------------------+
+      No.   Version Date      ID    Remark
+      ------------------------------------------------
+                    29-01-18  ALO   Remove control characters from code and text fields of a given table.
+                                    Example usage in OnRun.
+                                    Optional SetUserInterface( TRUE ) enables progressbar and results message.
+                    29.11.18  ALO   Added functions RemoveControlCharsFromText, RemoveControlCharsFromCode
+    }
+    END.
+  }
+}
+

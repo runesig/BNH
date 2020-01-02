@@ -1,0 +1,88 @@
+OBJECT Codeunit 5231126 BNH Delete Items
+{
+  OBJECT-PROPERTIES
+  {
+    Date=22.11.17;
+    Time=10:28:26;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    TableNo=5231124;
+    OnRun=BEGIN
+            CLEAR( RecordCountG );
+
+            WITH BnHItemG DO BEGIN
+              COPY( Rec );
+              SETFILTER( "No.", '<>%1', '' );
+              RecordCountG[1] := COUNT;
+
+              IF NOT CONFIRM( C_DeleteItems, FALSE, RecordCountG[1] ) THEN
+                EXIT;
+
+              IF NOT CONFIRM( C_Sure, FALSE ) THEN
+                EXIT;
+
+              IF FINDSET THEN
+                REPEAT
+                  BnHItemG.CALCFIELDS( "No." );
+                  CASE ItemG.GET( BnHItemG."No." ) OF
+                    FALSE:
+                      BEGIN
+                        Status := Status::Error;
+                        Datetime := CURRENTDATETIME;
+                        "Update message" := C_ItemDoesNotExist;
+                        MODIFY;
+                        RecordCountG[3] += 1;
+                      END;
+                    TRUE:
+                      BEGIN
+                        COMMIT;
+                        CLEARLASTERROR;
+                        CASE BnHDeleteItem.RUN( ItemG ) OF
+                          TRUE:
+                            BEGIN
+                              "No." := '';
+                              Status := Status::" ";
+                              Datetime := 0DT;
+                              "Update message" := '';
+                              MODIFY;
+                              RecordCountG[2] += 1;
+                            END;
+                          FALSE:
+                            BEGIN
+                              Status := Status::Error;
+                              Datetime := CURRENTDATETIME;
+                              "Update message" := GETLASTERRORTEXT;
+                              MODIFY;
+                              RecordCountG[3] += 1;
+                            END;
+                        END;
+                      END;
+                  END;
+                UNTIL NEXT = 0;
+            END;
+
+            IF GUIALLOWED THEN
+              MESSAGE( C_DeleteItemsResults, RecordCountG[1], RecordCountG[2], RecordCountG[3] );
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      ItemG@1101103003 : Record 27;
+      BnHItemG@1101103002 : Record 5231124;
+      RecordCountG@1101103001 : ARRAY [3] OF Integer;
+      BnHDeleteItem@1101103000 : Codeunit 5231128;
+      C_DeleteItems@1101103007 : TextConst 'ENU=Delete %1 Items?;NOR=Slett %1 varer?';
+      C_Sure@1101103005 : TextConst 'ENU=Sure?;NOR=Sikker?';
+      C_DeleteItemsResults@1101103004 : TextConst 'ENU=Delete Items:\ \%1 processed\%2 deleted\%3 failed;NOR=Slett varer:\ \%1 prosessert\%2 slettet\%3 feilet';
+      C_ItemDoesNotExist@1101103006 : TextConst 'ENU=Item does not exist.;NOR=Vare finnes ikke.';
+
+    BEGIN
+    END.
+  }
+}
+

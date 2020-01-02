@@ -1,0 +1,196 @@
+OBJECT Page 50022 Internal Vehilce
+{
+  OBJECT-PROPERTIES
+  {
+    Date=18.12.18;
+    Time=07:50:01;
+    Modified=Yes;
+    Version List=BNH;
+  }
+  PROPERTIES
+  {
+    CaptionML=[ENU=Internal Veheicle;
+               NOR=Interne kj›ret›y];
+    InsertAllowed=No;
+    DeleteAllowed=No;
+    ModifyAllowed=No;
+    SourceTable=Table50005;
+    PageType=List;
+    OnOpenPage=BEGIN
+                 Update();
+                 SETRANGE("User ID", USERID);
+                 CurrPage.UPDATE;
+               END;
+
+    OnAfterGetRecord=BEGIN
+                       //CALCFIELDS("Sals Price");
+                       PriceG := "Sals Price" * -1;
+                     END;
+
+    ActionList=ACTIONS
+    {
+      { 1101103024;  ;ActionContainer;
+                      ActionContainerType=ActionItems }
+      { 1101103025;1 ;Action    ;
+                      Name=Vehicle;
+                      CaptionML=[ENU=Vehicle;
+                                 NOR=Kj›ret›y];
+                      Image=Card;
+                      OnAction=VAR
+                                 VehicleL@1101103000 : Record 5025400;
+                               BEGIN
+                                 WITH VehicleL DO BEGIN
+                                   RESET;
+                                     IF VehicleL.GET( Rec.VIN ) THEN
+                                       PAGE.RUN( PAGE::"Vehicle Card", VehicleL )
+                                 END;
+
+                                 CurrPage.UPDATE( FALSE );
+                               END;
+                                }
+    }
+  }
+  CONTROLS
+  {
+    { 1101103000;0;Container;
+                ContainerType=ContentArea }
+
+    { 1101103001;1;Group  ;
+                Name=Group;
+                GroupType=Repeater }
+
+    { 1101103002;2;Field  ;
+                SourceExpr=VIN }
+
+    { 1101103003;2;Field  ;
+                SourceExpr="License No." }
+
+    { 1101103004;2;Field  ;
+                SourceExpr="Current Book No." }
+
+    { 1101103005;2;Field  ;
+                SourceExpr="Make Code" }
+
+    { 1101103006;2;Field  ;
+                SourceExpr=Model }
+
+    { 1101103019;2;Field  ;
+                SourceExpr="Vehicle Category Code" }
+
+    { 1101103007;2;Field  ;
+                SourceExpr="Location Code" }
+
+    { 1101103008;2;Field  ;
+                SourceExpr="Department Code" }
+
+    { 1101103009;2;Field  ;
+                SourceExpr="Date of Sale" }
+
+    { 1101103010;2;Field  ;
+                SourceExpr="Plassering / Status" }
+
+    { 1101103011;2;Field  ;
+                SourceExpr=Financing }
+
+    { 1101103012;2;Field  ;
+                SourceExpr="Initial Registration" }
+
+    { 1101103013;2;Field  ;
+                SourceExpr=Buyer }
+
+    { 1101103014;2;Field  ;
+                SourceExpr="Buyer Name" }
+
+    { 1101103026;2;Field  ;
+                SourceExpr=Owner }
+
+    { 1101103027;2;Field  ;
+                SourceExpr="Owner Name" }
+
+    { 1101103015;2;Field  ;
+                SourceExpr=User }
+
+    { 1101103016;2;Field  ;
+                SourceExpr="User Name" }
+
+    { 1101103017;2;Field  ;
+                SourceExpr=Driver }
+
+    { 1101103018;2;Field  ;
+                SourceExpr="Driver Name" }
+
+    { 1101103020;2;Field  ;
+                CaptionML=[ENU=Sales Price;
+                           NOR=Salgspris];
+                SourceExpr="Sals Price" }
+
+    { 1101103021;2;Field  ;
+                SourceExpr="Purch. Order No." }
+
+    { 1101103022;2;Field  ;
+                SourceExpr="Salesperson Code" }
+
+    { 1101103023;2;Field  ;
+                SourceExpr=Salesperson }
+
+  }
+  CODE
+  {
+    VAR
+      PriceG@1101103000 : Decimal;
+
+    PROCEDURE Update@1101103000();
+    VAR
+      InternalVeheicleL@1101103000 : Record 50005;
+      VehicleL@1101103001 : Record 5025400;
+    BEGIN
+      InternalVeheicleL.SETRANGE("User ID", USERID);
+      IF InternalVeheicleL.FINDFIRST THEN
+        InternalVeheicleL.DELETEALL;
+
+      VehicleL.SETFILTER("Customer No.", '%1|%2', 'BNHB-VARE', 'BNHB-PERS');
+
+      IF VehicleL.FINDFIRST THEN
+        REPEAT
+        InternalVeheicleL.INIT;
+        InternalVeheicleL."User ID" := USERID;
+        InternalVeheicleL.VIN := VehicleL.VIN;
+        InternalVeheicleL.INSERT(TRUE);
+        InternalVeheicleL."License No." := VehicleL."License No.";
+        InternalVeheicleL."Current Book No." := VehicleL."Current Book No.";
+        InternalVeheicleL."Make Code" := VehicleL."Make Code";
+        InternalVeheicleL."Sals Price" := SalesPrice(VehicleL.VIN, VehicleL."Current Book No.");
+        InternalVeheicleL.Model := VehicleL.Model;
+        InternalVeheicleL."Location Code" := VehicleL."Location Code";
+        InternalVeheicleL."Department Code" := VehicleL."Department Code";
+        InternalVeheicleL."Date of Sale" := VehicleL."Date of Sale";
+        InternalVeheicleL."Plassering / Status" := VehicleL."Extra Code 2";
+        InternalVeheicleL.Financing := VehicleL."Text 3";
+        InternalVeheicleL."Initial Registration" := VehicleL."Initial Registration";
+        InternalVeheicleL."Vehicle Category Code" := VehicleL."Vehicle Category Code";
+        InternalVeheicleL.Buyer := VehicleL."Customer No.";
+        InternalVeheicleL.MODIFY;
+        UNTIL VehicleL.NEXT = 0;
+    END;
+
+    PROCEDURE SalesPrice@1101103001(VINP@1101103000 : Code[20];BookNoP@1101103001 : Code[10]) SalesPriceR : Decimal;
+    VAR
+      VehicleLedgerEntryL@1101103002 : Record 5025405;
+    BEGIN
+      VehicleLedgerEntryL.SETCURRENTKEY(VIN,"Book No.",Vehicle,"Entry Type");
+      VehicleLedgerEntryL.SETRANGE(VIN, VINP);
+      VehicleLedgerEntryL.SETRANGE("Book No.", BookNoP);
+      VehicleLedgerEntryL.SETRANGE("Entry Type", VehicleLedgerEntryL."Entry Type"::Sale);
+      IF VehicleLedgerEntryL.FINDFIRST THEN
+        REPEAT
+        SalesPriceR += VehicleLedgerEntryL."Total Price";
+        UNTIL VehicleLedgerEntryL.NEXT = 0;
+
+      EXIT(SalesPriceR * -1);
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

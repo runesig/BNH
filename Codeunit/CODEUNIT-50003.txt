@@ -1,0 +1,710 @@
+OBJECT Codeunit 50003 SynkarionFunctions
+{
+  OBJECT-PROPERTIES
+  {
+    Date=27.11.17;
+    Time=13:01:53;
+    Modified=Yes;
+    Version List=BNH - Synkarion;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      ERR01_LINETYPE@1101103000 : TextConst 'NOR=Endring av linjetype m† gj›res i Incadea!';
+
+    PROCEDURE CreateUpdateServiceHeader@1101103000(apiOrderP@1101103000 : DotNet "'NavSynkarionDLL, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bc52fb4d226f0168'.SynkarionDLL.Order";VAR update@1101103002 : Boolean) orderNo : Code[20];
+    VAR
+      rServiceHeaderL@1101103001 : Record 5025624;
+    BEGIN
+
+      orderNo := apiOrderP.orderNumber;
+
+      IF orderNo = '' THEN
+      BEGIN
+        orderNo := CreateServiceHeader(apiOrderP);
+        update  := FALSE;
+      END
+      ELSE
+      BEGIN
+        orderNo := UpdateServiceHeader(apiOrderP);
+        update  := TRUE;
+      END;
+    END;
+
+    PROCEDURE CreateServiceHeader@1101103007(apiOrderP@1101103000 : DotNet "'NavSynkarionDLL, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bc52fb4d226f0168'.SynkarionDLL.Order") orderNo : Code[20];
+    VAR
+      rServiceHeaderL@1101103001 : Record 5025624;
+      rVehicleL@1101103002 : Record 5025400;
+    BEGIN
+
+      orderNo := apiOrderP.orderNumber;
+
+      rServiceHeaderL.SetHideValidationDialog(TRUE);
+
+      rServiceHeaderL.INIT;
+      rServiceHeaderL."Document Type"         := rServiceHeaderL."Document Type"::Order;
+      rServiceHeaderL."No."                   := '';
+
+      rServiceHeaderL.OnInsertWithFixLocationCode(apiOrderP.location);
+      //rServiceHeaderL.INSERT(TRUE);
+
+      //rServiceHeaderL.validate("Location Code", apiOrderP.location);
+
+      rServiceHeaderL.VALIDATE("Sell-to Customer No.", apiOrderP.customer.incadeaCustomerNo);
+
+      rServiceHeaderL.VALIDATE("Location Code"       , apiOrderP.location);
+
+      rServiceHeaderL."Order Date"            := DT2DATE(apiOrderP.createdDate);
+
+      IF NOT rVehicleL.GET(apiOrderP.vehicle.chassisNumber) THEN
+      BEGIN
+        CreateVehicle(apiOrderP.vehicle);
+        IF rVehicleL.GET(apiOrderP.vehicle.chassisNumber) THEN
+        BEGIN
+          rVehicleL.VALIDATE("Customer No.", apiOrderP.customer.incadeaCustomerNo);
+          rVehicleL.MODIFY(TRUE);
+        END;
+      END;
+
+      rServiceHeaderL."External Document No." := apiOrderP.damageNumber;
+
+
+      rServiceHeaderL.VALIDATE(VIN            , apiOrderP.vehicle.chassisNumber);
+
+      rServiceHeaderL.MODIFY(TRUE);
+
+      orderNo := rServiceHeaderL."No.";
+    END;
+
+    PROCEDURE UpdateServiceHeader@1101103008(apiOrderP@1101103000 : DotNet "'NavSynkarionDLL, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bc52fb4d226f0168'.SynkarionDLL.Order") orderNo : Code[20];
+    VAR
+      rServiceHeaderL@1101103001 : Record 5025624;
+    BEGIN
+
+      orderNo := apiOrderP.orderNumber;
+
+      IF NOT rServiceHeaderL.GET(rServiceHeaderL."Document Type"::Order, orderNo) THEN
+        ERROR('OrderNo %1 does not exist!', orderNo);
+
+      rServiceHeaderL.SetHideValidationDialog(TRUE);
+
+      IF rServiceHeaderL."Location Code" <> apiOrderP.location THEN
+        rServiceHeaderL.VALIDATE("Location Code", apiOrderP.location);
+
+      IF rServiceHeaderL."Sell-to Customer No." <> apiOrderP.customer.incadeaCustomerNo THEN
+        rServiceHeaderL.VALIDATE("Sell-to Customer No.", apiOrderP.customer.incadeaCustomerNo);
+
+      //rServiceHeaderL."Order Date"            := DT2DATE(apiOrderP.createdDate);
+      //rServiceHeaderL.VALIDATE(VIN            , apiOrderP.vehicle.chassisNumber);
+
+      rServiceHeaderL.MODIFY(TRUE);
+    END;
+
+    PROCEDURE CreateServiceJobLines@1101103004(orderNoP@1101103002 : Code[20];apiOrderP@1101103000 : DotNet "'NavSynkarionDLL, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bc52fb4d226f0168'.SynkarionDLL.Order");
+    VAR
+      rServiceJobLineL@1101103001 : Record 5025627;
+      apiServiceJobL@1101103008 : DotNet "'NavSynkarionDLL, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bc52fb4d226f0168'.SynkarionDLL.ServiceJob";
+      i@1101103003 : Integer;
+      c@1101103004 : Integer;
+      lineNo@1101103005 : Integer;
+      List@1101103006 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.Generic.List`1";
+    BEGIN
+
+      c := apiOrderP.serviceJobs.Count; // apiOrderP.serviceJobIds.Count;
+
+      //List := List.List();
+      //List := apiOrderP.serviceJobIds;
+
+      FOR i := 1 TO c DO
+      BEGIN
+        //lineNo := List.Item(i-1);
+
+        apiServiceJobL := apiOrderP.serviceJobs.Item(i-1);
+
+        rServiceJobLineL.INIT;
+        rServiceJobLineL."Document Type"        := rServiceJobLineL."Document Type"::Order;
+        rServiceJobLineL."Document No."         := orderNoP;
+        rServiceJobLineL."Line No."             := apiServiceJobL.lineNo; // lineNo;
+        rServiceJobLineL."Instruction Data Make Code" := apiServiceJobL.makeCode;
+
+        IF apiServiceJobL.jobTypeId <> '' THEN
+          rServiceJobLineL."Instruction No." := apiServiceJobL.jobTypeId;
+
+        rServiceJobLineL.Instruction            := apiServiceJobL.name; // 'Jobb nr. ' + FORMAT(i);
+        rServiceJobLineL."Location Code"        := apiOrderP.location;
+        rServiceJobLineL.VALIDATE("Sell-to Customer No." , apiServiceJobL.incadeaCustomerNo); // apiOrderP.customer.incadeaCustomerNo);
+
+        rServiceJobLineL.INSERT(TRUE);
+
+      END;
+
+      IF apiOrderP.damageNumber <> '' THEN
+      BEGIN
+
+        rServiceJobLineL.RESET;
+        rServiceJobLineL.SETRANGE("Document Type", rServiceJobLineL."Document Type"::Order);
+        rServiceJobLineL.SETRANGE("Document No." , orderNoP);
+        IF rServiceJobLineL.FINDLAST THEN
+          lineNo :=rServiceJobLineL."Line No." + 10000
+        ELSE
+          lineNo := 10000;
+
+        rServiceJobLineL.INIT;
+        rServiceJobLineL."Document Type"        := rServiceJobLineL."Document Type"::Order;
+        rServiceJobLineL."Document No."         := orderNoP;
+        rServiceJobLineL."Line No."             := lineNo;
+        rServiceJobLineL."Instruction Data Make Code" := 'FELLES';
+
+        rServiceJobLineL.VALIDATE("Instruction No.", 'SKADE');
+
+        //rServiceJobLineL.Instruction            := apiServiceJobL.name; // 'Jobb nr. ' + FORMAT(i);
+        rServiceJobLineL."Location Code"        := apiOrderP.location;
+        //rServiceJobLineL.VALIDATE("Sell-to Customer No." , apiServiceJobL.incadeaCustomerNo); // apiOrderP.customer.incadeaCustomerNo);
+
+        rServiceJobLineL.INSERT(TRUE);
+
+      END;
+    END;
+
+    PROCEDURE UpdateServiceJobLines@1101103012(orderNoP@1101103002 : Code[20];apiOrderP@1101103000 : DotNet "'NavSynkarionDLL, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bc52fb4d226f0168'.SynkarionDLL.Order");
+    VAR
+      rServiceJobLineL@1101103001 : Record 5025627;
+      apiServiceJobL@1101103007 : DotNet "'NavSynkarionDLL, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bc52fb4d226f0168'.SynkarionDLL.ServiceJob";
+      i@1101103003 : Integer;
+      c@1101103004 : Integer;
+      lineNo@1101103005 : Integer;
+      List@1101103006 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.Generic.List`1";
+    BEGIN
+
+      c := apiOrderP.serviceJobs.Count;
+
+      //List := List.List();
+      //List := apiOrderP.serviceJobIds;
+
+      FOR i := 1 TO c DO
+      BEGIN
+        //lineNo := List.Item(i-1);
+
+        apiServiceJobL := apiOrderP.serviceJobs.Item(i-1);
+
+        IF rServiceJobLineL.GET(rServiceJobLineL."Document Type"::Order, orderNoP, apiServiceJobL.lineNo) THEN
+        BEGIN
+          //rServiceJobLineL.Instruction            := 'Jobb nr. ' + FORMAT(i);
+          rServiceJobLineL."Location Code"        := apiOrderP.location;
+          rServiceJobLineL.VALIDATE("Sell-to Customer No." , apiServiceJobL.incadeaCustomerNo); // apiOrderP.customer.incadeaCustomerNo);
+
+          rServiceJobLineL.MODIFY(TRUE);
+        END
+        ELSE
+        BEGIN
+
+          rServiceJobLineL.INIT;
+          rServiceJobLineL."Document Type"        := rServiceJobLineL."Document Type"::Order;
+          rServiceJobLineL."Document No."         := orderNoP;
+          rServiceJobLineL."Line No."             := apiServiceJobL.lineNo;
+          rServiceJobLineL.Instruction            := apiServiceJobL.name; // 'Jobb nr. ' + FORMAT(i);
+          rServiceJobLineL."Location Code"        := apiOrderP.location;
+          rServiceJobLineL.VALIDATE("Sell-to Customer No." , apiServiceJobL.incadeaCustomerNo); // apiOrderP.customer.incadeaCustomerNo);
+
+          rServiceJobLineL.INSERT(TRUE);
+        END;
+
+      END;
+    END;
+
+    PROCEDURE CreateServiceLines@1101103001(orderNoP@1101103001 : Code[20];apiOrderP@1101103000 : DotNet "'NavSynkarionDLL, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bc52fb4d226f0168'.SynkarionDLL.Order";VAR insertedLinesJson@1101103008 : BigText);
+    VAR
+      rServiceLineL@1101103006 : Record 5025625;
+      List@1101103007 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.Generic.List`1";
+      apiOrderLine@1101103002 : DotNet "'NavSynkarionDLL, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bc52fb4d226f0168'.SynkarionDLL.OrderLine";
+      i@1101103005 : Integer;
+      c@1101103004 : Integer;
+      lineNo@1101103003 : Integer;
+    BEGIN
+
+      c := apiOrderP.orderLines.Count;
+
+      List := List.List();
+      List := apiOrderP.orderLines;
+
+      insertedLinesJson.ADDTEXT('''Result'':[');
+
+      FOR i := 1 TO c DO
+      BEGIN
+        apiOrderLine := List.Item(i-1);
+
+
+        rServiceLineL.RESET;
+        rServiceLineL.SETRANGE("Document Type" , rServiceLineL."Document Type"::Order);
+        rServiceLineL.SETRANGE("Document No."  , orderNoP);
+        IF rServiceLineL.FINDLAST THEN
+          lineNo := rServiceLineL."Line No." + 10000
+        ELSE
+          lineNo := 10000;
+
+        rServiceLineL.RESET;
+
+        rServiceLineL.INIT;
+        rServiceLineL.VALIDATE("Document Type" , rServiceLineL."Document Type"::Order);
+        rServiceLineL.VALIDATE("Document No."  , orderNoP);
+        rServiceLineL.VALIDATE("Line No."      , lineNo);
+
+        CASE LOWERCASE(apiOrderLine.itemType) OF
+          'item'    : rServiceLineL.VALIDATE(Type, rServiceLineL.Type::Item);
+          'labor'   : rServiceLineL.VALIDATE(Type, rServiceLineL.Type::Labor);
+          'finance' : rServiceLineL.VALIDATE(Type, rServiceLineL.Type::"G/L Account");
+        END;
+
+        IF LOWERCASE(apiOrderLine.itemType) = 'text' THEN
+        BEGIN
+          rServiceLineL.VALIDATE(Type, rServiceLineL.Type::" ");
+          rServiceLineL.VALIDATE(Description, apiOrderLine.name);
+        END
+        ELSE
+        BEGIN
+          rServiceLineL.VALIDATE("No."           , apiOrderLine.itemNumber);
+          rServiceLineL.VALIDATE(Quantity        , apiOrderLine.quantity);
+          rServiceLineL.VALIDATE("Unit Price"    , apiOrderLine.price);
+          rServiceLineL.VALIDATE("Line Discount %" , apiOrderLine.discountPercentage);
+        END;
+
+        rServiceLineL.VALIDATE("Service Job No." , apiOrderLine.serviceJobLineNo);
+        rServiceLineL."Location Code" := apiOrderP.location;
+
+        rServiceLineL.INSERT(TRUE);
+        //IF NOT rServiceLineL.INSERT(TRUE) THEN
+        //  rServiceLineL.MODIFY(TRUE);
+
+        IF i > 1 THEN
+          insertedLinesJson.ADDTEXT(',');
+
+        insertedLinesJson.ADDTEXT('{''lineNumber'':' + FORMAT(lineNo) + ', ');
+        insertedLinesJson.ADDTEXT('''synkarionId'':' + FORMAT(apiOrderLine.synkarionId) + '}');
+
+      END;
+
+      insertedLinesJson.ADDTEXT('],'''':''');
+    END;
+
+    PROCEDURE UpdateServiceLines@1101103014(orderNoP@1101103001 : Code[20];apiOrderP@1101103000 : DotNet "'NavSynkarionDLL, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bc52fb4d226f0168'.SynkarionDLL.Order";VAR insertedLinesJson@1101103008 : BigText);
+    VAR
+      rServiceLineL@1101103006 : Record 5025625;
+      List@1101103007 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.Generic.List`1";
+      apiOrderLine@1101103002 : DotNet "'NavSynkarionDLL, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bc52fb4d226f0168'.SynkarionDLL.OrderLine";
+      i@1101103005 : Integer;
+      c@1101103004 : Integer;
+      lineNo@1101103003 : Integer;
+    BEGIN
+
+      c := apiOrderP.orderLines.Count;
+
+      List := List.List();
+      List := apiOrderP.orderLines;
+
+      insertedLinesJson.ADDTEXT('''Result'':[');
+
+      FOR i := 1 TO c DO
+      BEGIN
+        apiOrderLine := List.Item(i-1);
+
+        IF rServiceLineL.GET(rServiceLineL."Document Type"::Order, orderNoP, apiOrderLine.lineNumber) THEN
+        BEGIN
+
+          lineNo := rServiceLineL."Line No.";
+
+          CASE LOWERCASE(apiOrderLine.itemType) OF
+            'item'    : IF rServiceLineL.Type <> rServiceLineL.Type::Item THEN ERROR(ERR01_LINETYPE);
+            'labor'   : IF rServiceLineL.Type <> rServiceLineL.Type::Labor THEN ERROR(ERR01_LINETYPE);
+            'finance' : IF rServiceLineL.Type <> rServiceLineL.Type::"G/L Account" THEN ERROR(ERR01_LINETYPE);
+            'text'    : IF rServiceLineL.Type <> rServiceLineL.Type::" " THEN ERROR(ERR01_LINETYPE);
+          END;
+
+          //rServiceLineL.VALIDATE(Type             , rServiceLineL.Type::Item);
+          IF LOWERCASE(apiOrderLine.itemType) = 'text' THEN
+          BEGIN
+            rServiceLineL.VALIDATE(Description, apiOrderLine.name);
+          END
+          ELSE
+          BEGIN
+
+            rServiceLineL.VALIDATE("No."            , apiOrderLine.itemNumber);
+            rServiceLineL.VALIDATE(Quantity         , apiOrderLine.quantity);
+            rServiceLineL.VALIDATE("Unit Price"     , apiOrderLine.price);
+            rServiceLineL.VALIDATE("Line Discount %", apiOrderLine.discountPercentage);
+            rServiceLineL.VALIDATE("Service Job No.", apiOrderLine.serviceJobLineNo);
+
+            //rServiceLineL."Location Code" := apiOrderP.location;
+          END;
+
+          IF apiOrderLine.resourceNo <> '' THEN
+            rServiceLineL."Resource No." := apiOrderLine.resourceNo
+          ELSE
+            rServiceLineL."Resource No." := '';
+
+
+          rServiceLineL.MODIFY(TRUE);
+
+        END
+        ELSE
+        BEGIN
+
+          rServiceLineL.RESET;
+          rServiceLineL.SETRANGE("Document Type" , rServiceLineL."Document Type"::Order);
+          rServiceLineL.SETRANGE("Document No."  , orderNoP);
+          IF rServiceLineL.FINDLAST THEN
+            lineNo := rServiceLineL."Line No." + 10000
+          ELSE
+            lineNo := 10000;
+
+          rServiceLineL.RESET;
+
+
+          rServiceLineL.INIT;
+          rServiceLineL.VALIDATE("Document Type" , rServiceLineL."Document Type"::Order);
+          rServiceLineL.VALIDATE("Document No."  , orderNoP);
+          rServiceLineL.VALIDATE("Line No."      , lineNo);
+
+          CASE LOWERCASE(apiOrderLine.itemType) OF
+            'item'    : rServiceLineL.VALIDATE(Type, rServiceLineL.Type::Item);
+            'labor'   : rServiceLineL.VALIDATE(Type, rServiceLineL.Type::Labor);
+            'finance' : rServiceLineL.VALIDATE(Type, rServiceLineL.Type::"G/L Account");
+          END;
+
+          IF LOWERCASE(apiOrderLine.itemType) = 'text' THEN
+          BEGIN
+            rServiceLineL.VALIDATE(Type, rServiceLineL.Type::" ");
+            rServiceLineL.VALIDATE(Description, apiOrderLine.name);
+          END
+          ELSE
+          BEGIN
+            rServiceLineL.VALIDATE("No."           , apiOrderLine.itemNumber);
+            rServiceLineL.VALIDATE(Quantity        , apiOrderLine.quantity);
+            rServiceLineL.VALIDATE("Unit Price"    , apiOrderLine.price);
+            rServiceLineL.VALIDATE("Line Discount %" , apiOrderLine.discountPercentage);
+          END;
+
+          rServiceLineL.VALIDATE("Service Job No."  , apiOrderLine.serviceJobLineNo);
+          rServiceLineL."Location Code" := apiOrderP.location;
+
+          IF apiOrderLine.resourceNo <> '' THEN
+            rServiceLineL."Resource No." := apiOrderLine.resourceNo
+          ELSE
+            rServiceLineL."Resource No." := '';
+
+
+          rServiceLineL.INSERT(TRUE);
+
+        END;
+
+
+        IF i > 1 THEN
+          insertedLinesJson.ADDTEXT(',');
+
+        insertedLinesJson.ADDTEXT('{''lineNumber'':' + FORMAT(lineNo) + ', ');
+        insertedLinesJson.ADDTEXT('''synkarionId'':' + FORMAT(apiOrderLine.synkarionId) + '}');
+
+      END;
+
+      insertedLinesJson.ADDTEXT('],'''':''');
+    END;
+
+    PROCEDURE "----"@1101103015();
+    BEGIN
+    END;
+
+    PROCEDURE CreateVehicle@1101103003(apiVehicleP@1101103000 : DotNet "'NavSynkarionDLL, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bc52fb4d226f0168'.SynkarionDLL.Vehicle") : Text[250];
+    VAR
+      rVehicleL@1101103001 : Record 5025400;
+      responseL@1101103002 : Text[250];
+    BEGIN
+
+      IF rVehicleL.GET(apiVehicleP.chassisNumber) THEN
+      BEGIN
+
+        responseL := 'Vehicle (vin: ' + apiVehicleP.chassisNumber + ') already exists!';
+
+      END
+      ELSE
+      BEGIN
+
+        IF STRLEN(apiVehicleP.chassisNumber) = 17 THEN
+        BEGIN
+
+          rVehicleL.INIT;
+          rVehicleL.VALIDATE(VIN                    , apiVehicleP.chassisNumber);
+          //rVehicleL.validate("Initial Registration" , apiVehicleP.firstRegDate);
+          rVehicleL.VALIDATE("Key No."              , apiVehicleP.keyNumber);
+          rVehicleL.VALIDATE(Mileage                , apiVehicleP.milleage);
+          rVehicleL.VALIDATE(Model                  , apiVehicleP.model);
+          rVehicleL.VALIDATE("Model Year"           , apiVehicleP.modelYear);
+          //rVehicleL.VALIDATE("Color Description"    , apiVehicleP.paintColor);
+          rVehicleL.VALIDATE("Make Code"            , apiVehicleP.producer);
+          rVehicleL.VALIDATE("License No."          , apiVehicleP.registrationNumber);
+
+          //apiVehicleP.createdDate
+          //apiVehicleP.updatedDate
+
+          IF rVehicleL.INSERT(TRUE) THEN
+            responseL := 'Vehicle (vin: ' + apiVehicleP.chassisNumber + ') created successfully!';
+        END
+        ELSE
+          ERROR('VIN must be 17 chars. (%1 = %2)', apiVehicleP.chassisNumber, STRLEN(apiVehicleP.chassisNumber));
+
+      END;
+
+      EXIT(responseL);
+    END;
+
+    PROCEDURE "---"@1101103005();
+    BEGIN
+    END;
+
+    PROCEDURE CreateUpdateCustomer@1101103006(apiCustomerP@1101103000 : DotNet "'NavSynkarionDLL, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bc52fb4d226f0168'.SynkarionDLL.Customer") customerNo : Code[20];
+    VAR
+      rCustomerL@1101103001 : Record 18;
+    BEGIN
+
+      customerNo := apiCustomerP.incadeaCustomerNo;
+
+      IF customerNo = '' THEN
+      BEGIN
+
+        rCustomerL.INIT;
+        rCustomerL.VALIDATE("First Name"         , COPYSTR(apiCustomerP.firstName, 1, 30));
+        rCustomerL.VALIDATE("Last Name"          , COPYSTR(apiCustomerP.lastName, 1, 50));
+        rCustomerL.VALIDATE(Address              , COPYSTR(apiCustomerP.street, 1, 50));
+        rCustomerL.VALIDATE("Post Code"          , apiCustomerP.postalCode);
+        rCustomerL.VALIDATE(City                 , COPYSTR(apiCustomerP.postalPlace, 1, 30));
+        rCustomerL.VALIDATE("Country/Region Code", apiCustomerP.countryCode);
+        rCustomerL.VALIDATE("Mobile Phone No."   , apiCustomerP.mobilePhone);
+        rCustomerL.VALIDATE("E-Mail"             , COPYSTR(apiCustomerP.email, 1, 80));
+
+        rCustomerL.INSERT(TRUE);
+
+        customerNo := rCustomerL."No.";
+
+      END
+      ELSE
+      BEGIN
+
+        IF rCustomerL.GET(customerNo) THEN
+        BEGIN
+          rCustomerL.VALIDATE("First Name"         , COPYSTR(apiCustomerP.firstName, 1, 30));
+          rCustomerL.VALIDATE("Last Name"          , COPYSTR(apiCustomerP.lastName, 1, 50));
+          rCustomerL.VALIDATE(Address              , COPYSTR(apiCustomerP.street, 1, 50));
+          rCustomerL.VALIDATE("Post Code"          , apiCustomerP.postalCode);
+          rCustomerL.VALIDATE(City                 , COPYSTR(apiCustomerP.postalPlace, 1, 30));
+          rCustomerL.VALIDATE("Country/Region Code", apiCustomerP.countryCode);
+          rCustomerL.VALIDATE("Mobile Phone No."   , apiCustomerP.mobilePhone);
+          rCustomerL.VALIDATE("E-Mail"             , COPYSTR(apiCustomerP.email, 1, 80));
+
+          rCustomerL.MODIFY(TRUE);
+
+        END;
+
+      END;
+    END;
+
+    PROCEDURE UpdateOrderStatus@1101103010(apiOrderStatusP@1101103000 : DotNet "'NavSynkarionDLL, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bc52fb4d226f0168'.SynkarionDLL.OrderStatus") responseR : Text[250];
+    VAR
+      rServiceHeaderL@1101103001 : Record 5025624;
+    BEGIN
+
+      responseR := 'Changed status to ' + apiOrderStatusP.name + ' for orderNo ' + apiOrderStatusP.orderNumber;
+
+      IF rServiceHeaderL.GET(rServiceHeaderL."Document Type"::Order, apiOrderStatusP.orderNumber) THEN
+      BEGIN
+
+        rServiceHeaderL.VALIDATE("Work Status Code", apiOrderStatusP.name);
+        IF NOT rServiceHeaderL.MODIFY(TRUE) THEN
+          responseR := 'Could not change status to ' + apiOrderStatusP.name + ' for orderNo ' + apiOrderStatusP.orderNumber;
+
+      END
+      ELSE
+        responseR := 'OrderNo ' + apiOrderStatusP.orderNumber + ' does not exist!';
+    END;
+
+    PROCEDURE CreateClocking@1101103002(apiClockingP@1101103000 : DotNet "'NavSynkarionDLL, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bc52fb4d226f0168'.SynkarionDLL.Clocking";ClockingTypeP@1101103008 : 'Started,Ended';linkToEntryNoP@1101103009 : Integer) entryNoR : Integer;
+    VAR
+      SynkarionSetupL@1101103010 : Record 50001;
+      TimeClockEntryL@1101103012 : Record 5208401;
+      TimeClockEntry2L@1101103011 : Record 5208401;
+      ServiceHeaderL@1101103007 : Record 5025624;
+      ServiceJobLineL@1101103006 : Record 5025627;
+      serviceJobNo@1101103005 : Integer;
+      nextEntryNo@1101103004 : Integer;
+      resourceL@1101103003 : Record 156;
+      linkedEntryNo@1101103002 : Integer;
+      duration@1101103001 : Decimal;
+    BEGIN
+
+        SynkarionSetupL.GET;
+
+        resourceL.GET(apiClockingP.employeeID);
+
+        ServiceHeaderL.GET(ServiceHeaderL."Document Type"::Order, apiClockingP.ordernumber);
+
+        serviceJobNo := apiClockingP.serviceJobNumber;
+
+        TimeClockEntryL.RESET;
+        IF TimeClockEntryL.FINDLAST THEN
+          nextEntryNo := TimeClockEntryL."Entry No." + 1
+        ELSE
+          nextEntryNo := 1;
+
+        TimeClockEntryL.INIT;
+        TimeClockEntryL."Entry No."                := nextEntryNo;
+        TimeClockEntryL."Employee No."             := resourceL."Employee No.";
+        TimeClockEntryL."Resource No."             := resourceL."No.";
+        TimeClockEntryL."Address No."              := resourceL."Address No.";
+
+        CASE ClockingTypeP OF
+          ClockingTypeP::Started:
+            BEGIN
+              TimeClockEntryL.Date                       := DT2DATE(apiClockingP.fromDate);
+              TimeClockEntryL.Time                       := DT2TIME(apiClockingP.fromDate);
+              TimeClockEntryL.Sorting                    := 1;
+              TimeClockEntryL.Duration                   := 0;
+              TimeClockEntryL.Type                       := TimeClockEntryL.Type::"Begin";
+              TimeClockEntryL."Linked to Entry No."      := 0;
+            END;
+          ClockingTypeP::Ended:
+            BEGIN
+              linkedEntryNo := linkToEntryNoP;
+              duration      := (apiClockingP.toDate - apiClockingP.fromDate) / 3600000; // millisec to hours
+
+              TimeClockEntryL.Date                       := DT2DATE(apiClockingP.toDate);
+              TimeClockEntryL.Time                       := DT2TIME(apiClockingP.toDate);
+              TimeClockEntryL.Sorting                    := 0;
+              TimeClockEntryL.Duration                   := duration;
+
+              TimeClockEntryL.Type                       := TimeClockEntryL.Type::"End";
+              TimeClockEntryL."Linked to Entry No."      := linkedEntryNo;
+            END;
+        END;
+
+        TimeClockEntryL."Task Type Code"           := SynkarionSetupL."Task Type Code Clocking";
+        TimeClockEntryL.Leaving                    := FALSE;
+        TimeClockEntryL."Service Order No."        := ServiceHeaderL."No.";
+        TimeClockEntryL."Service Job No."          := serviceJobNo;
+        TimeClockEntryL."Service Line No."         := 0;
+        TimeClockEntryL."Labor Standard Time Type" := TimeClockEntryL."Labor Standard Time Type"::"Fixed Reference";
+        TimeClockEntryL.Approved                   := TRUE;
+        TimeClockEntryL."Approved by Employee No." := '';
+        TimeClockEntryL."Approval Timestamp"       := 0DT;
+        TimeClockEntryL.Canceled                   := FALSE;
+        TimeClockEntryL."Canceled by User ID"      := '';
+        TimeClockEntryL."Cancelation Timestamp"    := 0DT;
+        TimeClockEntryL."Created by User ID"       := USERID;
+        TimeClockEntryL."Creation Timestamp"       := CURRENTDATETIME;
+        TimeClockEntryL.Productive                 := TRUE;
+        TimeClockEntryL."Statistics Group"         := TimeClockEntryL."Statistics Group"::Presence;
+        TimeClockEntryL."Considered as Working"    := TRUE;
+        TimeClockEntryL."Order Location Code"      := ServiceHeaderL."Location Code";
+        TimeClockEntryL."Resource Location Code"   := resourceL."Location Code";
+        TimeClockEntryL."Make Code"                := ServiceHeaderL."Make Code";
+        TimeClockEntryL."Branch Code"              := ServiceHeaderL."Branch Code";
+        TimeClockEntryL."Labor No."                := '';
+
+        IF apiClockingP.description <> '' THEN
+        BEGIN
+          TimeClockEntryL.Description := apiClockingP.description;
+          IF TimeClockEntry2L.GET(linkedEntryNo) THEN
+          BEGIN
+            TimeClockEntry2L.Description := apiClockingP.description;
+            TimeClockEntry2L.MODIFY(FALSE);
+          END;
+        END
+        ELSE
+          TimeClockEntryL.Description := 'Arbeid p† ordre';
+
+        TimeClockEntryL."Source Code" := '';
+
+        TimeClockEntryL.INSERT;
+
+        entryNoR := TimeClockEntryL."Entry No.";
+
+        EXIT(entryNoR);
+    END;
+
+    PROCEDURE ClockingRelatedInfo@1101103009(apiClockingP@1101103003 : DotNet "'NavSynkarionDLL, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bc52fb4d226f0168'.SynkarionDLL.Clocking");
+    VAR
+      rServiceHeaderL@1101103000 : Record 5025624;
+      rServiceLineL@1101103001 : Record 5025625;
+      rServiceJobLineL@1101103002 : Record 5025627;
+    BEGIN
+
+        //Resource and Status to Service Job Line
+        IF rServiceJobLineL.GET(rServiceJobLineL."Document Type"::Order, apiClockingP.ordernumber, apiClockingP.serviceJobNumber) THEN
+        BEGIN
+          //rServiceJobLineL.VALIDATE("Work Status Code"    , newStatus);
+          rServiceJobLineL.VALIDATE("Assign. Resource No.", apiClockingP.employeeID);
+
+          // ???
+          //rServiceJobLineL.Completed := TRUE
+
+          rServiceJobLineL.MODIFY(TRUE);
+        END;
+
+        //Resource to Service Line
+        rServiceLineL.RESET;
+        rServiceLineL.SETRANGE("Document Type"  , rServiceLineL."Document Type"::Order);
+        rServiceLineL.SETRANGE("Document No."   , apiClockingP.ordernumber);
+        rServiceLineL.SETRANGE("Service Job No.", apiClockingP.serviceJobNumber);
+        rServiceLineL.SETRANGE(Type             , rServiceLineL.Type::Labor);
+        IF rServiceLineL.FIND('-') THEN
+        REPEAT
+          rServiceLineL.VALIDATE("Resource No.", apiClockingP.employeeID);
+          rServiceLineL.MODIFY(FALSE);
+        UNTIL rServiceLineL.NEXT = 0;
+
+        // Change status of service order
+        //IF ServiceHeaderL.GET(ServiceHeaderL."Document Type"::Order, apiClockingP.ordernumber) THEN
+        //BEGIN
+        //  //ServiceHeaderL.VALIDATE("Work Status Code", newStatus);
+        //  ServiceHeaderL."Service Advisor No./Pick-Up" := apiClockingP.employeeID;
+        //  ServiceHeaderL.MODIFY(TRUE);
+        //END;
+    END;
+
+    PROCEDURE "--"@1101103011();
+    BEGIN
+    END;
+
+    PROCEDURE InsertLog@1101103013(apiLogP@1101103000 : DotNet "'NavSynkarionDLL, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bc52fb4d226f0168'.SynkarionDLL.Log") responseR : Text[250];
+    VAR
+      rSynkarionLogL@1101103001 : Record 50000;
+      btL@1101103002 : BigText;
+      outStreamL@1101103003 : OutStream;
+      requestShortL@1101103004 : Text[250];
+    BEGIN
+
+      btL.ADDTEXT(apiLogP.JsonRequest);
+
+      btL.GETSUBTEXT(requestShortL, 1, 250);
+
+      rSynkarionLogL.INIT;
+      rSynkarionLogL.Datetime         := apiLogP.Datetime;
+      rSynkarionLogL.Direction        := apiLogP.Direction;
+      rSynkarionLogL.Method           := apiLogP.Method;
+      rSynkarionLogL.Status           := apiLogP.Status;
+      rSynkarionLogL.JsonRequestShort := requestShortL;
+      rSynkarionLogL.JsonResponse     := COPYSTR(apiLogP.JsonResponse, 1, 250);
+
+      rSynkarionLogL.JsonRequest.CREATEOUTSTREAM(outStreamL);
+      btL.WRITE(outStreamL);
+
+      rSynkarionLogL.INSERT;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

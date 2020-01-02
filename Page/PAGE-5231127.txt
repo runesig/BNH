@@ -1,0 +1,163 @@
+OBJECT Page 5231127 BB Historic Header
+{
+  OBJECT-PROPERTIES
+  {
+    Date=14.12.17;
+    Time=20:11:27;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    SourceTable=Table5231135;
+    PageType=List;
+    ActionList=ACTIONS
+    {
+      { 1101103038;  ;ActionContainer;
+                      ActionContainerType=ActionItems }
+      { 1101103039;1 ;Action    ;
+                      Name=Import Invoice;
+                      RunObject=XMLport 5231128 }
+      { 1101103041;1 ;Action    ;
+                      Name=Import Credti Memo;
+                      RunObject=XMLport 5231130 }
+      { 1101103042;1 ;Action    ;
+                      Name=Create Record;
+                      OnAction=VAR
+                                 QHistoryHeaderL@1101103000 : Record 5231135;
+                               BEGIN
+                                 CurrPage.SETSELECTIONFILTER( QHistoryHeaderL );
+                                 CODEUNIT.RUN( CODEUNIT::"BB History Header", QHistoryHeaderL );
+                               END;
+                                }
+    }
+  }
+  CONTROLS
+  {
+    { 1101103000;0;Container;
+                ContainerType=ContentArea }
+
+    { 1101103001;1;Group  ;
+                Name=Group;
+                GroupType=Repeater }
+
+    { 1101103002;2;Field  ;
+                SourceExpr="Q Primary Key" }
+
+    { 1101103003;2;Field  ;
+                SourceExpr="Q Status" }
+
+    { 1101103004;2;Field  ;
+                SourceExpr="Q Datetime" }
+
+    { 1101103005;2;Field  ;
+                SourceExpr="Q Update message" }
+
+    { 1101103006;2;Field  ;
+                SourceExpr="Q Record ID" }
+
+    { 1101103040;2;Field  ;
+                SourceExpr=Type }
+
+    { 1101103007;2;Field  ;
+                SourceExpr=codeChassis }
+
+    { 1101103008;2;Field  ;
+                SourceExpr="Sell-to Customer No." }
+
+    { 1101103009;2;Field  ;
+                SourceExpr="Service Order No." }
+
+    { 1101103010;2;Field  ;
+                SourceExpr=Dummy }
+
+    { 1101103011;2;Field  ;
+                SourceExpr=Location }
+
+    { 1101103012;2;Field  ;
+                SourceExpr=Dummy2 }
+
+    { 1101103013;2;Field  ;
+                SourceExpr=Dummy3 }
+
+    { 1101103014;2;Field  ;
+                SourceExpr=Dummy4 }
+
+    { 1101103015;2;Field  ;
+                SourceExpr=Dummy5 }
+
+    { 1101103016;2;Field  ;
+                SourceExpr=Dummy6 }
+
+    { 1101103017;2;Field  ;
+                SourceExpr=Dummy7 }
+
+    { 1101103018;2;Field  ;
+                SourceExpr=Dummy8 }
+
+    { 1101103019;2;Field  ;
+                SourceExpr=Dummy9 }
+
+    { 1101103020;2;Field  ;
+                SourceExpr="Posting Date" }
+
+    { 1101103021;2;Field  ;
+                SourceExpr="No." }
+
+    { 1101103022;2;Field  ;
+                SourceExpr=Dummy10 }
+
+    { 1101103023;2;Field  ;
+                SourceExpr=Dummy11 }
+
+    { 1101103024;2;Field  ;
+                SourceExpr=txtBelop }
+
+    { 1101103025;2;Field  ;
+                SourceExpr=Dummy12 }
+
+    { 1101103026;2;Field  ;
+                SourceExpr=Dummy13 }
+
+    { 1101103027;2;Field  ;
+                SourceExpr=Dummy14 }
+
+    { 1101103028;2;Field  ;
+                SourceExpr=Dummy15 }
+
+    { 1101103029;2;Field  ;
+                SourceExpr=Dummy16 }
+
+    { 1101103030;2;Field  ;
+                SourceExpr=Dummy17 }
+
+    { 1101103031;2;Field  ;
+                SourceExpr=Dummy18 }
+
+    { 1101103032;2;Field  ;
+                SourceExpr=Dummy19 }
+
+    { 1101103033;2;Field  ;
+                SourceExpr=Dummy20 }
+
+    { 1101103034;2;Field  ;
+                SourceExpr=OrdreDato }
+
+    { 1101103035;2;Field  ;
+                SourceExpr=km }
+
+    { 1101103036;2;Field  ;
+                SourceExpr=Dummey21 }
+
+    { 1101103037;2;Field  ;
+                SourceExpr=Dummey22 }
+
+  }
+  CODE
+  {
+
+    BEGIN
+    END.
+  }
+}
+

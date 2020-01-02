@@ -1,0 +1,42 @@
+OBJECT Table 50000 SynkarionLog
+{
+  OBJECT-PROPERTIES
+  {
+    Date=13.11.17;
+    Time=15:20:55;
+    Modified=Yes;
+    Version List=BNH - Synkarion;
+  }
+  PROPERTIES
+  {
+  }
+  FIELDS
+  {
+    { 1   ;   ;Datetime            ;DateTime       }
+    { 10  ;   ;Direction           ;Option        ;OptionString=Synkarion -> Nav,Nav -> Synkarion }
+    { 20  ;   ;Method              ;Text250        }
+    { 30  ;   ;JsonRequest         ;BLOB          ;OnLookup=BEGIN
+
+                                                              //Rec.JsonRequest.EXPORT('', TRUE);
+                                                            END;
+                                                             }
+    { 32  ;   ;JsonRequestShort    ;Text250        }
+    { 40  ;   ;Status              ;Option        ;OptionString=OK,ERROR }
+    { 50  ;   ;JsonResponse        ;Text250        }
+  }
+  KEYS
+  {
+    {    ;Datetime                                ;MaintainSIFTIndex=No;
+                                                   Clustered=Yes }
+  }
+  FIELDGROUPS
+  {
+  }
+  CODE
+  {
+
+    BEGIN
+    END.
+  }
+}
+

@@ -1,0 +1,156 @@
+OBJECT Codeunit 5231137 BNH History Line Update
+{
+  OBJECT-PROPERTIES
+  {
+    Date=22.11.17;
+    Time=20:14:03;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    TableNo=5231132;
+    OnRun=BEGIN
+            QHistoryLineG.COPY( Rec );
+            RecordRefG.OPEN( DATABASE::"KillMe T5029011" );
+            CASE TRUE OF
+              QHistoryLineG."Q Status" = "Q Status"::Ignore:
+                EXIT;
+              RecordRefG.GET( QHistoryLineG."Q Record ID" ):
+                ModifyRecord;
+              ELSE
+                InsertRecord;
+            END;
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      C_ConfirmProcess@1101103000 : TextConst 'ENU=Process %1 records?;NOR=Prosesser %1 poster?';
+      QHistoryHeaderG@1101103004 : Record 5231131;
+      QHistoryLineG@1101103003 : Record 5231132;
+      CustVehHistHdrLegacyDMSG@1101103001 : Record 5210222;
+      CustVehHistLineLegacyG@1101103005 : Record 5210223;
+      RecordRefG@1101103002 : RecordRef;
+      C_NoHeader@1101103007 : TextConst 'ENU=No header found. Filter %1;NOR=Finner ikke hode. Filter %1.';
+      C_MultipleHeaders@1101103006 : TextConst 'ENU=Multiple headers found. Filter %1;NOR=Finner flere poster. Filter %1.';
+      LineNoG@1101103008 : Integer;
+
+    PROCEDURE InsertRecord@1101103000();
+    BEGIN
+      CLEAR( CustVehHistLineLegacyG );
+      WITH CustVehHistLineLegacyG DO BEGIN
+        INIT;
+        GetHeader;
+        SetLineNo;
+        SetFields;
+        INSERT( TRUE );
+      END;
+
+      WITH QHistoryLineG DO BEGIN
+        GET( "Q Primary Key" );
+        RecordRefG.GETTABLE( CustVehHistLineLegacyG );
+        "Q Record ID" := RecordRefG.RECORDID;
+        MODIFY( TRUE );
+      END;
+    END;
+
+    PROCEDURE ModifyRecord@1101103001();
+    BEGIN
+      WITH CustVehHistLineLegacyG DO BEGIN
+        GetHeader;
+        CustVehHistLineLegacyG.GET(QHistoryLineG."Q Record ID");
+        SetFields;
+        MODIFY( TRUE );
+      END;
+    END;
+
+    PROCEDURE GetHeader@1101103004();
+    BEGIN
+      WITH CustVehHistHdrLegacyDMSG DO BEGIN
+        RESET;
+        SETRANGE( "Order No.", QHistoryLineG.OrdrNr );
+        SETRANGE( "Document No.", QHistoryLineG.Faktnr );
+        SETRANGE( "License No.", QHistoryLineG.RegNr );
+        CASE TRUE OF
+          ISEMPTY:
+            ERROR( C_NoHeader, GETFILTERS );
+          COUNT = 1:
+            FINDFIRST;
+          ELSE
+            ERROR( C_MultipleHeaders, GETFILTERS );
+        END;
+      END;
+    END;
+
+    PROCEDURE SetLineNo@1101103002();
+    VAR
+      CustVehHistLineLegacyL@1101103000 : Record 5210223;
+    BEGIN
+      WITH CustVehHistLineLegacyL DO BEGIN
+        SETRANGE("Entry No.", CustVehHistHdrLegacyDMSG."Entry No.");
+      //  SETRANGE(VIN, CustVehHistHdrLegacyDMSG.VIN);
+      //  SETRANGE(, CustVehHistHdrLegacyDMSG."Order No.");
+      //  SETRANGE("Invoice No.", CustVehHistHdrLegacyDMSG."Invoice No.");
+        IF FINDLAST THEN
+          LineNoG := CustVehHistLineLegacyL."Line No." + 10000
+        ELSE
+          LineNoG := 10000;
+      END;
+    END;
+
+    PROCEDURE SetFields@1101103003();
+    VAR
+      ValueL@1101103001 : Text;
+      LastSpacePosL@1101103000 : Integer;
+    BEGIN
+      WITH CustVehHistLineLegacyG DO BEGIN
+      //  "Primary Key" := CustVehHistHdrLegacyDMSG."Primar,y Key";
+        "Entry No." := CustVehHistHdrLegacyDMSG."Entry No.";
+        VIN := CustVehHistHdrLegacyDMSG.VIN;
+      //  "Order No." := CustVehHistHdrLegacyDMSG."Order No.";
+      //  "Invoice No." := CustVehHistHdrLegacyDMSG."Invoice No.";
+        IF CustVehHistLineLegacyG."Line No." = 0 THEN
+          "Line No." := LineNoG;
+        IF (QHistoryLineG.LType = 'V') OR (QHistoryLineG.LType = 'D') THEN
+          BEGIN
+          Type := Type::Item;
+          "No." := QHistoryLineG.VareNrServNr;
+          Description := COPYSTR( QHistoryLineG.Tekst, 1, MAXSTRLEN( Description ));
+          IF EVALUATE( Quantity, CONVERTSTR(QHistoryLineG.FakAnt, '.', ',') ) THEN ;
+          IF EVALUATE( "Unit Price", CONVERTSTR(QHistoryLineG.Upris, '.', ',') ) THEN ;
+          Amount := 0;
+          "Amount Including VAT" := Quantity * "Unit Price";
+          END;
+        IF QHistoryLineG.LType = 'S' THEN
+          BEGIN
+          Type := Type::Labor;
+          "No." := QHistoryLineG.VareNrServNr;
+          Description := COPYSTR( QHistoryLineG.Tekst, 1, MAXSTRLEN( Description ));
+          IF EVALUATE( Quantity, CONVERTSTR(QHistoryLineG.FakAnt, '.', ',') ) THEN ;
+          IF EVALUATE( "Unit Price", CONVERTSTR(QHistoryLineG.Upris, '.', ',') ) THEN ;
+          Amount := 0;
+          "Amount Including VAT" := Quantity * "Unit Price";
+          END;
+        IF QHistoryLineG.LType = 'T' THEN
+          BEGIN
+          Type := Type::Text;
+      //    "No." := QHistoryLineG.VareNrServNr;
+          Description := COPYSTR( QHistoryLineG.Tekst, 1, MAXSTRLEN( Description ));
+      //    IF EVALUATE( Quantity, QHistoryLineG.FakAnt ) THEN ;
+      //    IF EVALUATE( "Unit Price (LCY)", QHistoryLineG.Upris ) THEN ;
+          END;
+        //"Description 2"
+        //"Unit of Measure"
+
+        //"Unit Cost (LCY)" :=
+
+      END;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

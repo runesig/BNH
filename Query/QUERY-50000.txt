@@ -1,0 +1,128 @@
+OBJECT Query 50000 Leveringsliste
+{
+  OBJECT-PROPERTIES
+  {
+    Date=14.12.17;
+    Time=11:12:53;
+    Modified=Yes;
+    Version List=BNH;
+  }
+  PROPERTIES
+  {
+  }
+  ELEMENTS
+  {
+    { 1101103000;;DataItem;                  ;
+               DataItemTable=Table36;
+               DataItemTableFilter=Document Type=CONST(Order),
+                                   Order Type=CONST(Vehicle Sales & Purchases) }
+
+    { 1101103005;1;Column;                   ;
+               DataSource=Location Code }
+
+    { 1101103015;1;Column;Salgsordre         ;
+               DataSource=No. }
+
+    { 1101103001;1;Column;Kundenr            ;
+               DataSource=Sell-to Customer No. }
+
+    { 1101103002;1;Column;Kundenavn          ;
+               DataSource=Sell-to Customer Name }
+
+    { 1101103003;1;Column;Leveringsdato      ;
+               DataSource=Date 2 }
+
+    { 1101103004;1;Column;Registreringsdato  ;
+               DataSource=Date 1 }
+
+    { 1101103006;1;Column;Selgerkode         ;
+               DataSource=Salesperson Code }
+
+    { 1101103019;1;DataItem;                 ;
+               DataItemTable=Table13;
+               DataItemLink=Code=Sales_Header."Salesperson Code" }
+
+    { 1101103020;2;Column;Selger             ;
+               DataSource=Name }
+
+    { 1101103007;2;DataItem;                 ;
+               DataItemTable=Table37;
+               DataItemTableFilter=Item Type=CONST(Vehicle);
+               DataItemLink=Document Type=Sales_Header."Document Type",
+                            Document No.=Sales_Header."No." }
+
+    { 1101103008;3;Column;                   ;
+               DataSource=Description }
+
+    { 1101103009;3;DataItem;                 ;
+               DataItemTable=Table5025400;
+               DataItemLink=VIN=Sales_Line.VIN }
+
+    { 1101103013;4;Column;                   ;
+               DataSource=VIN }
+
+    { 1101103011;4;Column;                   ;
+               DataSource=License No. }
+
+    { 1101103010;4;Column;Import›rnr         ;
+               DataSource=Text 1 }
+
+    { 1101103012;4;Column;                   ;
+               DataSource=Extra Code 1 }
+
+    { 1101103014;4;Column;                   ;
+               DataSource=Extra Code 2 }
+
+    { 1101103026;4;Column;                   ;
+               DataSource=Purchase Receipt Date }
+
+    { 1101103016;4;DataItem;                 ;
+               DataItemTable=Table5025624;
+               DataItemLink=Extra Code 1=Sales_Header."No." }
+
+    { 1101103017;5;Column;                   ;
+               DataSource=No. }
+
+    { 1101103021;5;Column;                   ;
+               DataSource=Pickup Date }
+
+    { 1101103018;5;Column;                   ;
+               DataSource=Status Code }
+
+    { 1101103022;5;Column;                   ;
+               DataSource=Work Status Code }
+
+    { 1101103023;5;DataItem;                 ;
+               DataItemTable=Table5025636;
+               DataItemLink=Extra Code 1=Sales_Header."No." }
+
+    { 1101103024;6;Column;Arkivert_ordre     ;
+               DataSource=No. }
+
+    { 1101103025;6;Column;                   ;
+               DataSource=Reason for Archiving }
+
+    { 1101103027;6;DataItem;                 ;
+               DataItemTable=Table39;
+               DataItemLink=Document Type=Sales_Line."From Purch. Document Type",
+                            Document No.=Sales_Line."From Purch. Document No.",
+                            Line No.=Sales_Line."From Purch. Line No." }
+
+    { 1101103028;7;Column;                   ;
+               DataSource=Document No. }
+
+    { 1101103029;7;Column;                   ;
+               DataSource=Expected Receipt Date }
+
+    { 1101103030;7;Column;                   ;
+               DataSource=Vendor Order No. }
+
+  }
+  CODE
+  {
+
+    BEGIN
+    END.
+  }
+}
+

@@ -1,0 +1,58 @@
+OBJECT Table 5231102 BB Bevegelser 2016
+{
+  OBJECT-PROPERTIES
+  {
+    Date=20.11.17;
+    Time=10:50:18;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+  }
+  FIELDS
+  {
+    { 1   ;   ;Konto               ;Code10         }
+    { 2   ;   ;Periode             ;Integer        }
+    { 3   ;   ;Filial              ;Code10         }
+    { 4   ;   ;Avdeling            ;Code10         }
+    { 5   ;   ;Make Code           ;Code10         }
+    { 10  ;   ;Status              ;Option        ;OptionCaptionML=[ENU=" ,Ignore,OK,Error";
+                                                                    NOR=" ,Ignorer,OK,Feil"];
+                                                   OptionString=[ ,Ignore,OK,Error] }
+    { 11  ;   ;Datetime            ;DateTime      ;CaptionML=[ENU=Time;
+                                                              NOR=Tidspunkt] }
+    { 12  ;   ;Update message      ;Text250       ;CaptionML=[ENU=Message;
+                                                              NOR=Melding] }
+    { 13  ;   ;No.                 ;Code20        ;CaptionML=[ENU=Item No.;
+                                                              NOR=Varenr.] }
+    { 20  ;   ;Bel›p               ;Decimal       ;FieldClass=FlowField;
+                                                   CalcFormula=Sum("BB Finans".Bel›p WHERE (G/L Account No.=FIELD(Konto),
+                                                                                            M†ned=FIELD(Periode),
+                                                                                            Branch Code=FIELD(Filial),
+                                                                                            Department Code=FIELD(Avdeling),
+                                                                                            Make Code=FIELD(Make Code)));
+                                                   Description=BNH;
+                                                   Editable=No }
+    { 25  ;   ;Opprinnelig system  ;Option        ;OptionCaptionML=[ENU=Dracar,Engine;
+                                                                    NOR=Dracar,Engine];
+                                                   OptionString=Dracar,Engine }
+    { 100 ;   ;Incadea konto       ;Code10        ;FieldClass=FlowField;
+                                                   CalcFormula=Lookup("BB Konvertering kontonr."."Incadea kontonr." WHERE (BB kontonr.=FIELD(Konto)));
+                                                   Editable=No }
+  }
+  KEYS
+  {
+    {    ;Konto,Periode,Filial,Avdeling,Make Code ;Clustered=Yes }
+  }
+  FIELDGROUPS
+  {
+  }
+  CODE
+  {
+
+    BEGIN
+    END.
+  }
+}
+

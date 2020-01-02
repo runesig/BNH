@@ -1,0 +1,349 @@
+OBJECT Codeunit 5231139 Import Lagerbiler
+{
+  OBJECT-PROPERTIES
+  {
+    Date=30.01.18;
+    Time=08:51:34;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    OnRun=VAR
+            LoggOrderImportL@1101103001 : Record 1057969;
+          BEGIN
+
+            IF UserSessiong.GetLocation() <> '01' THEN
+              ERROR(C_INC001, UserSessiong.GetLocation());
+
+            LoggOrderImportL.SETRANGE("User ID", USERID);
+            IF LoggOrderImportL.FINDFIRST THEN
+              BEGIN
+              LoggOrderImportL.DELETEALL;
+              COMMIT;
+              END;
+
+            IF UPLOAD('Bestillingsfil', '', '', '', ToFile) THEN;
+            ProcessFile(ToFile, '');
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      diaG@1101103029 : Dialog;
+      QtyReadG@1101103030 : Integer;
+      UserSessiong@1101103028 : Record 5028686;
+      ChassisnrG@1101103000 : Code[20];
+      ModellG@1101103001 : Text[50];
+      LokasjonG@1101103002 : Code[10];
+      "Kjõp
+
+    G"@1101103003 : Code[15];
+      KjopsdatoG@1101103004 : Code[15];
+      OmkG@1101103005 : Code[15];
+      TotalKostprisG@1101103006 : Code[15];
+      ToFile@1101103025 : Text[250];
+      NewOrder@1101103026 : Integer;
+      UpdateOrder@1101103027 : Integer;
+      C_INC001@1101103031 : TextConst 'ENU=Import must be run from location 01 \ You are now logged in to location %1;NOR=Importen mÜ kjõres fra lokasjon 01\Du er nÜ pÜlogget lokasjon %1';
+      C_INC002@1101103032 : TextConst 'ENU=Created %1 new orders, \ Updated %2 orders \ Skipped %3 order;NOR=Opprettet %1 nye bestillinger,\Oppdatert %2 bestillinger \ Hoppet over %3 bestillinger';
+      C_INC003@1101103033 : TextConst 'ENU=Vehicles with chassis number %1 have already been purchased, import was canceled.;NOR=Kjõretõy med chassisnummer %1 er allerede kjõpt inn,  importen avbrytes.';
+      C_INC004@1101103034 : TextConst 'ENU=Several purchase orders with same "Importõrnr." (%1);NOR=Flere besatillinger med samme "Importõrnr." (%1)';
+      C_INC005@1101103035 : TextConst 'ENU=Purchase order %1 does not exist!;NOR=Bestilling %1 eksisterer ikke!';
+      C_INC006@1101103036 : TextConst 'ENU=The model code on the line %3 is %1 and new model code is %2./ Must be changed manually.;NOR=Modellkoden pÜ linjen er %1, og ny modellkode er %2./MÜ endres manuelt.';
+      C_INC007@1101103037 : TextConst 'ENU=Chassisnumber has been changed from %1 to %2 for purchase order %3\Confirm update on order / order;NOR=Chassisnummer har blitt endret fra %1 til %2 for bestilling %3\Bekreft oppdatering pÜ bestilling / ordre';
+      C_INC008@1101103038 : TextConst 'ENU=The import is canceled.;NOR=Importen er avbrutt.';
+      C_INC009@1101103039 : TextConst 'ENU=NISSAN;NOR=NISSAN';
+      C_INC010@1101103040 : TextConst 'ENU=Purchase order %1 has changed color code from %2 to %3\Shall the purchase order be updated with new color code?;MNN=Bestilling %1 har endret fargekode fra %2 til %3\Skal bestillingen oppdateres med ny fargekode?';
+      C_INC011@1101103041 : TextConst 'ENU=Purchase order %1 has changed upholstery from %2 to %3\Shall the purchase order be updated with new Upholstery?;NOR=Bestilling %1 har endret interiõr fra %2 til %3\Skal bestillingen oppdateres med nytt interiõr?';
+      C_INC012@1101103042 : TextConst 'ENU=Model code %1 does not exist, must be created!;NOR=Modellkode %1 finnes ikke, mÜ opprettes!';
+      SkippedOrder@1101103043 : Integer;
+      C_INC013@1101103044 : TextConst 'ENU=New purchase order created;NOR=Ny bestilling opprettet';
+      C_INC014@1101103045 : TextConst 'ENU=Expected purchase date changed from %1 to %2;NOR=Forventet mottaksdato endret fra %1 til %2';
+      C_INC015@1101103046 : TextConst 'ENU="""Forhandler"" is cahneged from %1 to %2";NOR="""Forhandler"" er endret fra %1 til %2"';
+      C_INC016@1101103047 : TextConst 'ENU=VIN is creared / changed. Old VIN: %1, new VIN: %2;NOR=Chassisnr. er opprettet / endtret. Gammelt chassisnr.: %1, nytt chassisnr: %2';
+      C_INC017@1101103048 : TextConst 'ENU=Color code has chenged from %1 to %2;NOR=Fargekode er endret fra %1 til %2';
+      C_INC018@1101103049 : TextConst 'ENU=Upholstery code has chenged from %1 to %2;NOR=Interiõrkode er endret fra %1 til %2';
+      C_INC019@1101103050 : TextConst 'ENU="Modelcode cannot be ""blank"" when creating new order, importõrnr. %1 ";NOR=Modellkode kan ikke vëre "blank" for ny ordre, importõrnr. %1';
+
+    PROCEDURE ProcessFile@1101103001(FilenameP@1101103000 : Text;ArkP@1101103003 : Text) : Text;
+    VAR
+      ExcelBufferL@1101103010 : TEMPORARY Record 370;
+      NoL@1101103001 : Integer;
+      FieldNoL@1101103006 : Text;
+      FieldNameL@1101103005 : Text;
+      RowL@1101103002 : Integer;
+    BEGIN
+      WITH ExcelBufferL DO BEGIN
+        ArkP := ExcelBufferL.SelectSheetsName(FilenameP);
+        OpenBook( FilenameP, ArkP );
+        ReadSheet;
+      END;
+      OpenDialog();
+      WITH ExcelBufferL DO BEGIN
+        FINDSET;
+        REPEAT
+        IF ExcelBufferL."Row No." > 1 THEN
+          BEGIN
+          IF (RowL <> 0) AND (RowL <> ExcelBufferL."Row No.") THEN
+            //ProcessPurchaceLine();
+            UpdatePurchaseDate();
+          RowL := ExcelBufferL."Row No.";
+          CASE ExcelBufferL.xlColID OF
+            'A' :
+              BEGIN
+              ClearValue();
+              ChassisnrG        := ExcelBufferL."Cell Value as Text";
+              QtyReadG += 1;
+              END;
+            'B' :
+              ModellG           := COPYSTR(ExcelBufferL."Cell Value as Text", 1, 20);
+            'C' :
+              LokasjonG         := ExcelBufferL."Cell Value as Text";
+            'E' :
+              "Kjõp
+
+    G"           := ExcelBufferL."Cell Value as Text";
+            'D' :
+              KjopsdatoG      := ExcelBufferL."Cell Value as Text";
+            'F' :
+              OmkG              := ExcelBufferL."Cell Value as Text";
+            'G' :
+              TotalKostprisG    := ExcelBufferL."Cell Value as Text";
+          END;
+        END;
+      //  IF STRLEN(KjopsdatoG) > 4 THEN
+          UpdateDialog(ChassisnrG);
+        UNTIL NEXT = 0;
+        //UNTIL RowL = 2;
+
+      //IF STRLEN(KjopsdatoG) > 4 THEN
+          //ProcessPurchaceLine();
+          UpdatePurchaseDate();
+      END;
+      //MESSAGE(C_INC002, NewOrder, UpdateOrder, SkippedOrder);
+      CloseDialog();
+
+      //PAGE.RUN(PAGE::"Logg Order Import");
+    END;
+
+    PROCEDURE ProcessPurchaceLine@1101103000();
+    VAR
+      PurchaseLineL@1101103000 : Record 39;
+      VehicleL@1101103001 : Record 5025400;
+      LineL@1101103002 : Integer;
+      OrdreNoL@1101103003 : Code[10];
+    BEGIN
+      ChassisnrG := DELCHR(ChassisnrG, '<>');
+
+      CASE LokasjonG OF
+        'BUSKERUD'  :
+          OrdreNoL := 'KKO02188';
+        'FOLLO'    :
+          OrdreNoL := '';
+        'LILLESTùM'    :
+          OrdreNoL := '';
+        'NESBRU'    :
+          OrdreNoL := '';
+        'OSLO'    :
+          OrdreNoL := '';
+        'RUD'    :
+          OrdreNoL := '';
+        'RùYKEN'    :
+          OrdreNoL := '';
+       END;
+
+      IF OrdreNoL = '' THEN
+        ERROR('Mangler ordrenr %1', ChassisnrG);
+
+      PurchaseLineL.SETRANGE("Document Type", PurchaseLineL."Document Type"::Order);
+      PurchaseLineL.SETRANGE("Document No.", OrdreNoL);
+      IF PurchaseLineL.FINDLAST THEN
+        LineL := PurchaseLineL."Line No.";
+
+      PurchaseLineL.RESET;
+
+      IF VehicleL.GET(ChassisnrG) THEN
+        IF VehicleL."Vehicle Status" = VehicleL."Vehicle Status"::"Used Vehicle" THEN
+          BEGIN
+        //  VehicleL."Purchase Invoice Date" := Str2Date(KjopsdatoG, 4);
+        //  VehicleL.MODIFY;
+          END ELSE BEGIN
+          PurchaseLineL.INIT;
+          CheckUnit(VehicleL."Model No.");
+          PurchaseLineL.VALIDATE("Document Type", PurchaseLineL."Document Type"::Order);
+          PurchaseLineL.VALIDATE("Document No.", OrdreNoL);
+          PurchaseLineL.VALIDATE("Line No.", LineL + 10000);
+          PurchaseLineL.INSERT(TRUE);
+          PurchaseLineL.VALIDATE(Type, PurchaseLineL.Type::Item);
+          PurchaseLineL.VALIDATE("Item Type", PurchaseLineL."Item Type"::Vehicle);
+          PurchaseLineL.VALIDATE(VIN, ChassisnrG);
+          EVALUATE(PurchaseLineL."Direct Unit Cost", TotalKostprisG);
+          PurchaseLineL.VALIDATE(Quantity);
+       //   PurchaseLineL.VALIDATE("Gen. Prod. Posting Group", 'BIL-EL-IMP');
+          //IF EVALUATE( Quantity, CONVERTSTR(QHistoryLineG.FakAnt, '.', ',') ) THEN ;
+
+          PurchaseLineL.MODIFY(TRUE);
+          END;
+
+      {
+      PurchaseHeaderL.SETRANGE("Vendor Order No.", Importornr);
+      IF PurchaseHeaderL.FINDFIRST THEN
+        BEGIN
+        IF PurchaseHeaderL.COUNT <>1 THEN
+          ERROR(C_INC004, Importornr);
+        IF (Chassis = '') OR ((Chassis <> '') AND (NOT VehicleL.GET(Chassis))) THEN
+          BEGIN
+          UpdateOrder += 1;
+          MakeG := PurchaseHeaderL."Shortcut Dimension 2 Code";
+          OrderHeader(PurchaseHeaderL."No.");
+          END ELSE BEGIN
+          SkippedOrder += 1 ;
+          END;
+        END ELSE BEGIN
+        IF Chassis <> '' THEN
+          IF VehicleL.GET(Chassis) THEN
+            ERROR(C_INC003, Chassis);
+        IF Modellkode <> '' THEN
+          BEGIN
+          MakeG := FindMake();
+          OrderHeader('');
+          NewOrder += 1;
+          END ELSE  BEGIN
+          LogImport(0,PurchaseHeaderL."Document Type", '',STRSUBSTNO(C_INC019, Importornr));
+          END;
+        END;
+       }
+    END;
+
+    PROCEDURE CheckUnit@1101103002(ModelP@1101103000 : Code[20]);
+    VAR
+      ItemUnitofMeasureL@1101103001 : Record 5404;
+    BEGIN
+      IF NOT ItemUnitofMeasureL.GET(ModelP, 'STK') THEN
+        BEGIN
+        ItemUnitofMeasureL.INIT;
+        ItemUnitofMeasureL.VALIDATE("Item No.", ModelP);
+        ItemUnitofMeasureL.VALIDATE(Code, 'STK');
+        ItemUnitofMeasureL.VALIDATE("Qty. per Unit of Measure", 1);
+        ItemUnitofMeasureL.INSERT(TRUE);
+        END;
+    END;
+
+    PROCEDURE UpdatePurchaseDate@1101103003();
+    VAR
+      VehicleL@1101103000 : Record 5025400;
+      BookNoL@1101103001 : Record 5025439;
+    BEGIN
+      IF VehicleL.GET(ChassisnrG) THEN
+        IF VehicleL."Vehicle Status" = VehicleL."Vehicle Status"::"Used Vehicle" THEN
+          BEGIN
+          BookNoL.SETRANGE(VIN, VehicleL.VIN);
+          IF BookNoL.FINDFIRST THEN
+            REPEAT
+            IF BookNoL."Posting Date" = 0D THEN //251117D THEN
+              BEGIN
+              BookNoL."Posting Date" := 251117D; //Str2Date(KjopsdatoG, 4);
+              VehicleL."Purchase Invoice Date" := 251117D; //Str2Date(KjopsdatoG, 4);
+              BookNoL.MODIFY;
+              VehicleL.MODIFY;
+              END;
+            UNTIL BookNoL.NEXT = 0;
+          END;
+    END;
+
+    PROCEDURE ___@1101103013();
+    BEGIN
+    END;
+
+    PROCEDURE ClearValue@1101103004();
+    BEGIN
+
+      CLEAR(ChassisnrG);
+      CLEAR(ModellG);
+      CLEAR(LokasjonG);
+      CLEAR("Kjõp
+
+    G");
+      CLEAR(KjopsdatoG);
+      CLEAR(OmkG);
+      CLEAR(TotalKostprisG);
+    END;
+
+    PROCEDURE Str2Date@1117700019(InnDato@1117700000 : Text[30];InnFormat@1117700001 : Integer) UtDato : Date;
+    VAR
+      Dag@1117700002 : Integer;
+      Mnd@1117700003 : Integer;
+      Aar@1117700004 : Integer;
+    BEGIN
+      IF (InnDato = '') OR (InnDato = '00000000') THEN EXIT(0D);
+      CASE InnFormat OF
+        0: // DD-MM-YYYY
+          BEGIN
+            EVALUATE(Dag, COPYSTR(InnDato,1,2));
+            EVALUATE(Mnd, COPYSTR(InnDato,4,2));
+            EVALUATE(Aar, COPYSTR(InnDato,7,4));
+            UtDato := DMY2DATE(Dag, Mnd, Aar);
+          END;
+        1: // MM-DD-YYYY
+          BEGIN
+            EVALUATE(Dag, COPYSTR(InnDato,4,2));
+            EVALUATE(Mnd, COPYSTR(InnDato,1,2));
+            EVALUATE(Aar, COPYSTR(InnDato,7,4));
+            UtDato := DMY2DATE(Dag, Mnd, Aar);
+          END;
+        2: // DDMMYY
+          BEGIN
+            EVALUATE(Dag, COPYSTR(InnDato,1,2));
+            EVALUATE(Mnd, COPYSTR(InnDato,3,2));
+            EVALUATE(Aar, COPYSTR(InnDato,5,2));
+            UtDato := DMY2DATE(Dag, Mnd, Aar+2000);
+          END;
+        3: // YYYYMMDD
+          BEGIN
+            EVALUATE(Dag, COPYSTR(InnDato,7,2));
+            EVALUATE(Mnd, COPYSTR(InnDato,5,2));
+            EVALUATE(Aar, COPYSTR(InnDato,1,4));
+            UtDato := DMY2DATE(Dag, Mnd, Aar);
+          END;
+        4: // DD-MM-YY
+          BEGIN
+            EVALUATE(Dag, COPYSTR(InnDato,1,2));
+            EVALUATE(Mnd, COPYSTR(InnDato,4,2));
+            EVALUATE(Aar, COPYSTR(InnDato,7,2));
+            UtDato := DMY2DATE(Dag, Mnd, Aar+2000);
+          END;
+
+      END;
+    END;
+
+    PROCEDURE OpenDialog@1101103036();
+    BEGIN
+
+
+      diaG.OPEN('Prosess:   ' + '##1#############################################' + '\' +
+                'Rad    :   ' + '##2################' + '\');
+    END;
+
+    PROCEDURE UpdateDialog@1101103026(txtStatus@1101103000 : Text[100]);
+    BEGIN
+
+      diaG.UPDATE(1, txtStatus);
+      diaG.UPDATE(2, QtyReadG);
+    END;
+
+    PROCEDURE CloseDialog@1101103037();
+    BEGIN
+
+      diaG.CLOSE();
+    END;
+
+    BEGIN
+    {
+      Import bilbestillinger fra Nissan
+    }
+    END.
+  }
+}
+

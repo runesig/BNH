@@ -1,0 +1,42 @@
+OBJECT Table 5231100 BB Konvertering kontonr.
+{
+  OBJECT-PROPERTIES
+  {
+    Date=21.10.17;
+    Time=14:32:45;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+  }
+  FIELDS
+  {
+    { 1   ;   ;BB kontonr.         ;Code20         }
+    { 10  ;   ;BB kontobeskrivelse ;Text50         }
+    { 20  ;   ;Incadea kontonr.    ;Code20        ;TableRelation="G/L Account".No. WHERE (Account Type=FILTER(Posting)) }
+    { 30  ;   ;Incade kontobeskrivelse;Text50     ;FieldClass=FlowField;
+                                                   CalcFormula=Lookup("G/L Account".Name WHERE (No.=FIELD(Incadea kontonr.)));
+                                                   Editable=No }
+    { 40  ;   ;Incadea merkekode   ;Code10        ;TableRelation=Make.Code }
+    { 50  ;   ;Lokasjon            ;Code10        ;TableRelation=Location.Code }
+    { 500 ;   ;Totalbel›p          ;Decimal       ;FieldClass=FlowField;
+                                                   CalcFormula=Sum("BB Finans".Bel›p WHERE (G/L Account No.=FIELD(BB kontonr.))) }
+    { 510 ;   ;Antall poster       ;Integer       ;FieldClass=FlowField;
+                                                   CalcFormula=Count("BB Finans" WHERE (G/L Account No.=FIELD(BB kontonr.))) }
+  }
+  KEYS
+  {
+    {    ;BB kontonr.                             ;Clustered=Yes }
+  }
+  FIELDGROUPS
+  {
+  }
+  CODE
+  {
+
+    BEGIN
+    END.
+  }
+}
+

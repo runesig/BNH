@@ -1,0 +1,278 @@
+OBJECT XMLport 5231079 Portrait Dialog Address Export
+{
+  OBJECT-PROPERTIES
+  {
+    Date=30.01.18;
+    Time=10:45:15;
+    Modified=Yes;
+    Version List=BNH Portrait;
+  }
+  PROPERTIES
+  {
+    CaptionML=ENU=Portrait Dialog Address Export;
+    Direction=Export;
+    TextEncoding=WINDOWS;
+    Format=Variable Text;
+    FieldDelimiter=<None>;
+    FieldSeparator=<TAB>;
+    TableSeparator=<NewLine>;
+    UseRequestPage=Yes;
+  }
+  ELEMENTS
+  {
+    { [{C19D763B-C1F1-473D-8D3E-3640AD129D95}];  ;root                ;Element ;Text    ;
+                                                  MinOccurs=Zero }
+
+    { [{2F33B595-F471-43E5-8833-FC6437A88452}];1 ;Header              ;Element ;Table   ;
+                                                  SourceTable=Table98 }
+
+    { [{E3A437D4-248C-4017-BA05-8D46CD656A47}];2 ;AddressNoHeader     ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 AddressNoHeader := 'Record_Id';
+                                                                               END;
+                                                                                }
+
+    { [{33182F4E-7ACC-470A-915D-550E03C911D0}];2 ;StatusActiveHeader  ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 StatusActiveHeader := 'Status_Id';
+                                                                               END;
+                                                                                }
+
+    { [{12B243CC-F8B0-4EAC-8BFB-812F215ED0D4}];2 ;TypeIdHeader        ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 TypeIdHeader := 'Type_Id';
+                                                                               END;
+                                                                                }
+
+    { [{D4DCC8BC-0BEA-48FC-AF81-92847B470E72}];2 ;FirstNameHeader     ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 FirstNameHeader := 'Firstname';
+                                                                               END;
+                                                                                }
+
+    { [{C53770A5-2C8C-43F6-A570-ECAB0132D05D}];2 ;LastNameHeader      ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 LastNameHeader := 'Lastname';
+                                                                               END;
+                                                                                }
+
+    { [{BFA4185C-E435-479A-AE43-B0541FC357B1}];2 ;GenderHeader        ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 GenderHeader := 'Gender';
+                                                                               END;
+                                                                                }
+
+    { [{C6B55A23-91B3-43EB-98FE-7C6A260CCCE2}];2 ;EMailHeader         ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 EMailHeader := 'Email';
+                                                                               END;
+                                                                                }
+
+    { [{E580149B-1717-4DE6-9C94-2A07F6F9CB48}];2 ;SSNHeader           ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 SSNHeader := 'SSN';
+                                                                               END;
+                                                                                }
+
+    { [{03BB8A60-15E5-49F7-9383-BDAF8EE7B3ED}];2 ;MobileHeader        ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 MobileHeader := 'Phone_Mobile';
+                                                                               END;
+                                                                                }
+
+    { [{B0682235-37F1-4F47-A374-C1EABA2A8BA5}];2 ;PhoneHeader         ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 PhoneHeader := 'Phone_Home';
+                                                                               END;
+                                                                                }
+
+    { [{4565668B-7C9E-4067-8B4F-201A9124759B}];2 ;DateOfBirthHeader   ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 DateOfBirthHeader := 'DOB';
+                                                                               END;
+                                                                                }
+
+    { [{7656EE87-ED94-4A0F-BD2B-5B743203AE8F}];2 ;AddressHeader       ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 AddressHeader := 'Address';
+                                                                               END;
+                                                                                }
+
+    { [{997B8D06-E8CA-47D3-B194-E5C3DDDEFF6B}];2 ;Address2Header      ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 Address2Header := 'Co_Address';
+                                                                               END;
+                                                                                }
+
+    { [{49CF5103-80B9-4658-83DE-185594902D1F}];2 ;ZipCodeHeader       ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 ZipCodeHeader := 'Post_Code';
+                                                                               END;
+                                                                                }
+
+    { [{C89C08C1-0487-4438-9FEF-D5B845DDE8B7}];2 ;CityHeader          ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 CityHeader := 'City';
+                                                                               END;
+                                                                                }
+
+    { [{D1D79DD1-51A3-4E70-808A-3E1B817148DF}];2 ;CountryHeader       ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 CountryHeader := 'Country';
+                                                                               END;
+                                                                                }
+
+    { [{75E1A15B-7192-46B7-81E9-B2751EEC25EB}];2 ;RecordOperationHeader;Element;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 RecordOperationHeader := 'Record_Operation';
+                                                                               END;
+                                                                                }
+
+    { [{125F3B85-5B53-4F67-9434-589A04D6DCA1}];1 ;AddressTable        ;Element ;Table   ;
+                                                  SourceTable=Table5029111;
+                                                  SourceTableView=SORTING(Field44)
+                                                                  ORDER(Ascending);
+                                                  AutoSave=No;
+                                                  Export::OnAfterGetRecord=VAR
+                                                                             TabL@1101103000 : Integer;
+                                                                           BEGIN
+                                                                           END;
+                                                                            }
+
+    { [{6F6AE99F-6389-4B2C-9E36-F1467E75DF18}];2 ;AddressNo           ;Element ;Field   ;
+                                                  DataType=Integer;
+                                                  SourceField=Address::Address No.;
+                                                  Width=7 }
+
+    { [{B8F0CCD0-271D-43A2-B8B5-B01AF23C7A92}];2 ;StatusActive        ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 //todo - logic for inactive
+                                                                                 StatusActive := '1';
+                                                                               END;
+                                                                                }
+
+    { [{F56BA13D-0D75-476F-B3D7-77B2E7AB8F77}];2 ;TypeId              ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 //todo - logic for prospect
+                                                                                 TypeId := '1';
+                                                                               END;
+                                                                                }
+
+    { [{5F2978A6-7DD1-4E82-99DB-A3D6BD3D170D}];2 ;FirstName           ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=Address::First Name;
+                                                  Width=35 }
+
+    { [{5E1BB788-798F-4825-A602-7858FBFEEB3A}];2 ;LastName            ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=Address::Last Name;
+                                                  Width=35 }
+
+    { [{8FDCCC3E-43D1-4383-B47D-394C8388B6CA}];2 ;Gender              ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 CASE Address."Customer Type" OF
+                                                                                   Address."Customer Type"::Male:
+                                                                                     Gender := 'M';
+                                                                                   Address."Customer Type"::Female:
+                                                                                     Gender := 'F';
+                                                                                   Address."Customer Type"::Business:
+                                                                                     Gender := 'U';
+                                                                                 END;
+                                                                               END;
+                                                                                }
+
+    { [{AA6DA8F2-78D2-4BAA-AF5B-A986C2B64BF2}];2 ;EMail               ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=Address::E-Mail }
+
+    { [{CF7AA63A-684A-4012-A090-3DB0C69D587C}];2 ;SSN                 ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 SSN := '';
+                                                                               END;
+                                                                                }
+
+    { [{EFE91E3F-874E-4DE4-902C-2330DF259A6F}];2 ;MobilePhoneNo       ;Element ;Text    ;
+                                                  DataType=Text;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 MobilePhoneNo := COPYSTR( Address."Mobile Phone No.", 1, 20 );
+                                                                               END;
+                                                                                }
+
+    { [{F75E4DBF-7A9A-4613-BC84-526CE5C30DB3}];2 ;PhoneNo             ;Element ;Text    ;
+                                                  DataType=Text;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 PhoneNo := COPYSTR( Address."Phone No.", 1, 20 );
+                                                                               END;
+                                                                                }
+
+    { [{A4FDEA0B-59BC-44B8-B727-C76969E767A2}];2 ;DateOfBirth         ;Element ;Text    ;
+                                                  DataType=Date;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 DateOfBirth := FORMAT(Address."Date of Birth", 0, '<Day,2>.<Month,2>.<Year4>');
+                                                                               END;
+                                                                                }
+
+    { [{FCD952B4-367C-4695-A052-3798BB9E56EC}];2 ;Address             ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=Address::Address;
+                                                  Width=50 }
+
+    { [{A6F8C634-7369-46A9-82B9-3A12DD19C70E}];2 ;Address2            ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=Address::Address 2;
+                                                  Width=50 }
+
+    { [{E314EF48-6846-45C8-A218-206E205F6EA2}];2 ;ZipCode             ;Element ;Field   ;
+                                                  DataType=Code;
+                                                  SourceField=Address::Post Code;
+                                                  Width=20 }
+
+    { [{122E63DE-A2BF-4677-AA38-0E23D516DA21}];2 ;City                ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=Address::City;
+                                                  Width=30 }
+
+    { [{C266086B-1451-4636-965A-A564A08DD0DC}];2 ;Country             ;Element ;Field   ;
+                                                  DataType=Code;
+                                                  SourceField=Address::Country Code }
+
+    { [{49F61B04-0FC6-424A-A73D-4CD84CEDB979}];2 ;RecordOperation     ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 //todo - logic for I = Insert, U = Update and D = Delete
+                                                                                 RecordOperation := 'U';
+                                                                               END;
+                                                                                }
+
+  }
+  EVENTS
+  {
+  }
+  REQUESTPAGE
+  {
+    PROPERTIES
+    {
+    }
+    CONTROLS
+    {
+    }
+  }
+  CODE
+  {
+    VAR
+      C_NoData@1101103000 : TextConst 'ENU=" ";NOR=" "';
+      ContactG@1101103001 : Record 5050;
+      DataPrivacyG@1101103002 : Record 5060972;
+
+    BEGIN
+    {
+      +----------------------------------------------+
+      | Copyright ¸ 2017   incadea.dms               |
+      +----------------------------------------------+
+      No.   Version Date      ID    Remark
+      ------------------------------------------------
+                    01.11.17  DHO   Initial Version
+    }
+    END.
+  }
+}
+

@@ -1,0 +1,293 @@
+OBJECT XMLport 5231080 Portrait Dialog Veh. Export
+{
+  OBJECT-PROPERTIES
+  {
+    Date=24.05.18;
+    Time=11:10:27;
+    Modified=Yes;
+    Version List=BNH Portrait;
+  }
+  PROPERTIES
+  {
+    CaptionML=ENU=Portrait Dialog Veh. Export;
+    Direction=Export;
+    TextEncoding=WINDOWS;
+    Format=Variable Text;
+    FieldDelimiter=<None>;
+    FieldSeparator=<TAB>;
+    TableSeparator=<NewLine>;
+    UseRequestPage=Yes;
+  }
+  ELEMENTS
+  {
+    { [{C19D763B-C1F1-473D-8D3E-3640AD129D95}];  ;root                ;Element ;Text    ;
+                                                  MinOccurs=Zero }
+
+    { [{8AEA3E17-B73A-4A87-9649-BCB9509D0902}];1 ;Header              ;Element ;Table   ;
+                                                  SourceTable=Table98 }
+
+    { [{B5270838-3293-4EB9-8C0B-25848AE75AB6}];2 ;AddressNoHeader     ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 AddressNoHeader := 'Record_Id';
+                                                                               END;
+                                                                                }
+
+    { [{68EC5ECE-3E00-457A-AD81-FB7230CB90A7}];2 ;OwnerNoHeader       ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 OwnerNoHeader := 'Owner_Id';
+                                                                               END;
+                                                                                }
+
+    { [{1D83AA24-AC1B-4052-94F1-9F43BE105F13}];2 ;VinHeader           ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 VinHeader := 'VIN';
+                                                                               END;
+                                                                                }
+
+    { [{3D3BC159-A2AA-47AC-9CA9-319D2A085CED}];2 ;MakeHeader          ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 MakeHeader := 'Make_Code';
+                                                                               END;
+                                                                                }
+
+    { [{CDEBADC4-FD67-4964-BA7A-F87EED800C1B}];2 ;ModelHeader         ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 ModelHeader := 'Model';
+                                                                               END;
+                                                                                }
+
+    { [{AFFC7B56-78A7-4E99-A773-7AE6AFFF8A97}];2 ;ModelYearHeader     ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 ModelYearHeader := 'Model_Year';
+                                                                               END;
+                                                                                }
+
+    { [{23DFC548-B03A-4E6F-BECB-CD7C1DD8212E}];2 ;ColorHeader         ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 ColorHeader := 'Color_Description';
+                                                                               END;
+                                                                                }
+
+    { [{05C6064C-B49F-4722-9B4A-42D2B6961C7B}];2 ;LicensePlateHeader  ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 LicensePlateHeader := 'License_No';
+                                                                               END;
+                                                                                }
+
+    { [{679CDE0D-C60D-47FE-B8B7-77087C487601}];2 ;InitialRegistrationHeader;Element;Text;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 InitialRegistrationHeader := 'Initial_Registration';
+                                                                               END;
+                                                                                }
+
+    { [{04B7791A-C91A-46DF-9089-CF8092A99E37}];2 ;LastMaintenanceHeader;Element;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 LastMaintenanceHeader := 'Last_Maintenance';
+                                                                               END;
+                                                                                }
+
+    { [{A85C5AD9-2F69-40B9-8F85-B659DD322A88}];2 ;LastSalesInvoiceHeader;Element;Text   ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 LastSalesInvoiceHeader := 'Last_Veh_Sales_Inv';
+                                                                               END;
+                                                                                }
+
+    { [{EED0B42B-8C88-4C78-8EF9-0209FE11AEC6}];2 ;DeliveryDateHeader  ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 DeliveryDateHeader := 'Delivery_Date';
+                                                                               END;
+                                                                                }
+
+    { [{F49388BD-26BB-4CD3-A43A-5F3E6C29F75D}];2 ;MVRCodeHeader       ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 MVRCodeHeader := 'MVR_Code';
+                                                                               END;
+                                                                                }
+
+    { [{B15F7204-CCEB-4488-BB39-63E19BE3BBE7}];2 ;VehicleStatusHeader ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 VehicleStatusHeader := 'Vehicle_Status';
+                                                                               END;
+                                                                                }
+
+    { [{9E3E00F2-2EE7-4346-A25A-88059D6CF4D3}];2 ;RecordOperationHeader;Element;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 RecordOperationHeader := 'Record_Operation';
+                                                                               END;
+                                                                                }
+
+    { [{BDA1E1A0-2C7C-4002-978C-BB0C16F28DFE}];1 ;Vehicle             ;Element ;Table   ;
+                                                  SourceTable=Table5025400;
+                                                  SourceTableView=SORTING(Field5045650,Field2)
+                                                                  ORDER(Ascending);
+                                                  CalcFields=Field5025353;
+                                                  AutoSave=No;
+                                                  Export::OnAfterGetRecord=BEGIN
+                                                                             VehicleCustG.RESET;
+                                                                             VehicleCustG.SETRANGE(VIN, Vehicle.VIN);
+                                                                             VehicleCustG.SETRANGE(VehicleCustG.Type, VehicleCustG.Type::"Vehicle User");
+                                                                             IF VehicleCustG.FINDFIRST THEN BEGIN
+                                                                               //AddressNo stores the driver
+                                                                               AddressNo := FORMAT(GetAddressNo(VehicleCustG."Contact No."));
+                                                                               OwnerNo := FORMAT(GetAddressNo(Vehicle."Contact No."));
+                                                                             END ELSE BEGIN
+                                                                               //Vehicle User not spesified, assuming owner is the one driving
+                                                                               AddressNo := FORMAT(GetAddressNo(Vehicle."Contact No."));
+                                                                               OwnerNo := FORMAT(GetAddressNo(Vehicle."Contact No."));
+                                                                             END;
+
+                                                                             IF AddressNo = '0' THEN
+                                                                               currXMLport.SKIP;
+                                                                           END;
+                                                                            }
+
+    { [{8F5DD80B-8771-4AB7-B806-ECA2E1F2076D}];2 ;AddressNo           ;Element ;Text     }
+
+    { [{D3B31CA4-BD0B-4D8F-ABFA-3B7CABF60900}];2 ;OwnerNo             ;Element ;Text    ;
+                                                  DataType=Code }
+
+    { [{9A774C89-A648-4F5A-969E-FBFBCC6AF688}];2 ;VIN                 ;Element ;Field   ;
+                                                  DataType=Code;
+                                                  SourceField=Vehicle::VIN }
+
+    { [{821769E5-7304-48AC-9A3D-48B89BB864BD}];2 ;Make                ;Element ;Field   ;
+                                                  DataType=Code;
+                                                  SourceField=Vehicle::Make Code }
+
+    { [{044CB448-605C-479F-9C71-F0150B9D1DBF}];2 ;Model               ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=Vehicle::Model }
+
+    { [{A809DD31-58DE-4966-B053-B9E692B40439}];2 ;ModelYear           ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=Vehicle::Model Year }
+
+    { [{DFA3A448-C3C2-4119-AFB2-50B94626FFA6}];2 ;Color               ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=Vehicle::Color Description }
+
+    { [{AAED6972-990B-4C8A-9BA2-BD6F6E8E0820}];2 ;LicensePlate        ;Element ;Field   ;
+                                                  DataType=Code;
+                                                  SourceField=Vehicle::License No. }
+
+    { [{3EC906F4-52BE-4418-BB21-9E24C0A9E4E2}];2 ;InitialRegistration ;Element ;Text    ;
+                                                  DataType=Date;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 InitialRegistration := FORMAT(Vehicle."Initial Registration", 0, '<Day,2>.<Month,2>.<Year4>');
+                                                                               END;
+                                                                                }
+
+    { [{CC43967F-FC77-4E82-BFFB-51ADA486EB95}];2 ;LastMaintenance     ;Element ;Text    ;
+                                                  DataType=Date;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 //LastMaintenance := FORMAT(Vehicle."Date Last Maintenance", 0, '<Day,2>.<Month,2>.<Year4>');
+                                                                                 LastMaintenance := FORMAT(Vehicle.DateLastServOrdGet, 0, '<Day,2>.<Month,2>.<Year4>');
+                                                                               END;
+                                                                                }
+
+    { [{BAE05561-30F8-415B-B751-41F6B138EC2D}];2 ;LastSalesInvoice    ;Element ;Text    ;
+                                                  DataType=Date;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 LastSalesInvoice := FORMAT(Vehicle."Date Last Veh. Sales Inv.", 0, '<Day,2>.<Month,2>.<Year4>');
+                                                                               END;
+                                                                                }
+
+    { [{C3EBC164-C8D9-4C7E-ACF5-4D4D4590F989}];2 ;DeliveryDate        ;Element ;Text     }
+
+    { [{AD79EF6B-885A-4196-81CB-CB4591BC9253}];2 ;MVRCode             ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 MVRCode := GetVehicleMvrCode;
+                                                                               END;
+                                                                                }
+
+    { [{17A0ADBB-F86E-413E-B248-6FB2BA3E532F}];2 ;VehicleStatus       ;Element ;Field   ;
+                                                  DataType=Option;
+                                                  SourceField=Vehicle::Vehicle Status }
+
+    { [{F6C2AB89-8880-46BF-86DF-1BDAEF6FA139}];2 ;RecordOperation     ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 RecordOperation := 'U';
+                                                                               END;
+                                                                                }
+
+  }
+  EVENTS
+  {
+  }
+  REQUESTPAGE
+  {
+    PROPERTIES
+    {
+    }
+    CONTROLS
+    {
+    }
+  }
+  CODE
+  {
+    VAR
+      C_NoData@1101103000 : TextConst 'ENU=" ";NOR=" "';
+      VehicleCustG@1101103001 : Record 5025469;
+
+    PROCEDURE GetAddressNo@1101103000(ContactNoP@1101103000 : Code[20]) AddressNoR : Integer;
+    VAR
+      ContactL@1101103001 : Record 5050;
+    BEGIN
+      ContactL.RESET;
+      ContactL.SETRANGE("No.", ContactNoP);
+      IF ContactL.FINDFIRST THEN
+        EXIT(ContactL."Address No.");
+      EXIT(0);
+    END;
+
+    PROCEDURE GetVehicleMvrCode@1101103001() : Code[10];
+    VAR
+      BisnodeUpdateL@1101103000 : Record 1057870;
+    BEGIN
+      WITH BisnodeUpdateL DO BEGIN
+
+        // VIN
+        RESET;
+        SETCURRENTKEY( VIN, Status, "Transaction ID" );
+        SETRANGE( VIN, Vehicle.VIN );
+        // Filter on Status = Accepted should be enabled! - omitted here to export from first Bisnode import not yet accepted
+        // SETRANGE( Status, BisnodeUpdateL.Status::Accepted );
+        IF FINDLAST THEN
+          IF "Verification Code" <> 0 THEN
+            EXIT( IntToTextLeadingZeros( "Verification Code", 2 ));
+
+        // License No.
+        RESET;
+        SETCURRENTKEY( "Registration No.", Status, "Transaction ID" );
+        SETRANGE( "Registration No.", Vehicle."License No." );
+        // Filter on Status = Accepted should be enabled! - omitted here to export from first Bisnode import not yet accepted
+        // SETRANGE( Status, BisnodeUpdateL.Status::Accepted );
+        IF FINDLAST THEN
+          IF "Verification Code" <> 0 THEN
+            EXIT( IntToTextLeadingZeros( "Verification Code", 2 ));
+
+        // No match on VIN or License No.
+        EXIT( '' );
+
+      END;
+    END;
+
+    PROCEDURE IntToTextLeadingZeros@1101103002(ValueP@1101103000 : Integer;LengtP@1101103001 : Integer) : Text;
+    BEGIN
+      EXIT( PADSTR( '', LengtP - STRLEN( FORMAT( ValueP )), '0' ) + FORMAT( ValueP ));
+    END;
+
+    BEGIN
+    {
+      +----------------------------------------------+
+      | Copyright ¸ 2017   incadea.dms               |
+      +----------------------------------------------+
+      No.   Version Date      ID    Remark
+      ------------------------------------------------
+                    03.10.17  DHO   Initial Version
+                    21.01.18  ALO   Functions: GetVehicleMvrCode
+    }
+    END.
+  }
+}
+

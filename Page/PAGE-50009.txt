@@ -1,0 +1,127 @@
+OBJECT Page 50009 Pre Calc. Sales Line
+{
+  OBJECT-PROPERTIES
+  {
+    Date=07.02.18;
+    Time=20:03:55;
+    Modified=Yes;
+    Version List=BNH;
+  }
+  PROPERTIES
+  {
+    CaptionML=[ENU=Pre Calc. Sales Line;
+               NOR=Forkalkulasjon linjer];
+    SourceTable=Table37;
+    PageType=List;
+    OnAfterGetRecord=BEGIN
+                       Calc();
+                     END;
+
+  }
+  CONTROLS
+  {
+    { 1101103000;0;Container;
+                ContainerType=ContentArea }
+
+    { 1101103001;1;Group  ;
+                Name=Group;
+                GroupType=Repeater }
+
+    { 1101103002;2;Field  ;
+                SourceExpr="Line No." }
+
+    { 1101103003;2;Field  ;
+                SourceExpr="Item Type" }
+
+    { 1101103004;2;Field  ;
+                SourceExpr="No." }
+
+    { 1101103005;2;Field  ;
+                SourceExpr=Description }
+
+    { 1101103006;2;Field  ;
+                SourceExpr="Description 2" }
+
+    { 1101103007;2;Field  ;
+                SourceExpr="Unit Price" }
+
+    { 1101103008;2;Field  ;
+                SourceExpr="Line Discount %" }
+
+    { 1101103014;2;Field  ;
+                SourceExpr="Line Discount Amount" }
+
+    { 1101103009;2;Field  ;
+                SourceExpr=Amount }
+
+    { 1101103010;2;Field  ;
+                Name=Cost;
+                SourceExpr=CostG }
+
+    { 1101103011;2;Field  ;
+                Name=Sales Incentiv;
+                SourceExpr=IncentiveG }
+
+    { 1101103012;2;Field  ;
+                Name=Profit;
+                SourceExpr=ProfitG }
+
+    { 1101103013;2;Field  ;
+                Name=DB;
+                SourceExpr=DBG }
+
+  }
+  CODE
+  {
+    VAR
+      CostG@1101103000 : Decimal;
+      ProfitG@1101103001 : Decimal;
+      DBG@1101103002 : Decimal;
+      IncentiveG@1101103003 : Decimal;
+
+    PROCEDURE Calc@1101103000();
+    VAR
+      PreCalculationL@1101103000 : Page 50007;
+      OptionSetupL@1101103001 : Record 5025472;
+      PreCalcVehicleSaleL@1101103002 : Codeunit 50004;
+      SalesHeaderL@1101103003 : Record 36;
+    BEGIN
+      CostG := 0;
+      ProfitG := 0;
+      DBG := 0;
+      IncentiveG := 0;
+
+      OptionSetupL.GET;
+      SalesHeaderL.GET("Document Type", "Document No.");
+      CASE "Item Type" OF
+        "Item Type"::Vehicle:
+          BEGIN
+          CostG += PreCalcVehicleSaleL.VehicleCost(SalesHeaderL);
+      //    CostG += PreCalculationL.VehicleCost("No.");
+          IncentiveG := PreCalculationL.SalesIncentive("Document Type", "Document No.");
+          ProfitG := Amount - CostG + IncentiveG;
+          IF Amount <> 0 THEN
+            DBG := (ProfitG / Amount) * 100;
+          END;
+        "Item Type"::"Own Option":
+          BEGIN
+         // IF COPYSTR("Gen. Prod. Posting Group", 1, STRLEN(OptionSetupL."Prod. Posting Group Default")) = OptionSetupL."Prod. Posting Group Default" THEN
+          //"Gen. Prod. Posting Group" = OptionSetupL."Prod. Posting Group Default" THEN
+            BEGIN
+            IF  "Unit Cost (LCY)" = 0 THEN
+            CostG += Amount
+            ELSE
+            CostG += "Unit Cost (LCY)";
+            ProfitG := Amount - CostG;
+            IF Amount <> 0 THEN
+              DBG := (ProfitG / Amount) * 100;
+            END;
+          END;
+      END;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

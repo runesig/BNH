@@ -1,0 +1,447 @@
+OBJECT XMLport 5231122 BNH Item
+{
+  OBJECT-PROPERTIES
+  {
+    Date=24.11.17;
+    Time=19:54:51;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    Direction=Import;
+    TextEncoding=WINDOWS;
+    OnPreXMLport=VAR
+                   BNHItemL@1101103000 : Record 5231124;
+                 BEGIN
+                   IF GUIALLOWED THEN
+                     DialogG.OPEN( C_INC_Progress );
+
+
+                   //RecordNoG := "BNH Item".COUNT;
+                   IF BNHItemL.FINDLAST THEN
+                   RecordNoG := BNHItemL."Primary Key";
+                 END;
+
+    OnPostXMLport=BEGIN
+                    IF GUIALLOWED THEN
+                      DialogG.CLOSE;
+                  END;
+
+    Format=Variable Text;
+    FieldDelimiter=|;
+  }
+  ELEMENTS
+  {
+    { [{34AF006C-F03A-4600-A783-59D20CCB9C82}];  ;XML                 ;Element ;Text     }
+
+    { [{5032F8ED-A8CA-480B-83DC-6F5B63C9B2FF}];1 ;Table               ;Element ;Table   ;
+                                                  SourceTable=Table5231124;
+                                                  Import::OnBeforeInsertRecord=BEGIN
+                                                                                 RecordNoG += 1;
+                                                                                 "BNH Item"."Primary Key" := RecordNoG;
+
+                                                                                 IF RecordNoG MOD 100 = 0 THEN
+                                                                                   DialogG.UPDATE( 1, RecordNoG );
+
+                                                                                 "BNH Item"."Location Code" := LocationCodeG;
+                                                                               END;
+                                                                                }
+
+    { [{4BEF449D-0452-4D3A-A92C-1F00B7E977D1}];2 ;PROD-GRP            ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Item::PROD-GRP;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{21F44A48-ADFE-44FD-8CEF-37C4BAACFD19}];2 ;PROD-CODE           ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Item::PROD-CODE;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{91E8EA28-282D-4D20-B433-B0CA2424A8F5}];2 ;PRODS-NAME          ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Item::PRODS-NAME;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{30FF1281-9492-415A-ABA1-E4DD9855CC93}];2 ;FOREIGN-NAME        ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Item::FOREIGN-NAME;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{026DA121-7963-4F86-9FFC-02F104D7DE47}];2 ;TAX-CODE            ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Item::TAX-CODE;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{5816AFCF-91D5-4D16-8D7F-5613D6A9086C}];2 ;RE-PURCHASE-PRICE   ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Item::RE-PURCHASE-PRICE;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{9B963B59-87FF-4B53-AB53-A3EED727C419}];2 ;LATEST-PURCH-PRICE  ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Item::LATEST-PURCH-PRICE;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{4B142B28-F972-4593-9A9D-401814408043}];2 ;AVERAGE-PRICE       ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Item::AVERAGE-PRICE;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{A6DF8859-5B6C-439B-BADE-753A643EE13E}];2 ;PRICE-A             ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Item::PRICE-A;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{30044F26-4244-45E7-A9B0-E82D43B9F6FE}];2 ;PRICE-B             ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Item::PRICE-B;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{B8FD79D9-0095-45EB-9851-F95E12D8AB5B}];2 ;REPLACING-PROD      ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Item::REPLACING-PROD;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{53134174-18C1-4EE9-854B-A2DBE77620BC}];2 ;REPLACE-CODE        ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Item::REPLACE-CODE;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{5758E013-BA04-42EC-B4E9-41C86F5AF84B}];2 ;PART-TYPE           ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Item::PART-TYPE;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{EDAC703B-A0E2-49C3-9B3F-8495D3372C06}];2 ;PROD-TYPE           ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Item::PROD-TYPE;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{7454290D-70AD-43EF-88BA-FD23DEF54E6B}];2 ;DISCOUNT-CODE       ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Item::DISCOUNT-CODE;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{8CF887C3-90B5-438C-ADA8-76DBF718F9B2}];2 ;DISCOUNT-CODE1      ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Item::DISCOUNT-CODE1;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{425A70F6-F0E4-42FB-96F9-313F20202D12}];2 ;CALCULATION-CODE    ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Item::CALCULATION-CODE;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{23BD4D4D-514B-4BE2-907C-DC95E7D89C1E}];2 ;SALES-PRICE         ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Item::SALES-PRICE;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{E6AF418D-6A36-4225-A4CB-DA7AC23A445D}];2 ;PRICE-CHANGE-DATE   ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Item::PRICE-CHANGE-DATE;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{AF658C82-1A7E-4E2C-8194-5C9DC48364AA}];2 ;SUPPLIER            ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Item::SUPPLIER;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{76C48B08-D01D-4C14-A754-6F6432109B47}];2 ;CREATION-DATE       ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Item::CREATION-DATE;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{733D3D9F-7A0C-4AB0-92EA-3D34F38F7EF7}];2 ;MISC-1              ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Item::MISC-1;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{F2BC086D-87EE-4357-8B3A-B57CC0AB17AC}];2 ;MISC-2              ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Item::MISC-2;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{A847A722-3260-4FBA-A7BB-16950B885EBE}];2 ;MISC-3              ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Item::MISC-3;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{A8A6EC0C-46D1-45C9-913A-90B154772F75}];2 ;STOCK-ADDR          ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Item::STOCK-ADDR;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{870BCDED-658F-4936-A4B0-13C344A7F1DB}];2 ;STOCK-AMOUNT        ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Item::STOCK-AMOUNT;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{85AC62AE-7F28-408E-885A-9742FAE7D427}];2 ;INVENTORY-DATE      ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Item::INVENTORY-DATE;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{69913100-6CE3-4503-8CC5-29F215572923}];2 ;AGE-CODE            ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Item::AGE-CODE;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{AA44F943-DF6A-4CC4-BB1F-1538E4D23780}];2 ;DEPR-CODE           ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Item::DEPR-CODE;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{565E7251-94F4-4D75-9883-612D137DABFA}];2 ;REORDER-CODE        ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Item::REORDER-CODE;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{396E0808-B3B0-4EC0-8D7C-DE33C11B429E}];2 ;MIN-ORDER-POINT     ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Item::MIN-ORDER-POINT;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{563120FC-1468-4361-B759-3F08CE9A25E7}];2 ;ORDER-POINT         ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Item::ORDER-POINT;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{F27C3AA1-30D4-48D0-A24E-514A5196709B}];2 ;ECON-ORDER-QTY      ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Item::ECON-ORDER-QTY;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{EE617368-C17C-4D68-9CC4-5434EF5302C3}];2 ;EXPECTED-DEMAND     ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Item::EXPECTED-DEMAND;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{41A5C9B0-5AD1-4B21-B50F-6BBCA43153DE}];2 ;ORDER-PROPOSAL      ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Item::ORDER-PROPOSAL;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{2BDBF853-8FE2-446B-885D-158D0DEAA7F0}];2 ;ON-STOCK            ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Item::ON-STOCK;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{C4A64AF7-3DE1-451F-812B-7E9B99816486}];2 ;REALISATION         ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Item::REALISATION;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{CBFF8F94-315F-45CD-9377-EB0BE57A50E2}];2 ;LAST-BUYING-DTE     ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Item::LAST-BUYING-DTE;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{071AA430-A3F7-4EA8-BA05-6D768D0A6DC6}];2 ;PURCHASES-PCS-MONTH ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Item::PURCHASES-PCS-MONTH;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{1E6F5C4D-577A-41F6-BDE9-07E4E1FD6C9C}];2 ;PURCHASES-PCS-THIS-Y;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Item::PURCHASES-PCS-THIS-Y;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{93CE5E44-3759-4B03-8E66-817EA69D8DDA}];2 ;PURCHASES-PCS-PREV-Y;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Item::PURCHASES-PCS-PREV-Y;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{CB09A188-7B21-439F-BAA9-B9EC5AB98350}];2 ;LAST-SALES-DTE      ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Item::LAST-SALES-DTE;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{327C87E0-6DEE-4161-8621-D2EA0BF149AA}];2 ;DELIVERY-AMOUNT1    ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Item::DELIVERY-AMOUNT 1;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{BCBEE128-C114-4F74-A98D-615E7C16E6F1}];2 ;DELIVERY-AMOUNT2    ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Item::DELIVERY-AMOUNT 2;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{ACB88E50-E196-4F8F-AA2D-A208095338E0}];2 ;DELIVERY-AMOUNT3    ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Item::DELIVERY-AMOUNT 3;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{8AD649E7-0A2E-491E-A160-A4A099AD31BD}];2 ;DELIVERY-AMOUNT4    ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Item::DELIVERY-AMOUNT 4;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{88F147F0-A460-445A-8025-27322E70FB09}];2 ;DELIVERY-AMOUNT5    ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Item::DELIVERY-AMOUNT 5;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{CABB02EE-3A61-4B60-A3F8-13FD11F3E4A6}];2 ;DELIVERY-AMOUNT5    ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Item::DELIVERY-AMOUNT 6;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{9F9C02AC-367E-4148-963F-023C601B5130}];2 ;DELIVERY-AMOUNT6    ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Item::DELIVERY-AMOUNT 7;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{D5A44BDE-C28B-4D76-8E93-409A6110786B}];2 ;DELIVERY-AMOUNT7    ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Item::DELIVERY-AMOUNT 8;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{DCC1677C-1FB3-42AF-A414-D3588575391C}];2 ;DELIVERY-AMOUNT9    ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Item::DELIVERY-AMOUNT 9;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{1C6E1612-203B-46E9-9F4D-DE5EB9A6D12E}];2 ;DELIVERY-AMOUNT10   ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Item::DELIVERY-AMOUNT 10;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{18B673C6-CC51-47F8-B9C1-9E6BF66E7A0D}];2 ;DELIVERY-AMOUNT11   ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Item::DELIVERY-AMOUNT 11;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{73EDDC94-51B2-45D3-A9A2-3A328FECC115}];2 ;DELIVERY-AMOUNT12   ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Item::DELIVERY-AMOUNT 12;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{89573401-F128-4C1D-A601-451498F47827}];2 ;SALES-PCS-THIS-YEAR ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Item::SALES-PCS-THIS-YEAR;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{8BA7C4D1-1811-4760-9641-624BAC100805}];2 ;SALES-PCS-PREV-YEAR ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Item::SALES-PCS-PREV-YEAR;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{DC5D0E30-87D9-48FD-8799-0D812F044E27}];2 ;ADD-COST-CODE       ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Item::ADD-COST-CODE;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{077B9C5B-AC92-4982-B6B2-5856D6211575}];2 ;PACKAGE             ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Item::PACKAGE;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+  }
+  EVENTS
+  {
+  }
+  REQUESTPAGE
+  {
+    PROPERTIES
+    {
+      OnClosePage=BEGIN
+                    IF LocationCodeG = '' THEN
+                      IF NOT CONFIRM( C_NoLocationCode, FALSE ) THEN
+                        ERROR( '' );
+                  END;
+
+    }
+    CONTROLS
+    {
+      { 1101103000;;Container;
+                  CaptionML=NOR=Alternativer;
+                  ContainerType=ContentArea }
+
+      { 1101103002;1;Group  ;
+                  CaptionML=[ENU=Alternatives;
+                             NOR=Alternativer];
+                  GroupType=Group }
+
+      { 1101103001;2;Field  ;
+                  CaptionML=[ENU=Location Code;
+                             NOR=Lokasjonskode];
+                  NotBlank=Yes;
+                  SourceExpr=LocationCodeG;
+                  TableRelation=Location }
+
+    }
+  }
+  CODE
+  {
+    VAR
+      C_INC_Progress@1101103004 : TextConst 'ENU=Import in progress...\ \Record No. #1#####;NOR=Import kj€rer...\ \Post nummer #1#####';
+      DialogG@1101103000 : Dialog;
+      RecordNoG@1101103001 : Integer;
+      LocationCodeG@1101103002 : Code[10];
+      C_NoLocationCode@1101103003 : TextConst 'ENU=No location code is selected. Continue import?;NOR=Ingen lokasjonskode er valgt. Fortsett import?';
+
+    BEGIN
+    END.
+  }
+}
+

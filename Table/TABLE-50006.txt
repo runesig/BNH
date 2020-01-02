@@ -1,0 +1,39 @@
+OBJECT Table 50006 Gjenkjûpsbiler Dracar
+{
+  OBJECT-PROPERTIES
+  {
+    Date=17.01.19;
+    Time=19:50:31;
+    Modified=Yes;
+    Version List=BNH;
+  }
+  PROPERTIES
+  {
+  }
+  FIELDS
+  {
+    { 1   ;   ;Reg.nr              ;Code11         }
+    { 10  ;   ;Enhetsnr            ;Code10         }
+    { 11  ;   ;N†v.eier            ;Text50         }
+    { 12  ;   ;V.k.mod.tekst       ;Text50         }
+    { 13  ;   ;Gjenkj›ps bel›p     ;Decimal        }
+    { 14  ;   ;Selgernavn          ;Text50         }
+    { 15  ;   ;S.av                ;Code10         }
+    { 16  ;   ;Filial              ;Code10         }
+    { 17  ;   ;Avd                 ;Code10         }
+  }
+  KEYS
+  {
+    {    ;Reg.nr                                  ;Clustered=Yes }
+  }
+  FIELDGROUPS
+  {
+  }
+  CODE
+  {
+
+    BEGIN
+    END.
+  }
+}
+

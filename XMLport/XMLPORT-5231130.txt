@@ -1,0 +1,193 @@
+OBJECT XMLport 5231130 BB Historric Header Cred
+{
+  OBJECT-PROPERTIES
+  {
+    Date=13.12.17;
+    Time=19:39:57;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    OnPreXMLport=BEGIN
+                   IF GUIALLOWED THEN
+                     DialogG.OPEN( C_INC_Progress );
+
+                   WITH "BB History Header" DO
+                     IF FINDLAST THEN
+                       RecordNoG := "Q Primary Key";
+                 END;
+
+    OnPostXMLport=BEGIN
+                    IF GUIALLOWED THEN
+                      DialogG.CLOSE;
+                  END;
+
+    Format=Variable Text;
+    FieldDelimiter=|;
+  }
+  ELEMENTS
+  {
+    { [{C6E00D23-349B-4CAB-AAE6-F31E878E2442}];  ;XML                 ;Element ;Text     }
+
+    { [{FA495D4B-8529-485E-AD72-F1A8C3A2221B}];1 ;Header              ;Element ;Table   ;
+                                                  SourceTable=Table5231135;
+                                                  Import::OnBeforeInsertRecord=BEGIN
+                                                                                 RecordNoG += 1;
+                                                                                 "BB History Header"."Q Primary Key" := RecordNoG;
+
+                                                                                 IF RecordNoG MOD 100 = 0 THEN
+                                                                                   DialogG.UPDATE( 1, RecordNoG );
+                                                                               END;
+                                                                                }
+
+    { [{9E25E221-7360-4911-A757-5F45B4836892}];2 ;A                   ;Element ;Field   ;
+                                                  DataType=Code;
+                                                  SourceField=BB History Header::codeChassis;
+                                                  Import::OnAfterAssignField=BEGIN
+                                                                               "BB History Header".Type := "BB History Header".Type::"Credit Memo";
+                                                                               "BB History Header".codeChassis := DELCHR("BB History Header".codeChassis, '=', '|');
+                                                                             END;
+                                                                              }
+
+    { [{CB8B94F4-21AE-4912-B186-960A46DE52BE}];2 ;B                   ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB History Header::Sell-to Customer No. }
+
+    { [{5717A90C-1130-4780-AC0C-6A3C3B42F6EC}];2 ;C                   ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB History Header::Service Order No. }
+
+    { [{267331E6-93B2-4070-B8FA-A856F715AD9D}];2 ;D                   ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB History Header::Dummy }
+
+    { [{92BB15A9-D9DC-4878-9567-EACB4E47CCE4}];2 ;E                   ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB History Header::Location }
+
+    { [{60F6611D-5CB8-4D66-B09B-090EA0D1202C}];2 ;F                   ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB History Header::Dummy2 }
+
+    { [{4C159850-A8C8-45AE-AAE9-1B5CFD3DF5A5}];2 ;G                   ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB History Header::Dummy3 }
+
+    { [{0651B90E-79CB-4C3D-BDBB-160A3F2A4C87}];2 ;H                   ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB History Header::Dummy4 }
+
+    { [{6FB0FD81-A856-488A-B726-F2515B7E4AF6}];2 ;I                   ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB History Header::Dummy5 }
+
+    { [{0857844D-72A2-4742-B178-F6C9078AAC85}];2 ;J                   ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB History Header::Dummy6 }
+
+    { [{2A095FC7-F696-4627-A88D-ED6FC840D9B9}];2 ;K                   ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB History Header::Dummy7 }
+
+    { [{048AE398-2C82-48FB-A03F-E1829221692A}];2 ;L                   ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB History Header::Dummy8 }
+
+    { [{7EDA179D-FBBE-44C0-9189-EFB536EB18F1}];2 ;M                   ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB History Header::Dummy9 }
+
+    { [{9B4F529F-476A-49DF-B1F3-BEADC5301EEA}];2 ;N                   ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB History Header::Posting Date }
+
+    { [{3BD9F337-19AB-450B-B902-FF7515E295DD}];2 ;O                   ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB History Header::No. }
+
+    { [{73ED74EA-B199-4799-AFE9-5D182255B42D}];2 ;P                   ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB History Header::Dummy10 }
+
+    { [{E7DDDAE1-FD78-4B2B-8800-FA5CB12ACE25}];2 ;Q                   ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB History Header::Dummy11 }
+
+    { [{2C484591-B57E-4A8B-AAFB-E2CF3F051DD3}];2 ;R                   ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB History Header::txtBelop }
+
+    { [{ECAB42F0-3349-4ED0-91B4-836E86B5FC2F}];2 ;S                   ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB History Header::Dummy12 }
+
+    { [{C2562D92-2F1B-4E79-AC73-077BA66B0143}];2 ;T                   ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB History Header::Dummy13 }
+
+    { [{0F6007A7-F6A6-4F5F-899D-3135FFD56D90}];2 ;U                   ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB History Header::Dummy14 }
+
+    { [{A2C5B9EE-28CD-415D-B572-807EB3886C73}];2 ;V                   ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB History Header::Dummy15 }
+
+    { [{EE7DAD38-5DF6-49B6-A856-18E389BF6F2E}];2 ;W                   ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB History Header::Dummy16 }
+
+    { [{609A3D38-0A3A-4C98-A172-62CD4DE33CEC}];2 ;X                   ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB History Header::Dummy17 }
+
+    { [{362B20BB-1BF4-49BE-A5A0-65E87210DBBB}];2 ;Z                   ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB History Header::Dummy18 }
+
+    { [{1EC66B5F-D0F8-4A0B-A3EE-62AC83CDDA59}];2 ;Y                   ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB History Header::Dummy19 }
+
+    { [{20F97DB2-5272-4ED3-941F-5819433CDB2C}];2 ;AA                  ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB History Header::Dummy20 }
+
+    { [{4AEE27CD-2807-4806-9F5B-A09D71290F34}];2 ;AB                  ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB History Header::OrdreDato }
+
+    { [{4A38C47D-0886-43D5-BED4-E31B01DE8108}];2 ;AC                  ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB History Header::km }
+
+    { [{94A4DE89-28FE-437C-AC8B-BDECF49C6517}];2 ;AD                  ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB History Header::Dummey21 }
+
+  }
+  EVENTS
+  {
+  }
+  REQUESTPAGE
+  {
+    PROPERTIES
+    {
+    }
+    CONTROLS
+    {
+    }
+  }
+  CODE
+  {
+    VAR
+      DialogG@1101103001 : Dialog;
+      RecordNoG@1101103000 : Integer;
+      C_INC_Progress@1101103002 : TextConst 'ENU=Import in progress...\ \Record No. #1#####;NOR=Import kj›rer...\ \Post nummer #1#####';
+
+    BEGIN
+    END.
+  }
+}
+

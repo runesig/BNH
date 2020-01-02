@@ -1,0 +1,199 @@
+OBJECT Page 5231103 BB Finansposter
+{
+  OBJECT-PROPERTIES
+  {
+    Date=24.11.17;
+    Time=16:04:12;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    SourceTable=Table5231101;
+    PageType=List;
+    ActionList=ACTIONS
+    {
+      { 1101103017;  ;ActionContainer;
+                      ActionContainerType=ActionItems }
+      { 1101103018;1 ;Action    ;
+                      Name=Import;
+                      RunObject=XMLport 5231102;
+                      Image=Import }
+      { 1101103022;1 ;Action    ;
+                      Name=Sett Dato og Bel›p;
+                      OnAction=BEGIN
+                                 CreateDate();
+                                 //CreateAmount();
+                                 //CreateDepartment();
+
+                                 CurrPage.UPDATE;
+                               END;
+                                }
+      { 1101103024;1 ;Action    ;
+                      Name=Create Journal;
+                      OnAction=VAR
+                                 BBFinansL@1101103000 : Record 5231101;
+                               BEGIN
+                                 CurrPage.SETSELECTIONFILTER( BBFinansL );
+                                 CODEUNIT.RUN( CODEUNIT::"BB Regnskapsposter", BBFinansL );
+                               END;
+                                }
+      { 1101103025;1 ;Action    ;
+                      Name=Journal;
+                      RunObject=Page 39 }
+    }
+  }
+  CONTROLS
+  {
+    { 1101103000;0;Container;
+                ContainerType=ContentArea }
+
+    { 1101103001;1;Group  ;
+                Name=Group;
+                GroupType=Repeater }
+
+    { 1101103002;2;Field  ;
+                SourceExpr="Primary Key" }
+
+    { 1101103003;2;Field  ;
+                SourceExpr=Status }
+
+    { 1101103004;2;Field  ;
+                SourceExpr=Datetime }
+
+    { 1101103005;2;Field  ;
+                SourceExpr="Update message" }
+
+    { 1101103006;2;Field  ;
+                SourceExpr="No." }
+
+    { 1101103007;2;Field  ;
+                SourceExpr="Entry No." }
+
+    { 1101103008;2;Field  ;
+                SourceExpr="G/L Account No." }
+
+    { 1101103009;2;Field  ;
+                SourceExpr="Branch Code" }
+
+    { 1101103010;2;Field  ;
+                SourceExpr="Department Code" }
+
+    { 1101103011;2;Field  ;
+                SourceExpr="Make Code" }
+
+    { 1101103012;2;Field  ;
+                SourceExpr="Document No." }
+
+    { 1101103013;2;Field  ;
+                SourceExpr="Posting Date" }
+
+    { 1101103014;2;Field  ;
+                SourceExpr=Amount }
+
+    { 1101103015;2;Field  ;
+                SourceExpr="Bal. Account No." }
+
+    { 1101103016;2;Field  ;
+                SourceExpr=Description }
+
+    { 1101103019;2;Field  ;
+                SourceExpr="Bokf. dato" }
+
+    { 1101103020;2;Field  ;
+                SourceExpr="Bel›p" }
+
+    { 1101103021;2;Field  ;
+                SourceExpr=Avdeling }
+
+  }
+  CODE
+  {
+
+    PROCEDURE CreateDate@1101103000();
+    VAR
+      BBFinansL@1101103000 : Record 5231101;
+      tmpDateL@1101103001 : Date;
+    BEGIN
+      IF BBFinansL.FINDFIRST THEN
+        REPEAT
+        IF COPYSTR(BBFinansL."Posting Date",1, 1) = 'U' THEN
+          BEGIN
+            tmpDateL := 311216D;
+            BBFinansL."Bokf. dato" := CLOSINGDATE(tmpDateL);
+          END ELSE BEGIN
+          BBFinansL."Bokf. dato" := Str2Date(BBFinansL."Posting Date", 4);
+          END;
+        EVALUATE(BBFinansL."Bel›p", BBFinansL.Amount);
+        BBFinansL.M†ned := DATE2DMY(BBFinansL."Bokf. dato", 2);
+      //  BBFinansL.Avdeling := CreateDepartment(BBFinansL."Department Code");
+        BBFinansL.MODIFY;
+        UNTIL BBFinansL.NEXT = 0;
+    END;
+
+    PROCEDURE CreateAmount@1101103001();
+    BEGIN
+    END;
+
+    PROCEDURE CreateDepartment@1101103002(DepP@1101103000 : Code[10]) : Code[10];
+    BEGIN
+      CASE DepP OF
+        '600' :
+          EXIT('10');
+
+      END;
+    END;
+
+    PROCEDURE Str2Date@1117700019(InnDato@1117700000 : Text[30];InnFormat@1117700001 : Integer) UtDato : Date;
+    VAR
+      Dag@1117700002 : Integer;
+      Mnd@1117700003 : Integer;
+      Aar@1117700004 : Integer;
+    BEGIN
+      IF InnDato = '' THEN EXIT(0D);
+
+      CASE InnFormat OF
+        0: // DD-MM-YYYY
+          BEGIN
+            EVALUATE(Dag, COPYSTR(InnDato,1,2));
+            EVALUATE(Mnd, COPYSTR(InnDato,4,2));
+            EVALUATE(Aar, COPYSTR(InnDato,7,4));
+            UtDato := DMY2DATE(Dag, Mnd, Aar);
+          END;
+        1: // MM-DD-YYYY
+          BEGIN
+            EVALUATE(Dag, COPYSTR(InnDato,4,2));
+            EVALUATE(Mnd, COPYSTR(InnDato,1,2));
+            EVALUATE(Aar, COPYSTR(InnDato,7,4));
+            UtDato := DMY2DATE(Dag, Mnd, Aar);
+          END;
+        2: // DDMMYY
+          BEGIN
+            EVALUATE(Dag, COPYSTR(InnDato,1,2));
+            EVALUATE(Mnd, COPYSTR(InnDato,3,2));
+            EVALUATE(Aar, COPYSTR(InnDato,5,2));
+            UtDato := DMY2DATE(Dag, Mnd, Aar+2000);
+          END;
+        3: // YYYYMMDD
+          BEGIN
+            EVALUATE(Dag, COPYSTR(InnDato,7,2));
+            EVALUATE(Mnd, COPYSTR(InnDato,5,2));
+            EVALUATE(Aar, COPYSTR(InnDato,1,4));
+            UtDato := DMY2DATE(Dag, Mnd, Aar);
+          END;
+        4: // DD-MM-YY
+          BEGIN
+            EVALUATE(Dag, COPYSTR(InnDato,1,2));
+            EVALUATE(Mnd, COPYSTR(InnDato,4,2));
+            EVALUATE(Aar, COPYSTR(InnDato,7,2));
+            UtDato := DMY2DATE(Dag, Mnd, Aar+2000);
+          END;
+
+      END;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

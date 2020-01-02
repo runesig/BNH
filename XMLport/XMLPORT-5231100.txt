@@ -1,0 +1,241 @@
+OBJECT XMLport 5231100 BB Kunde
+{
+  OBJECT-PROPERTIES
+  {
+    Date=22.10.17;
+    Time=11:29:28;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    Direction=Import;
+    TextEncoding=MS-DOS;
+    OnPreXMLport=BEGIN
+                   IF GUIALLOWED THEN
+                     DialogG.OPEN( C_INC_Progress );
+
+                   WITH "BB Kunde" DO
+                     IF FINDLAST THEN
+                       RecordNoG := "Primary Key";
+                 END;
+
+    OnPostXMLport=BEGIN
+                    IF GUIALLOWED THEN
+                      DialogG.CLOSE;
+                  END;
+
+    Format=Variable Text;
+    FieldDelimiter=#;
+    FieldSeparator=|;
+  }
+  ELEMENTS
+  {
+    { [{EE15BFFB-8F1F-4CC9-9C0A-BC8B64B611FF}];  ;XML                 ;Element ;Text     }
+
+    { [{CD1050B4-8785-4A26-8A6B-2FB6DE9A2222}];1 ;Table               ;Element ;Table   ;
+                                                  SourceTable=Table5231104;
+                                                  Import::OnBeforeInsertRecord=BEGIN
+                                                                                 RecordNoG += 1;
+                                                                                 "BB Kunde"."Primary Key" := RecordNoG;
+
+                                                                                 IF RecordNoG MOD 100 = 0 THEN
+                                                                                   DialogG.UPDATE( 1, RecordNoG );
+                                                                               END;
+                                                                                }
+
+    { [{77025352-4CB1-4861-A82C-2835E3C486D7}];2 ;No.                 ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Kunde::Cust No.;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{7B8F1E88-3858-41F1-A1CB-DD33D338365E}];2 ;Name                ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Kunde::Name;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{D69E5925-D3EB-43DA-A54B-BB4B6E45DAD1}];2 ;Name_2              ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Kunde::Name 2;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{86C35F09-AB25-4049-9E67-090F0E6FDECA}];2 ;Address             ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Kunde::Address;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{F7B9B46B-861B-42DD-A907-573696FC2319}];2 ;Address_2           ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Kunde::Address 2;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{FD7C5FF3-3D30-4181-B000-BC9CC13C9EC2}];2 ;City                ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Kunde::City;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{9CBA3B23-FF27-4F87-9342-90CD2F9B913D}];2 ;Contact             ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Kunde::Contact;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{543ED979-5F70-40D7-998F-00606496C4C9}];2 ;Phone_No.           ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Kunde::Phone No.;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{E3C57410-07FC-4498-872E-A2E91668A354}];2 ;Telex_No.           ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Kunde::Telex No.;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{81300DC3-9D90-4D1B-A953-57BFE2F7695A}];2 ;Credit_Limit_LCY    ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Kunde::Credit Limit (LCY);
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{496561A2-6BFF-4D9F-A764-4338C9682383}];2 ;Customer_Posting_Gro;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Kunde::Customer Posting Gro;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{FAB81257-9367-42C6-940A-3F54AD258F15}];2 ;Price_Group_Code    ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Kunde::Price Group Code;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{E682F19A-C4AC-4572-9024-5D5DEEDCF74A}];2 ;Payment_Terms_Code  ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Kunde::Payment Terms Code;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{A0B0A002-3407-4095-BA29-DA9F0079E8D3}];2 ;Blocked             ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Kunde::Blocked;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{921627C7-F206-4080-91DF-7ABCC457FF13}];2 ;Payment_Method_Code ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Kunde::Payment Method Code;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{FBFA3E5E-B160-4624-BED1-F9AACBDBFAB9}];2 ;Home_Phone_No.      ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Kunde::Home Phone No.;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{E83A2C9C-3043-44E1-9121-A0428A1ECAFE}];2 ;Mobile_Phone_No.    ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Kunde::Mobile Phone No.;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{8A38AC5F-DD0C-46EF-BEC6-38183672D574}];2 ;Last_Name           ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Kunde::Last Name;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{28D224EB-079D-495C-B579-65F1818EAD59}];2 ;First_Name          ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Kunde::First Name;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{F7C1D732-CBDE-4EA8-9183-192E152576E1}];2 ;Fax_No.             ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Kunde::Fax No.;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{605D8255-4312-44B2-B46B-76F7CF60B89C}];2 ;VAT_Registration_No.;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Kunde::VAT Registration No.;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{90C0AD10-1F7D-4B93-B130-BD8DBB7159CA}];2 ;Item_Sales_Price_Gro;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Kunde::Item Sales Price Gro;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{76FF8062-D74F-4C60-991D-B0297CF4CC6E}];2 ;Post_Code           ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Kunde::Post Code;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{0F3416AE-534F-43FD-AD7B-471D32B0E6A2}];2 ;Home_Fax_No.        ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Kunde::Home Fax No.;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{C08CC81F-0C10-4F19-8E04-F2B77860D6BD}];2 ;Home_Mobile_Phone_No;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Kunde::Home Mobile Phone No;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{9C2E6A1B-C256-43FC-ACF5-C6A17A34B27D}];2 ;Home_E-Mail         ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Kunde::Home E-Mail;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{5BB413B3-6312-4025-89F2-6845C3DF93DE}];2 ;E-Mail              ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Kunde::E-Mail;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{3CEDE9AA-0627-4BFE-A094-6F59442FE46C}];2 ;Last_Date           ;Element ;Field   ;
+                                                  DataType=Code;
+                                                  SourceField=BB Kunde::Last Date }
+
+    { [{5A93045E-1292-44EB-8DD9-2D26D194F487}];2 ;Customer_Type       ;Element ;Field   ;
+                                                  DataType=Code;
+                                                  SourceField=BB Kunde::Customer Type }
+
+  }
+  EVENTS
+  {
+  }
+  REQUESTPAGE
+  {
+    PROPERTIES
+    {
+    }
+    CONTROLS
+    {
+    }
+  }
+  CODE
+  {
+    VAR
+      C_INC_Progress@1101103000 : TextConst 'ENU=Import in progress...\ \Record No. #1#####;NOR=Import kj›rer...\ \Post nummer #1#####';
+      DialogG@1101103001 : Dialog;
+      RecordNoG@1101103002 : Integer;
+
+    BEGIN
+    END.
+  }
+}
+

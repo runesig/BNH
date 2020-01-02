@@ -1,0 +1,83 @@
+OBJECT XMLport 5231118 Chassis og modellkoder
+{
+  OBJECT-PROPERTIES
+  {
+    Date=06.11.17;
+    Time=20:31:58;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    Direction=Import;
+    TextEncoding=WINDOWS;
+    OnPreXMLport=BEGIN
+                   IF GUIALLOWED THEN
+                     DialogG.OPEN( C_INC_Progress );
+
+                   WITH "Chassis og modellkoder" DO
+                     IF FINDLAST THEN
+                       RecordNoG := "Chassis og modellkoder"."Primary Key";
+                 END;
+
+    OnPostXMLport=BEGIN
+                    IF GUIALLOWED THEN
+                      DialogG.CLOSE;
+                  END;
+
+    Format=Variable Text;
+    FieldDelimiter=<">;
+    FieldSeparator=[;];
+  }
+  ELEMENTS
+  {
+    { [{168000F3-A33A-4C7A-A829-53C850D03911}];  ;XML                 ;Element ;Text     }
+
+    { [{AA7006DC-FB4E-4E21-893B-CCC44E68FF9B}];1 ;Table               ;Element ;Table   ;
+                                                  SourceTable=Table5231120;
+                                                  Import::OnBeforeInsertRecord=BEGIN
+                                                                                 RecordNoG += 1;
+                                                                                 "Chassis og modellkoder"."Primary Key" := RecordNoG;
+
+                                                                                 IF RecordNoG MOD 100 = 0 THEN
+                                                                                   DialogG.UPDATE( 1, RecordNoG );
+                                                                               END;
+                                                                                }
+
+    { [{876B9EEE-3DB6-4679-9133-9B0E7E992D6D}];2 ;Chassis_vin         ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=Chassis og modellkoder::Chassis_vin;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{1B5A29F8-8A0C-4192-8D77-96D83DF1CFDF}];2 ;Modellkode          ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=Chassis og modellkoder::Modellkode;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+  }
+  EVENTS
+  {
+  }
+  REQUESTPAGE
+  {
+    PROPERTIES
+    {
+    }
+    CONTROLS
+    {
+    }
+  }
+  CODE
+  {
+    VAR
+      C_INC_Progress@1101103000 : TextConst 'ENU=Import in progress...\ \Record No. #1#####;NOR=Import kj›rer...\ \Post nummer #1#####';
+      DialogG@1101103001 : Dialog;
+      RecordNoG@1101103002 : Integer;
+
+    BEGIN
+    END.
+  }
+}
+

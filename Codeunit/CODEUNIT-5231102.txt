@@ -1,0 +1,432 @@
+OBJECT Codeunit 5231102 BB Customer Update
+{
+  OBJECT-PROPERTIES
+  {
+    Date=17.11.17;
+    Time=08:44:13;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    TableNo=5231104;
+    OnRun=BEGIN
+            BBCustomerG.COPY( Rec );
+
+            CASE TRUE OF
+              BBCustomerG.Status = Status::Ignore:
+                EXIT;
+              BBCustomerG."Customer Posting Gro" <> 'INNLAND':
+                ERROR('Customer %1 have "Customer Posting Gro"  %2', BBCustomerG."Cust No.", BBCustomerG."Customer Posting Gro");
+              BBCustomerG."BNH Kundenr." <> '':
+                ERROR('Customer already exit in BNH with Customernr.: %1', BBCustomerG."BNH Kundenr.");
+              ( "No." <> '' ) AND CustomerG.GET( BBCustomerG."No." ):
+                ModifyRecord;
+              ELSE
+                InsertRecord;
+            END;
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      C_ConfirmProcess@1101103000 : TextConst 'ENU=Process %1 records?;NOR=Prosesser %1 poster?';
+      BBCustomerG@1101103001 : Record 5231104;
+      CustomerG@1101103002 : Record 18;
+
+    PROCEDURE InsertRecord@1101103000();
+    VAR
+    ;
+    BEGIN
+      CLEAR( CustomerG );
+      WITH CustomerG DO BEGIN
+        INIT;
+        INSERT( TRUE );
+        SetFields;
+      //  SetName;
+        MODIFY( TRUE );
+      END;
+
+      WITH BBCustomerG DO BEGIN
+        GET( "Primary Key" );
+        "No." := CustomerG."No.";
+        MODIFY;
+      END;
+    END;
+
+    PROCEDURE ModifyRecord@1101103001();
+    BEGIN
+      WITH CustomerG DO BEGIN
+        SetFields;
+        SetName;
+        MODIFY( TRUE );
+      END;
+    END;
+
+    PROCEDURE SetName@1101103003();
+    VAR
+      ValueL@1101103001 : Text;
+      LastSpacePosL@1101103000 : Integer;
+      CompanynameL@1101103002 : Text[100];
+    BEGIN
+      WITH CustomerG DO BEGIN
+        ValueL := BBCustomerG.Name;
+      //  BBCustomerG.CALCFIELDS("First Name", "Last Name");
+        CASE TRUE OF
+          BBCustomerG."Last Name" <> '' :
+      //    BBCustomerG."VAT Registration No." = '':
+            BEGIN
+      //        LastSpacePosL := LastSpacePos( ValueL );
+      //        IF LastSpacePosL > 1 THEN BEGIN
+                VALIDATE( "First Name", BBCustomerG."First Name");
+                VALIDATE( "Last Name", BBCustomerG."Last Name");
+                //"First Name" := COPYSTR( ValueL, 1, LastSpacePosL - 1 );
+                //"Last Name" := COPYSTR( ValueL, LastSpacePosL + 1 );
+                //IF (BbCustomerG."Last Name" = '') THEN
+                //  BEGIN
+                //  "Last Name" := BbCustomerG."First Name";
+                //  END ELSE BEGIN
+                //  "First Name" := COPYSTR(BbCustomerG."First Name", 1, 30);
+                //  "Last Name" := BbCustomerG."Last Name";
+                //  END;
+        //        IF (BBCustomerG."First Name" = '') AND (BBCustomerG."Last Name" = '') THEN
+        //          "Last Name" := BBCustomerG.Name;
+              //END ELSE
+                //VALIDATE( "Last Name", ValueL );
+                //"Last Name" := ValueL;
+              END;
+      //      END;
+          ELSE
+            //VALIDATE( "Last Name", ValueL );
+            IF (BBCustomerG."First Name" = '') AND (BBCustomerG."Last Name" = '') THEN BEGIN
+              "Last Name" := ValueL;
+              END ELSE BEGIN
+              IF BBCustomerG."First Name" <> '' THEN
+                CompanynameL := BBCustomerG."First Name" + ' ' + BBCustomerG."Last Name"
+                ELSE CompanynameL := BBCustomerG."Last Name";
+                "Last Name" := COPYSTR(CompanynameL, 1, 50);
+              END;
+        END;
+        VALIDATE( "Last Name" );
+        VALIDATE( Name );
+      END;
+    END;
+
+    PROCEDURE SetFields@1101103004();
+    VAR
+      ValueL@1101103001 : Text;
+      LastSpacePosL@1101103000 : Integer;
+      AddressManagementL@1101103002 : Codeunit 5029101;
+    BEGIN
+      WITH CustomerG DO BEGIN
+
+        VALIDATE("First Name", Propercase(BBCustomerG."First Name"));
+        VALIDATE("Last Name", Propercase(BBCustomerG."Last Name"));
+        VALIDATE(Address, Propercase(BBCustomerG.Address));
+        VALIDATE("Address 2", Propercase(BBCustomerG."Address 2"));
+        VALIDATE("Post Code", BBCustomerG."Post Code");
+        VALIDATE(City, Propercase(BBCustomerG.City));
+        CustomerG."Text 1" := BBCustomerG."Cust No.";
+        VALIDATE(Contact, Propercase(BBCustomerG.Contact));
+        VALIDATE("Phone No.", BBCustomerG."Phone No.");
+        VALIDATE("Telex No.", BBCustomerG."Telex No.");
+        VALIDATE("Credit Limit (LCY)", FormatDecimal(BBCustomerG."Credit Limit (LCY)"));
+      //  BBCustomerG."Customer Posting Gro"
+      //  BBCustomerG."Price Group Code"
+        VALIDATE("Payment Terms Code", PaymentTerms(BBCustomerG."Payment Terms Code"));
+        IF (UPPERCASE(BBCustomerG.Blocked) = 'JA') OR (UPPERCASE(BBCustomerG.Blocked) = 'YES') THEN
+          VALIDATE(Blocked, CustomerG.Blocked::All);
+        VALIDATE("Payment Method Code", PaymentMethodCode(BBCustomerG."Payment Method Code"));
+        VALIDATE("Home Phone No.", BBCustomerG."Home Phone No.");
+        VALIDATE("Mobile Phone No.", BBCustomerG."Mobile Phone No.");
+        VALIDATE("Fax No.", BBCustomerG."Fax No.");
+        VALIDATE("VAT Registration No.", BBCustomerG."VAT Registration No.");
+      //  BBCustomerG."Item Sales Price Gro"
+        VALIDATE("Home Fax No.", BBCustomerG."Home Fax No.");
+        VALIDATE("Home Mobile Phone No.", BBCustomerG."Home Mobile Phone No");
+        VALIDATE("Home E-Mail", BBCustomerG."Home E-Mail");
+        VALIDATE("E-Mail", BBCustomerG."E-Mail");
+        VALIDATE("Message Notification", CustomerG."Mobile Phone No.");
+        VALIDATE(CustomerG."Salesperson Code", '');
+        IF BBCustomerG."Customer Type" = 'MANN' THEN
+          VALIDATE("Customer Type", "Customer Type"::Male)
+          ELSE
+          IF BBCustomerG."Customer Type" = 'KVINNE' THEN
+            VALIDATE("Customer Type", "Customer Type"::Female)
+            ELSE
+            VALIDATE("Customer Type", "Customer Type"::Business);
+
+
+        AddressManagementL.UpdateCustomerAddress(CustomerG)
+      END;
+      {
+        BbCustomerG.CALCFIELDS("Mobilephone 1", "Mobilephone 2", "E-Mail", "Service Surcharges", "Date of Birth");
+
+
+        VALIDATE( "VAT Registration No.", BbCustomerG."VAT-REGNO" );
+        "Phone No." := BbCustomerG.PHONE;
+        IF STRLEN(BbCustomerG."Mobilephone 1") > 3 THEN
+          IF COPYSTR(BbCustomerG."Mobilephone 1", 1, 2) = '47' THEN
+            CustomerG.VALIDATE("Mobile Phone No.", '+' + BbCustomerG."Mobilephone 1")
+            ELSE
+            CustomerG.VALIDATE("Mobile Phone No.", BbCustomerG."Mobilephone 1");
+        IF STRLEN(BbCustomerG."Mobilephone 2") > 3 THEN
+          IF COPYSTR(BbCustomerG."Mobilephone 2", 1, 2) = '47' THEN
+            CustomerG.VALIDATE("Home Mobile Phone No.", '+' + BbCustomerG."Mobilephone 2")
+            ELSE
+            CustomerG.VALIDATE("Home Mobile Phone No.", BbCustomerG."Mobilephone 2");
+        CustomerG.VALIDATE("E-Mail", BbCustomerG."E-Mail");
+        IF BbCustomerG."Service Surcharges" = 'N' THEN
+          CustomerG.VALIDATE("Add Service Surcharges", FALSE);
+        IF STRLEN(BbCustomerG."Date of Birth") = 10 THEN
+          CustomerG.VALIDATE("Date of Birth", FormatDatoTekst(BbCustomerG."Date of Birth", '.', 0));
+
+        IF BbCustomerG."VAT-REGNO" <> '' THEN
+          VALIDATE( "Customer Type", CustomerG."Customer Type"::Business );
+        CustomerG."Text 1" := BbCustomerG."CUSTOMER-NUMBER";
+        IF (STRLEN(BbCustomerG."CREATION-DATE") = 8) AND (BbCustomerG."CREATION-DATE" <> '00000000') THEN
+          CustomerG.VALIDATE("Creation Date", Str2Date(BbCustomerG."CREATION-DATE", 3));
+
+        CustomerG.VALIDATE("Customer Group Code", BbCustomerG."CUSTOMER-GROUP");
+        IF (BbCustomerG."PMT-TERMCODE" = '0') OR (BbCustomerG."PMT-TERMCODE" = '1')THEN
+          BEGIN
+          CustomerG."Payment Method Code" := 'KASSE';
+          CustomerG."Payment Terms Code" := '00';
+          END ELSE BEGIN
+          CustomerG."Payment Method Code" := 'KREDITT';
+          CustomerG."Payment Terms Code" := PaymentTerms(BbCustomerG."PMT-TERMCODE");
+          END;
+        IF COPYSTR(BbCustomerG."PMT-TERMCODE", 1, 1) = 'E' THEN
+          CustomerG.VALIDATE("E-Invoice", TRUE);
+        AddressManagementL.UpdateCustomerAddress(CustomerG)
+      END;
+      }
+    END;
+
+    PROCEDURE Propercase@1101103002(TextP@1101103000 : Text) : Text;
+    VAR
+      i@1101103001 : Integer;
+    BEGIN
+      FOR i := 1 TO STRLEN( TextP ) DO BEGIN
+        IF i = 1 THEN
+          EVALUATE( TextP[i], UPPERCASE( FORMAT( TextP[i] )))
+        ELSE
+          IF ( TextP[i-1] = 32 ) OR ( TextP[i-1] = '-' ) THEN
+             EVALUATE( TextP[i], UPPERCASE( FORMAT( TextP[i] )))
+          ELSE
+             EVALUATE( TextP[i], LOWERCASE( FORMAT( TextP[i] )));
+      END;
+      EXIT( TextP );
+    END;
+
+    PROCEDURE LastSpacePos@1101103006(TextP@1101103000 : Text) : Integer;
+    VAR
+      i@1101103001 : Integer;
+    BEGIN
+      i := STRLEN( TextP );
+      CASE i OF
+        0:
+          EXIT( 0 );
+        ELSE
+          BEGIN
+            WHILE ( i > 1 ) AND ( TextP[i] <> ' ' ) DO
+              i -= 1;
+            IF ( i > 1 ) AND ( TextP[i] = ' ' ) THEN
+              EXIT( i )
+            ELSE
+              EXIT( 0 );
+          END;
+      END;
+    END;
+
+    PROCEDURE FormatDecimal@1101103009(InputP@1101103000 : Text[30]) ReturnR : Decimal;
+    BEGIN
+      IF EVALUATE(ReturnR, InputP) THEN
+        EXIT(ReturnR)
+        ELSE
+        EXIT(0);
+    END;
+
+    PROCEDURE FormatDatoTekst@5(DatoTekst@1000000000 : Text[30];SkilleTegn@1000000001 : Text[1];"Rekkef›lge"@1000000002 : 'DagMndAar,MndDagAar,AarDagMnd,AarMndDag') : Date;
+    VAR
+      Dato@1000000003 : Record 2000000007;
+      DatoSplitt@1000000004 : ARRAY [250] OF Text[250];
+      Dag@1000000005 : Integer;
+      Mnd@1000000006 : Integer;
+      Aar@1000000007 : Integer;
+      TestDato@1000000008 : Date;
+    BEGIN
+      // Splitter opp datoen
+      SplitSeparertTekst(DatoTekst, SkilleTegn, DatoSplitt);
+      // Konverterer
+      CASE "Rekkef›lge" OF
+        "Rekkef›lge"::DagMndAar: BEGIN
+          IF NOT EVALUATE(Dag, DatoSplitt[1]) THEN
+            Dag := 1;
+          IF NOT EVALUATE(Mnd, DatoSplitt[2]) THEN
+            Mnd := 1;
+          IF NOT EVALUATE(Aar, DatoSplitt[3]) THEN
+            Aar := 1;
+        END;
+        "Rekkef›lge"::MndDagAar: BEGIN
+          IF NOT EVALUATE(Dag, DatoSplitt[2]) THEN
+            Dag := 1;
+          IF NOT EVALUATE(Mnd, DatoSplitt[1]) THEN
+            Mnd := 1;
+          IF NOT EVALUATE(Aar, DatoSplitt[3]) THEN
+            Aar := 1;
+        END;
+        "Rekkef›lge"::AarDagMnd: BEGIN
+          IF NOT EVALUATE(Dag, DatoSplitt[2]) THEN
+            Dag := 1;
+          IF NOT EVALUATE(Mnd, DatoSplitt[3]) THEN
+            Mnd := 1;
+          IF NOT EVALUATE(Aar, DatoSplitt[1]) THEN
+            Aar := 1;
+        END;
+        "Rekkef›lge"::AarMndDag: BEGIN
+          IF NOT EVALUATE(Dag, DatoSplitt[3]) THEN
+            Dag := 1;
+          IF NOT EVALUATE(Mnd, DatoSplitt[2]) THEN
+            Mnd := 1;
+          IF NOT EVALUATE(Aar, DatoSplitt[1]) THEN
+            Aar := 1;
+        END;
+      END;
+
+      // Sjekker at datoen er korrekt
+      IF (Dag > 31) THEN
+        Dag := 31;
+      IF (Dag < 1) THEN
+        Dag := 1;
+      IF (Mnd > 12) THEN
+        Mnd := 12;
+      IF (Mnd < 1) THEN
+        Mnd := 1;
+      IF ((Aar <= 99) AND (Aar > 50)) THEN
+        Aar := 1900 + Aar;
+      IF ((Aar <= 99) AND (Aar < 50)) THEN
+        Aar := 2000 + Aar;
+      IF (Aar = 0) THEN
+        Aar := 2000;
+
+      // Siste sjekk f›r konvertering
+      IF Dag >= 28 THEN BEGIN
+        TestDato := 0D;
+        TestDato := DMY2DATE(1, Mnd, Aar);
+        Dag := DATE2DMY(CALCDATE('+1M-1D', TestDato), 1);
+      END;
+
+      EXIT(DMY2DATE(Dag, Mnd, Aar));
+    END;
+
+    PROCEDURE Str2Date@1117700019(InnDato@1117700000 : Text[30];InnFormat@1117700001 : Integer) UtDato : Date;
+    VAR
+      Dag@1117700002 : Integer;
+      Mnd@1117700003 : Integer;
+      Aar@1117700004 : Integer;
+    BEGIN
+      IF InnDato = '' THEN EXIT(0D);
+
+      CASE InnFormat OF
+        0: // DD-MM-YYYY
+          BEGIN
+            EVALUATE(Dag, COPYSTR(InnDato,1,2));
+            EVALUATE(Mnd, COPYSTR(InnDato,4,2));
+            EVALUATE(Aar, COPYSTR(InnDato,7,4));
+            UtDato := DMY2DATE(Dag, Mnd, Aar);
+          END;
+        1: // MM-DD-YYYY
+          BEGIN
+            EVALUATE(Dag, COPYSTR(InnDato,4,2));
+            EVALUATE(Mnd, COPYSTR(InnDato,1,2));
+            EVALUATE(Aar, COPYSTR(InnDato,7,4));
+            UtDato := DMY2DATE(Dag, Mnd, Aar);
+          END;
+        2: // DDMMYY
+          BEGIN
+            EVALUATE(Dag, COPYSTR(InnDato,1,2));
+            EVALUATE(Mnd, COPYSTR(InnDato,3,2));
+            EVALUATE(Aar, COPYSTR(InnDato,5,2));
+            UtDato := DMY2DATE(Dag, Mnd, Aar+2000);
+          END;
+        3: // YYYYMMDD
+          BEGIN
+            EVALUATE(Dag, COPYSTR(InnDato,7,2));
+            EVALUATE(Mnd, COPYSTR(InnDato,5,2));
+            EVALUATE(Aar, COPYSTR(InnDato,1,4));
+            UtDato := DMY2DATE(Dag, Mnd, Aar);
+          END;
+      END;
+    END;
+
+    PROCEDURE SplitSeparertTekst@4(Tekst@1000000000 : Text[250];Skilletegn@1000000001 : Text[1];VAR SplittetFelt@1000000002 : ARRAY [250] OF Text[250]);
+    VAR
+      Felt@1000000003 : Text[250];
+      Pos@1000000004 : Integer;
+      I@1000000005 : Integer;
+    BEGIN
+      Pos := STRPOS(Tekst, Skilletegn);
+      I := 0;
+      WHILE Pos > 0 DO BEGIN
+        I += 1;
+        Pos := STRPOS(Tekst, Skilletegn);
+        IF Pos > 0 THEN
+          Felt := COPYSTR(Tekst, 1, Pos - 1)
+        ELSE
+          Felt := COPYSTR(Tekst, 1);
+        Tekst := COPYSTR(Tekst, Pos + 1);
+        SplittetFelt[I] := Felt;
+      END;
+    END;
+
+    PROCEDURE PaymentTerms@1101103005(PaymentCodeP@1101103000 : Code[10]) : Code[10];
+    BEGIN
+      CASE PaymentCodeP OF
+        '00', '10', '14', '15', '2', '20', '21', '28', '30', '45', '7' :
+          EXIT(PaymentCodeP);
+        '0' :
+          EXIT('00');
+        '16' :
+          EXIT('1+15');
+        '25' :
+          EXIT('1+25');
+        '31' :
+          EXIT('1+30');
+        'E0' :
+          EXIT('2');
+        'E1' :
+          EXIT('10');
+        'E2' :
+          EXIT('20');
+      'E3' :
+          EXIT('30');
+        'E4' :
+          EXIT('14');
+        'E5' :
+          EXIT('15');
+        'E7' :
+          EXIT('7');
+        'E9' :
+          EXIT('1+25');
+         '05' :
+          EXIT('7');
+        END;
+    END;
+
+    PROCEDURE PaymentMethodCode@1101103008(PaymentMethodP@1101103000 : Code[10]) : Code[10];
+    BEGIN
+      CASE PaymentMethodP OF
+        'KREDITT':
+          EXIT(PaymentMethodP);
+        'KONTANT' :
+          EXIT('KASSE');
+        END;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

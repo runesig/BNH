@@ -1,0 +1,303 @@
+OBJECT Codeunit 5231129 BNH Create Item Journals
+{
+  OBJECT-PROPERTIES
+  {
+    Date=25.11.17;
+    Time=00:05:13;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    TableNo=5231124;
+    OnRun=BEGIN
+            BnHItemG.COPY( Rec );
+            CheckItemJournalBatch;
+            UpdateItemJournals;
+            ShowResults;
+            ShowItemJournals( ItemJournalBatchG[2] );
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      BnHItemG@1101103000 : Record 5231124;
+      LocationG@1101103001 : Record 14;
+      ItemJournalBatchG@1101103002 : ARRAY [3] OF Record 233;
+      ItemJournalLineG@1101103005 : Record 83;
+      PDMProgressG@1101103003 : Codeunit 50009;
+      RecordCountG@1101103004 : ARRAY [9] OF Integer;
+      C_DefaultTemplate@1101103015 : TextConst 'ENU=VARE;NOR=VARE';
+      C_DefaultBatch@1101103016 : TextConst 'ENU=XKONV;NOR=XKONV';
+      C_DocumentNo@1101103017 : TextConst 'ENU=IB_KONV;NOR=IB_KONV';
+      C_GenBusPostingGroup@1101103020 : TextConst 'ENU=KONV;NOR=KONV';
+      C_BatchName@1101103021 : TextConst 'ENU=XKONV-%1;NOR=XKONV-%1';
+      C_Dimension1Code@1101103018 : TextConst 'ENU=30;NOR=30';
+      C_UpdateItemJournals@1101103007 : TextConst 'ENU=Updating Item Journals;NOR=Oppdaterer varekladder';
+      C_UpdateItemJournalsCancelled@1101103008 : TextConst 'ENU=Update Item Journals CANCELLED;NOR=Oppdater varekladder AVBRUTT';
+      C_JournalLinesExists@1101103006 : TextConst 'ENU=Journal Lines Exists - Continue,Journal Lines Exists - Cancel;NOR=Kladdelinjer finnes - Fortsett,Kladdelinjer finnes - Avbryt';
+      C_NoInventory@1101103009 : TextConst 'ENU=No Inventory;NOR=Ingen beholdning';
+      C_Journal@1101103010 : TextConst 'ENU=%1 - %2 - %3;NOR=%1 - %2 - %3';
+      C_Results@1101103011 : TextConst 'ENU=To journal:\ \%1 OK\%2 Ignored\%3 Failed;NOR=Til journal:\ \%1 OK\%2 ignorert\%3 feil';
+      C_NoJournalEntries@1101103012 : TextConst 'ENU=No entries added to journal.;NOR=Ingen poster lagt til kladd.';
+      C_ItemNotCreated@1101103013 : TextConst 'ENU=Item not created;NOR=Vare er ikke opprettet';
+      C_Duplicate@1101103014 : TextConst 'ENU=Duplicate %1 - %2 - %3;NOR=Duplikat %1 - %2 - %3';
+      C_PostitiveAdjustmentsExists@1101103019 : TextConst 'ENU=Postitive Adjustments Exists;NOR=Oppjusteringer finnes';
+
+    PROCEDURE CheckItemJournalBatch@1101103000();
+    VAR
+      BatchNameL@1101103000 : Code[10];
+    BEGIN
+      CLEAR( LocationG );
+
+      //mark all locations involved
+      WITH BnHItemG DO
+        IF FINDSET THEN
+          REPEAT
+            WITH LocationG DO BEGIN
+              GET( BnHItemG."Location Code" );
+              MARK( TRUE );
+            END;
+          UNTIL NEXT = 0;
+
+      //find default batch
+      WITH ItemJournalBatchG[1] DO
+        GET( C_DefaultTemplate, C_DefaultBatch );
+
+      //find or create batch for each location
+      WITH LocationG DO BEGIN
+        MARKEDONLY( TRUE );
+        IF FINDSET THEN
+          REPEAT
+            WITH ItemJournalBatchG[2] DO BEGIN
+              BatchNameL := COPYSTR( STRSUBSTNO( C_BatchName, DELCHR( LocationG.Name, '=', '0123456789' )), 1, MAXSTRLEN( BatchNameL ));
+              IF NOT GET( C_DefaultTemplate, BatchNameL ) THEN BEGIN
+                COPY( ItemJournalBatchG[1] );
+                Name := BatchNameL;
+                Description := LocationG.Name;
+                "No. Series" := '';
+                "Posting No. Series" := '';
+                INSERT( TRUE );
+              END;
+              MARK( TRUE );
+            END;
+          UNTIL NEXT = 0;
+      END;
+
+      //mark batches with entries
+      WITH ItemJournalBatchG[2] DO BEGIN
+        MARKEDONLY( TRUE );
+        IF FINDSET THEN
+          REPEAT
+            WITH ItemJournalLineG DO BEGIN
+              RESET;
+              SETRANGE( "Journal Template Name", ItemJournalBatchG[2]."Journal Template Name" );
+              SETRANGE( "Journal Batch Name", ItemJournalBatchG[2].Name );
+            END;
+            WITH ItemJournalBatchG[3] DO BEGIN
+              GET( ItemJournalBatchG[2]."Journal Template Name", ItemJournalBatchG[2].Name );
+              MARK( NOT ItemJournalLineG.ISEMPTY );
+            END;
+          UNTIL NEXT = 0;
+      END;
+
+      //warning if batches with entries
+      WITH ItemJournalBatchG[3] DO BEGIN
+        MARKEDONLY( TRUE );
+        IF ISEMPTY = FALSE THEN
+          CASE STRMENU( C_JournalLinesExists ) OF
+            0, 2:
+              ERROR( C_UpdateItemJournalsCancelled );
+          END;
+      END;
+    END;
+
+    PROCEDURE UpdateItemJournals@1101103001();
+    VAR
+      QuantityL@1101103000 : Decimal;
+    BEGIN
+      WITH BnHItemG DO BEGIN
+        RecordCountG[9] := COUNT;
+        PDMProgressG.Start( C_UpdateItemJournals, RecordCountG[9] );
+        IF FINDSET THEN
+          REPEAT
+            BnHItemG.CALCFIELDS("No.");
+            PDMProgressG.Increment( 1 );
+
+            LocationG.GET( BnHItemG."Location Code" );
+            WITH ItemJournalBatchG[2] DO BEGIN
+              "Journal Template Name" := C_DefaultTemplate;
+              Name := COPYSTR( STRSUBSTNO( C_BatchName, DELCHR( LocationG.Name, '=', '0123456789' )), 1, MAXSTRLEN( Name ));
+            END;
+
+            CALCFIELDS( "No.", "Positive Adjustments" );
+            EVALUATE( QuantityL, CONVERTSTR( BnHItemG."STOCK-AMOUNT", '.', ',' ));
+            CASE TRUE OF
+              Status = Status::Ignore:
+                SetStatus( "Primary Key", Status::Ignore, '' );
+              "No." = '':
+                SetStatus( "Primary Key", Status::Error, C_ItemNotCreated );
+      //        "Positive Adjustments" > 0:
+      //          SetStatus( "Primary Key", Status::Error, C_PostitiveAdjustmentsExists );
+              JournalEntryExist:
+                SetStatus( "Primary Key", Status::Error, STRSUBSTNO( C_Duplicate, C_DefaultTemplate, ItemJournalBatchG[2].Name, ItemJournalLineG."Line No." ));
+              QuantityL > 0:
+                BEGIN
+                  UpdateItemJournal;
+                  SetStatus( "Primary Key", Status::OK, STRSUBSTNO( C_Journal, C_DefaultTemplate, ItemJournalBatchG[2].Name, ItemJournalLineG."Line No." ));
+                END;
+              ELSE
+                SetStatus( "Primary Key", Status::Ignore, C_NoInventory );
+            END;
+          UNTIL NEXT = 0;
+        PDMProgressG.Stop;
+      END;
+    END;
+
+    PROCEDURE UpdateItemJournal@1101103003();
+    VAR
+      LineNoL@1101103000 : Integer;
+    BEGIN
+      WITH ItemJournalBatchG[2] DO
+        GET( C_DefaultTemplate, ItemJournalBatchG[2].Name );
+
+      CheckShelfNo;
+
+      WITH ItemJournalLineG DO BEGIN
+        INIT;
+        "Journal Template Name" := C_DefaultTemplate;
+        "Journal Batch Name" := ItemJournalBatchG[2].Name;
+        "Line No." := GetNextLineNo( 10000 );
+        VALIDATE( "Item No.", BnHItemG."No."); //BnHItemG."PROD-CODE" );
+        VALIDATE( "Posting Date", 251117D );
+        VALIDATE( "Entry Type", "Entry Type"::"Positive Adjmt." );
+        "Document No." := C_DocumentNo;
+        VALIDATE( "Gen. Bus. Posting Group", C_GenBusPostingGroup );
+        VALIDATE( "Location Code", BnHItemG."Location Code" );
+        VALIDATE( "Shortcut Dimension 1 Code", C_Dimension1Code );
+        EVALUATE( "Unit Amount", CONVERTSTR( BnHItemG."AVERAGE-PRICE", '.', ',' ));
+        VALIDATE( "Unit Amount" );
+        VALIDATE( "Posting No. Series", ItemJournalBatchG[2]."Posting No. Series" );
+        IF BnHItemG."STOCK-ADDR" <> '' THEN
+          BEGIN
+          CreateBIN(BnHItemG."Location Code", BnHItemG."STOCK-ADDR");
+          InsertItemBin(BnHItemG."PROD-CODE", BnHItemG."Location Code", BnHItemG."STOCK-ADDR");
+          END;
+        VALIDATE("Bin Code", BnHItemG."STOCK-ADDR");
+        EVALUATE( Quantity, CONVERTSTR( BnHItemG."STOCK-AMOUNT", '.', ',' ));
+        VALIDATE( Quantity );
+        INSERT( TRUE );
+      END;
+    END;
+
+    PROCEDURE SetStatus@1101103002(PrimaryKeyP@1101103003 : Integer;StatusP@1101103000 : Option;MessageP@1101103001 : Text);
+    VAR
+      BnHItemL@1101103002 : Record 5231124;
+    BEGIN
+      RecordCountG[ StatusP ] += 1;
+
+      WITH BnHItemL DO BEGIN
+        GET( PrimaryKeyP );
+        Status := StatusP;
+        IF Status = Status::OK THEN
+          "Batch Name" := ItemJournalLineG."Journal Batch Name";
+        Datetime := CURRENTDATETIME;
+        IF MessageP <> '' THEN
+          "Update message" := MessageP;
+        MODIFY;
+      END;
+    END;
+
+    PROCEDURE ShowResults@1101103008();
+    BEGIN
+      WITH BnHItemG DO
+        MESSAGE( C_Results, RecordCountG[ Status::OK ], RecordCountG[ Status::Ignore ], RecordCountG[ Status::Error ] );
+    END;
+
+    PROCEDURE ShowItemJournals@1101103006(VAR ItemJournalBatchP@1101103000 : Record 233);
+    BEGIN
+      CASE RecordCountG[ BnHItemG.Status::OK ] OF
+        0:
+          MESSAGE( C_NoJournalEntries );
+        ELSE
+          BEGIN
+            ItemJournalBatchP.MARKEDONLY( TRUE );
+            PAGE.RUN( PAGE::"Item Journal Batches", ItemJournalBatchP );
+          END;
+      END;
+    END;
+
+    PROCEDURE JournalEntryExist@1101103004() : Boolean;
+    BEGIN
+      WITH ItemJournalBatchG[2] DO
+        GET( C_DefaultTemplate, ItemJournalBatchG[2].Name );
+
+      WITH ItemJournalLineG DO BEGIN
+        RESET;
+        SETRANGE( "Journal Template Name", C_DefaultTemplate );
+        SETRANGE( "Journal Batch Name", ItemJournalBatchG[2].Name );
+        SETRANGE( "Item No.", BnHItemG."PROD-CODE" );
+        EXIT( FINDFIRST );
+      END;
+    END;
+
+    PROCEDURE CheckShelfNo@1101103009();
+    VAR
+      ItemLocationL@1101103000 : Record 5028700;
+    BEGIN
+      WITH ItemLocationL DO BEGIN
+        RESET;
+        CASE TRUE OF
+          GET( BnHItemG."PROD-CODE", BnHItemG."Location Code" ):
+            ;
+        ELSE
+          BEGIN
+            INIT;
+            "Item No." := BnHItemG."PROD-CODE";
+            "Location Code" := BnHItemG."Location Code";
+            "Shelf No." := COPYSTR( BnHItemG."STOCK-ADDR", 1, MAXSTRLEN( "Shelf No." ));
+            INSERT;
+          END;
+        END;
+      END;
+    END;
+
+    PROCEDURE CreateBIN@1101103007(LocationCodeP@1101103001 : Code[10];CodeP@1101103002 : Code[20]);
+    VAR
+      BinL@1101103000 : Record 5400;
+    BEGIN
+      WITH BinL DO BEGIN
+        IF NOT GET(LocationCodeP, CodeP) THEN
+          BEGIN
+          INIT;
+          "Location Code" := LocationCodeP;
+          Code := CodeP;
+          INSERT(TRUE);
+          END;
+      END;
+    END;
+
+    PROCEDURE InsertItemBin@1101103005(ItemNoP@1101103003 : Code[20];LocationCodeP@1101103001 : Code[10];CodeP@1101103000 : Code[20]);
+    VAR
+      ItemBinL@1101103002 : Record 5028749;
+    BEGIN
+      WITH ItemBinL DO BEGIN
+        IF NOT ItemBinL.GET(ItemNoP, LocationCodeP, CodeP) THEN
+          BEGIN
+          INIT;
+          "Item No." :=  ItemNoP;
+          VALIDATE("Location Code", LocationCodeP);
+          VALIDATE(ItemBinL."Bin Code", CodeP);
+          VALIDATE("Purchase Default", TRUE);
+          VALIDATE("Sales Default", TRUE);
+          INSERT(TRUE);
+          END;
+      END;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

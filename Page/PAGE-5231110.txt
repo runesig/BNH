@@ -1,0 +1,418 @@
+OBJECT Page 5231110 BNH Customer
+{
+  OBJECT-PROPERTIES
+  {
+    Date=18.12.17;
+    Time=20:21:07;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    CaptionML=[ENU=BnH Customer;
+               NOR=BnH kunder];
+    SourceTable=Table5231110;
+    PageType=List;
+    ActionList=ACTIONS
+    {
+      { 1101103079;  ;ActionContainer;
+                      ActionContainerType=ActionItems }
+      { 1101103085;1 ;Action    ;
+                      Name=Import Data;
+                      CaptionML=[ENU=Import Data;
+                                 NOR=Importer data];
+                      RunObject=XMLport 5231110;
+                      Promoted=Yes;
+                      PromotedIsBig=Yes;
+                      Image=Import;
+                      PromotedCategory=Process }
+      { 1101103095;1 ;Action    ;
+                      Name=Import Tillegg1;
+                      CaptionML=ENU=Import Tillegg1;
+                      RunObject=XMLport 5231111;
+                      Promoted=Yes;
+                      Image=Import;
+                      PromotedCategory=Process }
+      { 1101103096;1 ;Action    ;
+                      Name=Import Tillegg2;
+                      CaptionML=ENU=Import Tillegg2;
+                      RunObject=XMLport 5231112;
+                      Promoted=Yes;
+                      Image=import;
+                      PromotedCategory=Process }
+      { 1101103080;1 ;Action    ;
+                      Name=Create Customers;
+                      CaptionML=[ENU=Create Customers;
+                                 NOR=Opprett kunder];
+                      Promoted=Yes;
+                      PromotedIsBig=Yes;
+                      Image=TransferOrder;
+                      PromotedCategory=Process;
+                      OnAction=VAR
+                                 BnHCustomerG@1101103000 : Record 5231110;
+                               BEGIN
+                                 CurrPage.SETSELECTIONFILTER( BnHCustomerG );
+                                 CODEUNIT.RUN( CODEUNIT::"BNH Customer", BnHCustomerG );
+                               END;
+                                }
+      { 1101103094;1 ;Action    ;
+                      Name=Delete All Record;
+                      OnAction=BEGIN
+                                 DeleteAllRecords();
+                               END;
+                                }
+      { 1101103097;1 ;Action    ;
+                      Name=Set Customer NO;
+                      OnAction=BEGIN
+                                 FindCustomer();
+                                 MESSAGE('Ferdig');
+                                 CurrPage.UPDATE;
+                               END;
+                                }
+      { 1101103098;1 ;Action    ;
+                      Name=Set Salesperson;
+                      OnAction=VAR
+                                 BnHCustomerL@1101103000 : Record 5231110;
+                               BEGIN
+                                 //CurrPage.SETSELECTIONFILTER( BnHCustomerL );
+                                 SetSalesPerson(BnHCustomerL);
+                               END;
+                                }
+    }
+  }
+  CONTROLS
+  {
+    { 1101103000;0;Container;
+                ContainerType=ContentArea }
+
+    { 1101103001;1;Group  ;
+                Name=Group;
+                GroupType=Repeater }
+
+    { 1101103002;2;Field  ;
+                SourceExpr="Primary Key" }
+
+    { 1101103081;2;Field  ;
+                SourceExpr=Status }
+
+    { 1101103082;2;Field  ;
+                SourceExpr=Datetime }
+
+    { 1101103083;2;Field  ;
+                SourceExpr="Update message" }
+
+    { 1101103084;2;Field  ;
+                AssistEdit=Yes;
+                SourceExpr="No.";
+                OnAssistEdit=VAR
+                               CustomerL@1101103000 : Record 18;
+                             BEGIN
+                               IF CustomerG.GET( "No." ) THEN
+                                 PAGE.RUN( PAGE::"Customer Card", CustomerG );
+                             END;
+                              }
+
+    { 1101103003;2;Field  ;
+                SourceExpr="CUSTOMER-NUMBER" }
+
+    { 1101103004;2;Field  ;
+                SourceExpr="STATE-CODE" }
+
+    { 1101103005;2;Field  ;
+                SourceExpr="TRANSACT-DATE" }
+
+    { 1101103006;2;Field  ;
+                SourceExpr=HANDLER }
+
+    { 1101103007;2;Field  ;
+                SourceExpr="KEY-2" }
+
+    { 1101103008;2;Field  ;
+                SourceExpr=NAME }
+
+    { 1101103086;2;Field  ;
+                SourceExpr="First Name" }
+
+    { 1101103087;2;Field  ;
+                SourceExpr="Last Name" }
+
+    { 1101103009;2;Field  ;
+                SourceExpr="STREET-ADDR" }
+
+    { 1101103010;2;Field  ;
+                SourceExpr="ADDR-2" }
+
+    { 1101103011;2;Field  ;
+                SourceExpr="MAIL-ADDR" }
+
+    { 1101103012;2;Field  ;
+                SourceExpr=ZIPCODE }
+
+    { 1101103013;2;Field  ;
+                SourceExpr="DEBIT-CUSTOMER" }
+
+    { 1101103014;2;Field  ;
+                SourceExpr="PMT-TERMCODE" }
+
+    { 1101103015;2;Field  ;
+                SourceExpr="INVOICE-COPY-CODE" }
+
+    { 1101103016;2;Field  ;
+                SourceExpr="DELIVERY-WAY-CODE" }
+
+    { 1101103017;2;Field  ;
+                SourceExpr="SMALL-ACCESSORIES" }
+
+    { 1101103018;2;Field  ;
+                SourceExpr="SMALL-INVOICE-CHARGE" }
+
+    { 1101103019;2;Field  ;
+                SourceExpr="VAT-REGNO" }
+
+    { 1101103088;2;Field  ;
+                SourceExpr="Date of Birth" }
+
+    { 1101103020;2;Field  ;
+                SourceExpr=SALESMAN }
+
+    { 1101103021;2;Field  ;
+                SourceExpr="WHOLESALE-CODE" }
+
+    { 1101103022;2;Field  ;
+                SourceExpr="DELIVERY-STOP-CODE" }
+
+    { 1101103023;2;Field  ;
+                SourceExpr="CREDIT-LIMIT" }
+
+    { 1101103024;2;Field  ;
+                SourceExpr="REMINDER-CODE" }
+
+    { 1101103025;2;Field  ;
+                SourceExpr="ACCOUNT-TYPE" }
+
+    { 1101103026;2;Field  ;
+                SourceExpr="ACCOUNT-PRINT" }
+
+    { 1101103027;2;Field  ;
+                SourceExpr="DISCOUNT-CODE" }
+
+    { 1101103028;2;Field  ;
+                SourceExpr="DISCOUNT-PERC" }
+
+    { 1101103029;2;Field  ;
+                SourceExpr="DISCOUNT-LIMIT" }
+
+    { 1101103030;2;Field  ;
+                SourceExpr="ANNUAL-DISC-PERC" }
+
+    { 1101103031;2;Field  ;
+                SourceExpr="ANNUAL-DISCOUNT" }
+
+    { 1101103032;2;Field  ;
+                SourceExpr="ANNUAL-DISC-CODE" }
+
+    { 1101103033;2;Field  ;
+                SourceExpr="AD-DISCOUNT-PERC" }
+
+    { 1101103034;2;Field  ;
+                SourceExpr="AD-DISCOUNT" }
+
+    { 1101103035;2;Field  ;
+                SourceExpr="INTERNAL-CODE" }
+
+    { 1101103036;2;Field  ;
+                SourceExpr="CUSTOMER-GROUP" }
+
+    { 1101103037;2;Field  ;
+                SourceExpr="TAX-CODE" }
+
+    { 1101103038;2;Field  ;
+                SourceExpr="FLEET-OWNER" }
+
+    { 1101103039;2;Field  ;
+                SourceExpr="CONTACT-PERSON" }
+
+    { 1101103040;2;Field  ;
+                SourceExpr=PHONE }
+
+    { 1101103041;2;Field  ;
+                SourceExpr="PHONE-2" }
+
+    { 1101103089;2;Field  ;
+                SourceExpr="Mobilephone 1" }
+
+    { 1101103090;2;Field  ;
+                SourceExpr="Mobilephone 2" }
+
+    { 1101103091;2;Field  ;
+                SourceExpr="E-Mail" }
+
+    { 1101103092;2;Field  ;
+                SourceExpr="Service Surcharges" }
+
+    { 1101103042;2;Field  ;
+                SourceExpr="COMMENT-1" }
+
+    { 1101103043;2;Field  ;
+                SourceExpr="COMMENT-2" }
+
+    { 1101103044;2;Field  ;
+                SourceExpr="CONTACT-DATE" }
+
+    { 1101103045;2;Field  ;
+                SourceExpr="MAIL-CODE-1" }
+
+    { 1101103046;2;Field  ;
+                SourceExpr="MAIL-CODE-2" }
+
+    { 1101103047;2;Field  ;
+                SourceExpr="MAIL-CODE-3" }
+
+    { 1101103048;2;Field  ;
+                SourceExpr="MAIL-CODE-4" }
+
+    { 1101103049;2;Field  ;
+                SourceExpr="MAIL-CODE-5" }
+
+    { 1101103050;2;Field  ;
+                SourceExpr="MAIL-CODE-6" }
+
+    { 1101103051;2;Field  ;
+                SourceExpr="MAIL-CODE-7" }
+
+    { 1101103052;2;Field  ;
+                SourceExpr="MAIL-CODE-8" }
+
+    { 1101103053;2;Field  ;
+                SourceExpr="MAIL-CODE-9" }
+
+    { 1101103054;2;Field  ;
+                SourceExpr="LAST-INVOICE-DATE" }
+
+    { 1101103055;2;Field  ;
+                SourceExpr="PROFIT-C-U" }
+
+    { 1101103056;2;Field  ;
+                SourceExpr="DEBITED-MM" }
+
+    { 1101103057;2;Field  ;
+                SourceExpr="DEBITED-TY" }
+
+    { 1101103058;2;Field  ;
+                SourceExpr="DEBITED-PRYE" }
+
+    { 1101103059;2;Field  ;
+                SourceExpr="DISCOUNT-MM" }
+
+    { 1101103060;2;Field  ;
+                SourceExpr="DISCOUNT-TY" }
+
+    { 1101103061;2;Field  ;
+                SourceExpr="DISCOUNT-PY" }
+
+    { 1101103062;2;Field  ;
+                SourceExpr="MARG-MM" }
+
+    { 1101103063;2;Field  ;
+                SourceExpr="MARG-TY" }
+
+    { 1101103064;2;Field  ;
+                SourceExpr="MARG-PY" }
+
+    { 1101103065;2;Field  ;
+                SourceExpr="SALDO-C-U" }
+
+    { 1101103066;2;Field  ;
+                SourceExpr="LAST-PMT-DTE" }
+
+    { 1101103067;2;Field  ;
+                SourceExpr="PMT-TIME" }
+
+    { 1101103068;2;Field  ;
+                SourceExpr=INTERESTS }
+
+    { 1101103069;2;Field  ;
+                SourceExpr="SALDO-LAST-ST" }
+
+    { 1101103070;2;Field  ;
+                SourceExpr="CPR-NO" }
+
+    { 1101103071;2;Field  ;
+                SourceExpr="DELETE-PROPOSAL" }
+
+    { 1101103072;2;Field  ;
+                SourceExpr="CREATION-DATE" }
+
+    { 1101103073;2;Field  ;
+                SourceExpr="BO-DELIVERY" }
+
+    { 1101103074;2;Field  ;
+                SourceExpr="REMINDER-GROUP" }
+
+    { 1101103075;2;Field  ;
+                SourceExpr="LAST-REMINDER-DATE" }
+
+    { 1101103076;2;Field  ;
+                SourceExpr="PMT-TERMCODE2" }
+
+    { 1101103077;2;Field  ;
+                SourceExpr="COUNTRY-CODE" }
+
+    { 1101103078;2;Field  ;
+                SourceExpr="INSTALMENT-CODE" }
+
+    { 1101103093;2;Field  ;
+                SourceExpr="Open Balance" }
+
+  }
+  CODE
+  {
+    VAR
+      CustomerG@1101103001 : Record 18;
+      C_DeleteAllRecords@1101103002 : TextConst 'ENU=Delete All Records?;NOR=Slett alle poster?';
+      C_Sure@1101103000 : TextConst 'ENU=Sure?;NOR=Sikker?';
+
+    PROCEDURE DeleteAllRecords@1101103001();
+    VAR
+      BNHCustomerL@1101103000 : Record 5231110;
+    BEGIN
+      IF CONFIRM( C_DeleteAllRecords, FALSE ) THEN
+        IF CONFIRM( C_Sure, FALSE ) THEN
+          BNHCustomerL.DELETEALL( FALSE );
+      CurrPage.UPDATE( FALSE );
+    END;
+
+    PROCEDURE FindCustomer@1101103000();
+    VAR
+      BNHCustomerL@1101103000 : Record 5231110;
+      CustomerL@1101103001 : Record 18;
+    BEGIN
+      IF BNHCustomerL.FINDFIRST THEN
+        REPEAT
+        CustomerL.RESET;
+        CustomerL.SETRANGE("Text 1", BNHCustomerL."CUSTOMER-NUMBER");
+        IF CustomerL.FINDFIRST THEN
+          BEGIN
+          BNHCustomerL."No." := CustomerL."No.";
+          BNHCustomerL.MODIFY;
+          END;
+        UNTIL BNHCustomerL.NEXT = 0;
+    END;
+
+    PROCEDURE SetSalesPerson@1101103002(BnHCustomerP@1101103000 : Record 5231110);
+    VAR
+      BnHCustomerL@1101103001 : Record 5231110;
+    BEGIN
+      CurrPage.SETSELECTIONFILTER( BnHCustomerL );
+      //BnHCustomerL.COPY(BnHCustomerP);
+      IF BnHCustomerL.FINDSET THEN
+        REPEAT
+
+        UNTIL BnHCustomerL.NEXT = 0;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

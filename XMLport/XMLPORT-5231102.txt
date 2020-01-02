@@ -1,0 +1,134 @@
+OBJECT XMLport 5231102 BB Finans
+{
+  OBJECT-PROPERTIES
+  {
+    Date=22.10.17;
+    Time=08:31:28;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    Direction=Import;
+    TextEncoding=MS-DOS;
+    OnPreXMLport=BEGIN
+                   IF GUIALLOWED THEN
+                     DialogG.OPEN( C_INC_Progress );
+
+                   WITH "BB Finans" DO
+                     IF FINDLAST THEN
+                       RecordNoG := "BB Finans"."Primary Key";
+                 END;
+
+    OnPostXMLport=BEGIN
+                    IF GUIALLOWED THEN
+                      DialogG.CLOSE;
+                  END;
+
+    Format=Variable Text;
+    FieldDelimiter=";
+  }
+  ELEMENTS
+  {
+    { [{00316A8D-DF46-4D94-AA17-5BCCE2AD9C97}];  ;XML                 ;Element ;Text     }
+
+    { [{10AF03DC-82A6-457F-A3AA-A603E2403BFF}];1 ;Table               ;Element ;Table   ;
+                                                  SourceTable=Table5231101;
+                                                  Import::OnBeforeInsertRecord=BEGIN
+                                                                                 RecordNoG += 1;
+                                                                                 "BB Finans"."Primary Key" := RecordNoG;
+
+                                                                                 IF RecordNoG MOD 100 = 0 THEN
+                                                                                   DialogG.UPDATE( 1, RecordNoG );
+                                                                               END;
+                                                                                }
+
+    { [{3FD35826-7E36-401F-B328-99F35A33E599}];2 ;Entry_No.           ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Finans::Entry No.;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{EAB55C61-4C83-4747-9929-7B58C2794474}];2 ;GL_Account_No.      ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Finans::G/L Account No.;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{DB943BE3-CE68-47BC-8923-A927CDBB9271}];2 ;Branch_Code         ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Finans::Branch Code;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded;
+                                                  Import::OnAfterAssignField=BEGIN
+                                                                               "BB Finans"."Branch Code" := '06';
+                                                                             END;
+                                                                              }
+
+    { [{FE7C8F05-9E62-4CEF-8271-8F1D13C4D1E7}];2 ;Department_Code     ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Finans::Department Code;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{6DB9FD7B-1164-4E2B-83EF-CC7AFF12E384}];2 ;Make_Code           ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Finans::Make Code;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{4743D98F-68E3-4343-BA19-8690EA91C16B}];2 ;Document_No.        ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Finans::Document No.;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{92FF2089-E77E-4D56-9752-E6A99B94B3EE}];2 ;Posting_Date        ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Finans::Posting Date;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{45843CBB-4908-47C3-8AA8-EDA66E7EDA61}];2 ;Amount              ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Finans::Amount;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{4470CB81-DFE4-4E6D-9FCB-63F807FDB594}];2 ;Bal._Account_No.    ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Finans::Bal. Account No.;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{24EB1756-23FA-4864-8306-277F876AFB69}];2 ;Description         ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB Finans::Description;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+  }
+  EVENTS
+  {
+  }
+  REQUESTPAGE
+  {
+    PROPERTIES
+    {
+    }
+    CONTROLS
+    {
+    }
+  }
+  CODE
+  {
+    VAR
+      C_INC_Progress@1101103000 : TextConst 'ENU=Import in progress...\ \Record No. #1#####;NOR=Import kj›rer...\ \Post nummer #1#####';
+      DialogG@1101103001 : Dialog;
+      RecordNoG@1101103002 : Integer;
+
+    BEGIN
+    END.
+  }
+}
+

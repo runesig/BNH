@@ -1,0 +1,94 @@
+OBJECT Page 5231121 BNH Make
+{
+  OBJECT-PROPERTIES
+  {
+    Date=24.11.17;
+    Time=20:07:55;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    SourceTable=Table5231125;
+    PageType=List;
+    ActionList=ACTIONS
+    {
+      { 1101103004;  ;ActionContainer;
+                      ActionContainerType=ActionItems }
+      { 1101103005;1 ;Action    ;
+                      Name=Opprett produktgrupper fra varefil;
+                      CaptionML=[ENU=Create Product Groups from file;
+                                 NOR=Opprett produktgrupper fra varefil];
+                      Promoted=Yes;
+                      PromotedIsBig=Yes;
+                      Image=NewItem;
+                      PromotedCategory=Process;
+                      OnAction=BEGIN
+                                 CreateProductGroups;
+                               END;
+                                }
+    }
+  }
+  CONTROLS
+  {
+    { 1101103000;0;Container;
+                ContainerType=ContentArea }
+
+    { 1101103001;1;Group  ;
+                Name=Group;
+                GroupType=Repeater }
+
+    { 1101103002;2;Field  ;
+                SourceExpr="PROD-GRP" }
+
+    { 1101103003;2;Field  ;
+                SourceExpr="Make Code" }
+
+    { 1101103006;2;Field  ;
+                SourceExpr=Antall }
+
+    { 1101103007;2;Field  ;
+                SourceExpr="Med beholdning" }
+
+  }
+  CODE
+  {
+    VAR
+      C_ProgressTitle@1101103002 : TextConst 'ENU=Creating Product Groups;NOR=Oppretter produktgrupper';
+
+    PROCEDURE CreateProductGroups@1101103000();
+    VAR
+      PDMProgressL@1101103000 : Codeunit 50009;
+      BnHMakeL@1101103003 : Record 5231125;
+      BnHItemL@1101103002 : Record 5231124;
+      ItemMasterL@1101103001 : Record 5029101;
+    BEGIN
+      WITH BnHItemL DO BEGIN
+        PDMProgressL.Start( C_ProgressTitle, COUNT );
+        IF FINDSET THEN
+          REPEAT
+            PDMProgressL.Increment( 1 );
+            WITH ItemMasterL DO BEGIN
+              RESET;
+              SETRANGE( "No.", COPYSTR( BnHItemL."PROD-CODE", 1, MAXSTRLEN( "No." )));
+              IF ISEMPTY THEN
+                WITH BnHMakeL DO BEGIN
+                  RESET;
+                  SETRANGE( "PROD-GRP", BnHItemL."PROD-GRP" );
+                  IF ISEMPTY THEN BEGIN
+                    INIT;
+                    "PROD-GRP" := BnHItemL."PROD-GRP";
+                    INSERT;
+                  END;
+                END;
+            END;
+          UNTIL NEXT = 0;
+        PDMProgressL.Stop;
+      END;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

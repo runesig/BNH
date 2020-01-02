@@ -1,0 +1,131 @@
+OBJECT XMLport 5231124 BNH masterdata2lev
+{
+  OBJECT-PROPERTIES
+  {
+    Date=22.11.17;
+    Time=18:29:12;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    Direction=Import;
+    TextEncoding=WINDOWS;
+    OnPreXMLport=BEGIN
+                   IF GUIALLOWED THEN
+                     DialogG.OPEN( C_INC_Progress );
+
+                   WITH "BNH masterdata2lev" DO
+                     IF FINDLAST THEN
+                       RecordNoG := "BNH masterdata2lev"."Primary Key";
+                 END;
+
+    OnPostXMLport=BEGIN
+                    IF GUIALLOWED THEN
+                      DialogG.CLOSE;
+                  END;
+
+    Format=Variable Text;
+    FieldDelimiter=<">;
+    FieldSeparator=[;];
+  }
+  ELEMENTS
+  {
+    { [{E0E05335-DEF7-4367-9C5E-D1A508BAEF5F}];  ;XML                 ;Element ;Text     }
+
+    { [{C727399F-0113-4234-A8CC-466256D9EAD6}];1 ;Table               ;Element ;Table   ;
+                                                  SourceTable=Table5231129;
+                                                  Import::OnBeforeInsertRecord=BEGIN
+                                                                                 RecordNoG += 1;
+                                                                                 "BNH masterdata2lev"."Primary Key" := RecordNoG;
+
+                                                                                 IF RecordNoG MOD 100 = 0 THEN
+                                                                                   DialogG.UPDATE( 1, RecordNoG );
+                                                                               END;
+                                                                                }
+
+    { [{0BB6491B-C1AB-4DA3-AB50-547F2552B57D}];2 ;Levr.nr             ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH masterdata2lev::Levr.nr;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{87E0EEA5-97E7-4445-94AE-A269D8C5CF59}];2 ;Sted_By             ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH masterdata2lev::Sted/By;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{A4E1BC32-7B2D-47D2-972D-C48BD5A8F0F0}];2 ;Banknr              ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH masterdata2lev::Banknr;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{BD50A581-913C-4FFD-BC12-49645AE60782}];2 ;Betalingsbetingelser;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH masterdata2lev::Betalingsbetingelser;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{78AC53F4-C426-4AFB-8D27-5334FA7A519B}];2 ;betalingsm†te       ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH masterdata2lev::betalingsm†te;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{9C39570F-F063-47A1-9BAD-802077566486}];2 ;Bankgironr          ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH masterdata2lev::Bankgironr;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{E7E33470-CF2B-4280-BAB0-709E620656EB}];2 ;organisasjonsnr     ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH masterdata2lev::organisasjonsnr;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{3731EEEA-2C82-450C-9929-3A352AE8F6E8}];2 ;Leverand›rtype      ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH masterdata2lev::Leverand›rtype;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{81492038-9A63-4308-A7B1-1015F657BCCB}];2 ;Telefon             ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH masterdata2lev::Telefon;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{DFACFC2B-FC50-4EA5-AE5C-90D6136D5818}];2 ;sist_fakturert      ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH masterdata2lev::sist fakturert;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+  }
+  EVENTS
+  {
+  }
+  REQUESTPAGE
+  {
+    PROPERTIES
+    {
+    }
+    CONTROLS
+    {
+    }
+  }
+  CODE
+  {
+    VAR
+      C_INC_Progress@1101103000 : TextConst 'ENU=Import in progress...\ \Record No. #1#####;NOR=Import kj›rer...\ \Post nummer #1#####';
+      DialogG@1101103001 : Dialog;
+      RecordNoG@1101103002 : Integer;
+
+    BEGIN
+    END.
+  }
+}
+

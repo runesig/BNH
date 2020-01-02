@@ -1,0 +1,25 @@
+OBJECT Codeunit 5231128 BNH Delete Item
+{
+  OBJECT-PROPERTIES
+  {
+    Date=22.11.17;
+    Time=10:28:48;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    TableNo=27;
+    OnRun=BEGIN
+            DELETE( TRUE );
+          END;
+
+  }
+  CODE
+  {
+
+    BEGIN
+    END.
+  }
+}
+

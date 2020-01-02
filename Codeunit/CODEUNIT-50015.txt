@@ -1,0 +1,362 @@
+OBJECT Codeunit 50015 BNH CSI UsedCarsales
+{
+  OBJECT-PROPERTIES
+  {
+    Date=10.10.18;
+    Time=09:22:56;
+    Modified=Yes;
+    Version List=BNH.01;
+  }
+  PROPERTIES
+  {
+    TableNo=5025702;
+    OnRun=VAR
+            JobBatchLineL@1101103000 : Record 5028852;
+          BEGIN
+            JobBatchLineL.SETRANGE("Imp./Exp. Process ID", "Process ID");
+              IF JobBatchLineL.FINDFIRST THEN
+              BEGIN
+              VerifySetup(JobBatchLineL."Batch Job No.", JobBatchLineL."Imp./Exp. Process ID");
+              ConfirmExport(JobBatchLineL."Batch Job No.");
+              ExecuteExports;
+              UpdateJobBatch;
+              END;
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      C_MakeCode@1101103014 : TextConst 'ENU=NISSAN;NOR=NISSAN';
+      C_FtpCode@1101103021 : TextConst 'ENU=GAPVIS-%1;NOR=GAPVIS-%1';
+      BNHUsedCarSetupG@1101103004 : Record 50017;
+      JobBatchHeaderG@1101103007 : Record 5028851;
+      JobBatchLineG@1101103008 : Record 5028852;
+      ImpExpProcessG@1101103001 : Record 5025702;
+      ImpExpProcessDirectoryG@1101103002 : Record 5025704;
+      ImpExpProcessFilenameG@1101103003 : Record 5025705;
+      C_Confirm@1101103005 : TextConst 'ENU=Run export method %1 for %2 departments?;NOR=Kj›r eksportmetode %1 for %2 avdelinger?';
+      C_PeriodError@1101103010 : TextConst 'ENU=Invalid dates in %1 No. %2 for Process ID %3;NOR=Ugyldige datoer i %1 nr. %2 for prosess id %3';
+      BookNoG@1101103011 : Record 5025439;
+      TempBNHCSIDataG@1101103006 : TEMPORARY Record 50015;
+      C_Unknown@1101103012 : TextConst 'ENU=Unknown;NOR=Unknown';
+      C_Language@1101103013 : TextConst 'ENU=Norwegian;NOR=Norwegian';
+      C_InternalVATPostingGroup@1101103015 : TextConst 'ENU=FRITT;NOR=FRITT';
+      C_FileDeleted@1101103020 : TextConst 'ENU=File deleted: %1;NOR=Fil slettet: %1';
+      C_FileCreated@1101103019 : TextConst 'ENU=File created: %1;NOR=Fil opprettet: %1';
+      C_FileUploaded@1101103018 : TextConst 'ENU=File uploaded: %1;NOR=Fil lastet opp: %1';
+      C_FtpDebug@1101103017 : TextConst 'ENU=FileNameP: %1, FtpSetupL."Target Directory": %2, FtpSetupL."FTP Server": %3, FtpSetupL."FTP User": %4;NOR=FileNameP: %1, FtpSetupL."Target Directory": %2, FtpSetupL."FTP Server": %3, FtpSetupL."FTP User": %4';
+      C_FtpSetupNotFound@1101103016 : TextConst 'ENU=FTP setup not found: %1;NOR=FTP oppsett ikke funnet: %1';
+
+    PROCEDURE VerifySetup@1101103000(JobBatchNoP@1101103000 : Code[20];ExportMethodP@1101103001 : Code[20]);
+    BEGIN
+      WITH BNHUsedCarSetupG DO BEGIN
+        RESET;
+        FINDFIRST;
+      END;
+
+      WITH JobBatchHeaderG DO BEGIN
+        RESET;
+        SETRANGE( "No.", JobBatchNoP );
+        FINDFIRST;
+      END;
+
+      WITH JobBatchLineG DO BEGIN
+        RESET;
+        SETRANGE( "Batch Job No.", JobBatchNoP );
+        SETRANGE( "Imp./Exp. Process ID", ExportMethodP );
+        FINDFIRST;
+      END;
+
+      WITH ImpExpProcessG DO BEGIN
+        RESET;
+        SETRANGE( "Process ID", ExportMethodP );
+        FINDFIRST;
+      END;
+
+      WITH ImpExpProcessDirectoryG DO BEGIN
+        RESET;
+        SETRANGE( "Process No.", ImpExpProcessG."Process ID" );
+        FINDFIRST;
+      END;
+
+      WITH ImpExpProcessFilenameG DO BEGIN
+        RESET;
+        SETRANGE( "Process No.", ImpExpProcessG."Process ID" );
+        FINDFIRST;
+      END;
+    END;
+
+    PROCEDURE ConfirmExport@1101103001(ExportMethodp@1101103000 : Code[10]);
+    BEGIN
+      IF NOT GUIALLOWED THEN
+        EXIT;
+
+      IF NOT CONFIRM( C_Confirm, TRUE, ExportMethodp, BNHUsedCarSetupG.COUNT ) THEN
+        ERROR( '' );
+    END;
+
+    PROCEDURE ExecuteExports@1101103005();
+    VAR
+      ExportFileNameL@1101103000 : Text;
+    BEGIN
+      WITH BNHUsedCarSetupG DO
+        IF FINDSET THEN REPEAT
+          PrepareExport;
+          ExecuteExport( ExportFileNameL );
+          UploadToFtp( ExportFileNameL );
+        UNTIL NEXT = 0;
+    END;
+
+    PROCEDURE PrepareExport@1101103004();
+    BEGIN
+      WITH JobBatchLineG DO BEGIN
+        IF "Date 2" = 0D THEN
+          "Date 2" := CALCDATE("Code 1",TODAY - 1);
+        CASE TRUE OF
+          "Date 1" = 0D,
+          "Date 1" > TODAY,
+          "Date 1" > "Date 2":
+            ERROR( C_PeriodError, TABLECAPTION, "Batch Job No.", "Imp./Exp. Process ID" );
+        END;
+      END;
+
+      TempBNHCSIDataG.DELETEALL;
+
+      WITH BookNoG DO
+        IF FINDSET THEN
+          REPEAT
+            PrepareExport1; //separate function to allow to use EXIT to skip records
+          UNTIL NEXT = 0;
+    END;
+
+    PROCEDURE PrepareExport1@1101103007();
+    VAR
+      StartDateL@1101103012 : Date;
+      "-----"@1101103008 : Integer;
+      CustomerL@1101103000 : Record 18;
+      VehicleL@1101103003 : Record 5025400;
+      VehicleLedgerEntryL@1101103004 : Record 5025405;
+      SalespersonPurchaserL@1101103006 : Record 13;
+      LanguageL@1101103007 : Record 8;
+      GenBusinessPostingGroupL@1101103009 : Record 250;
+      VehicleCustomerL@1101103011 : Record 5025469;
+      VehicleOwnerL@1101103010 : Record 18;
+    BEGIN
+      WITH TempBNHCSIDataG DO
+        INIT;
+
+      // check vehicle
+      WITH VehicleL DO BEGIN
+
+        IF NOT GET( BookNoG.VIN ) THEN
+          EXIT;
+
+        SETRANGE( "Book No. Filter", BookNoG."No." );
+        SETRANGE( "Sales Date Filter", JobBatchLineG."Date 1", JobBatchLineG."Date 2" );
+        CALCFIELDS( "Vehicle Sales Price" );
+        IF "Vehicle Sales Price" = 0 THEN
+          EXIT;
+      END;
+
+      // get location vehicle ledger entry
+      WITH VehicleLedgerEntryL DO BEGIN
+        RESET;
+        SETCURRENTKEY( VIN, "Book No.", Vehicle, "Entry Type" );
+        SETRANGE( VIN, BookNoG.VIN );
+        SETRANGE( "Entry Type", "Entry Type"::Sale );
+        SETRANGE( "Book No.", BookNoG."No." );
+        SETRANGE( "Line Type", "Line Type"::Vehicle );
+        SETRANGE( "Location Code", BNHUsedCarSetupG."Location Code" );
+        IF BNHUsedCarSetupG."Carsales Posting Group" <> '' THEN
+          SETFILTER( "Gen. Prod. Posting Group", BNHUsedCarSetupG."Carsales Posting Group" );
+        IF NOT FINDLAST THEN
+          EXIT;
+      END;
+
+      // calc start date to day one 4 months ago
+      StartDateL := CALCDATE( '<-4M>', JobBatchLineG."Date 1" );
+      StartDateL := DMY2DATE( 1, DATE2DMY( StartDateL, 2 ), DATE2DMY( StartDateL, 3 ));
+
+      // get Customer from Vehicle Ledger Entry
+      WITH CustomerL DO
+        GET( VehicleLedgerEntryL."Source No." );
+
+      // get salesperson
+      WITH SalespersonPurchaserL DO BEGIN
+        INIT;
+        IF NOT GET( VehicleLedgerEntryL."Salespers./Purch. Code" ) THEN
+          SalespersonPurchaserL.Code := C_Unknown;
+      END;
+
+      // get language
+      //WITH LanguageL DO BEGIN
+      //  INIT;
+      //  IF NOT GET( CustomerL."Language Code" ) THEN
+      //    LanguageL.Name := C_Language;
+      //END;
+
+      // set customer group
+      //WITH TempBNHCSIDataG DO
+      //  CASE TRUE OF
+      //    CustomerL."Customer Type" = CustomerL."Customer Type"::Male,
+      //    CustomerL."Customer Type" = CustomerL."Customer Type"::Female:
+      //      "Customer Group" := "Customer Group"::"1";
+      //  ELSE
+      //      "Customer Group" := "Customer Group"::"2";
+      //  END;
+
+      // set contact details
+
+      WITH TempBNHCSIDataG DO BEGIN
+      //  CASE TRUE OF
+      //    CustomerL."Home E-Mail" <> '':
+      //      "E-Mail" := CustomerL."Home E-Mail";
+      //    CustomerL."E-Mail" <> '':
+      //      "E-Mail" := CustomerL."E-Mail";
+      //  END;
+        CASE TRUE OF
+          CustomerL."Home Mobile Phone No." <> '':
+            Respondent := CustomerL."Home Mobile Phone No.";
+          CustomerL."Mobile Phone No." <> '':
+            Respondent := CustomerL."Mobile Phone No.";
+        END;
+        IF (COPYSTR(Respondent, 1, 1) <> '+') AND (STRLEN(Respondent) = 8) THEN
+          Respondent := '+47' + Respondent;
+        IF STRLEN(Respondent) <>  11 THEN
+          Respondent := '+47';
+      END;
+
+      // set business name
+      //WITH TempBNHCSIDataG DO BEGIN
+      //  CASE TRUE OF
+      //    ( CustomerL."First Name" = '' ) AND ( "Customer Group" = "Customer Group"::"2" ):
+      //      "Company Name" := CustomerL."Last Name";
+      //  END;
+      //END;
+
+      // set owner name
+      WITH VehicleCustomerL DO BEGIN
+        RESET;
+        SETCURRENTKEY( VIN, Type );
+        SETRANGE( VIN, VehicleL.VIN );
+        SETRANGE( Type, Type::Owner );
+        IF FINDFIRST THEN BEGIN
+          IF VehicleOwnerL.GET( "Customer No." ) THEN
+      //      TempBNHCSIDataG."Owner Name" := STRSUBSTNO( '%1 %2', VehicleOwnerL."Last Name", VehicleOwnerL."First Name" )
+      //    ELSE
+      //      TempBNHCSIDataG."Owner Name" := STRSUBSTNO( '%1 %2', CustomerL."Last Name", CustomerL."First Name" );
+      ;
+        END;
+      END;
+
+      // assign remaining fields & insert
+      WITH TempBNHCSIDataG DO BEGIN
+        "No." := COUNT + 1;
+        "Event ID" := BNHUsedCarSetupG."Dealer No.";
+        "External ID" := VehicleLedgerEntryL."Salespers./Purch. Code";
+        ExtRef := 'Extref:' + VehicleL."License No." + '|' + VehicleLedgerEntryL."Document No.";
+        "Posting Date" := FORMAT( VehicleLedgerEntryL."Posting Date", 0, '<Day,2>.<Month,2>.<Year4>' );
+        INSERT;
+      END;
+    END;
+
+    PROCEDURE ExecuteExport@1101103010(VAR ExportFilenameP@1101103005 : Text);
+    VAR
+      FileManagementL@1101103004 : Codeunit 419;
+      OutStreamL@1101103003 : OutStream;
+      FileL@1101103002 : File;
+      BNHCSIUsedCarsalesL@1101103000 : XMLport 50015;
+      i@1101103001 : Integer;
+    BEGIN
+      // Filename: %1_aftersales_%2_%3_%4.txt
+      // %1 = Nissan dealernumber
+      // %2 = From date
+      // %3 = To date
+      // %4 = Exported date
+      // %5 = Exported time
+
+      WITH TempBNHCSIDataG DO
+        IF FINDSET THEN
+          REPEAT
+            i += 1;
+          UNTIL NEXT = 0;
+
+      ExportFilenameP :=
+        FileManagementL.CombinePath(
+          ImpExpProcessDirectoryG.Directory,
+          STRSUBSTNO( ImpExpProcessFilenameG.Filename,
+            BNHUsedCarSetupG."Location Code",
+            FORMAT( JobBatchLineG."Date 1", 0, '<Year,2><Month,2><Day,2>' ),
+            FORMAT( JobBatchLineG."Date 2", 0, '<Year,2><Month,2><Day,2>' ),
+            FORMAT( TODAY, 0, '<Year,2><Month,2><Day,2>' ),
+            FORMAT( TIME, 0, '<Hours24,2><Filler Character,0><Minutes,2><Seconds,2>' )));
+
+      FileL.CREATE( ExportFilenameP );
+      FileL.CREATEOUTSTREAM( OutStreamL );
+
+      CLEAR( BNHCSIUsedCarsalesL );
+      WITH BNHCSIUsedCarsalesL DO BEGIN
+        SETDESTINATION( OutStreamL );
+        PassData( TempBNHCSIDataG );
+        EXPORT;
+      END;
+
+      FileL.CLOSE;
+
+      LogMessage( STRSUBSTNO( C_FileCreated, ExportFilenameP ));
+    END;
+
+    PROCEDURE UpdateJobBatch@1101103008();
+    BEGIN
+      WITH JobBatchLineG DO BEGIN
+        "Date 1" := "Date 2" + 1;
+        "Date 2" := 0D;
+        MODIFY;
+      END;
+    END;
+
+    PROCEDURE LogMessage@1101103016(MessageP@1101103000 : Text);
+    BEGIN
+      IF NOT GUIALLOWED THEN
+        MESSAGE( CONVERTSTR( MessageP, '\', '/' ));
+    END;
+
+    PROCEDURE UploadToFtp@1101103012(ClientFileNamePathP@1101103000 : Text) : Boolean;
+    VAR
+      FtpSetupL@1101103003 : Record 5045179;
+      sFtpL@1101103002 : DotNet "'CoreTechs.Sftp.Client, Version=1.0.0.3, Culture=neutral, PublicKeyToken=null'.CoreTechs.Sftp.Client.Sftp";
+      sFtpServerL@1101103004 : Text;
+    BEGIN
+      WITH FtpSetupL DO BEGIN
+
+        Code := STRSUBSTNO( C_FtpCode, BNHUsedCarSetupG."Location Code" );
+
+        IF NOT GET( FtpSetupL.Code ) THEN BEGIN
+          MESSAGE( C_FtpSetupNotFound, Code );
+          EXIT( FALSE );
+        END;
+
+        IF NOT GUIALLOWED THEN
+          MESSAGE( C_FtpDebug, ClientFileNamePathP, "Target Directory", "FTP Server", "FTP User" );
+
+        SendFile( Code, ClientFileNamePathP );
+
+        EXIT( TRUE );
+      END;
+    END;
+
+    BEGIN
+    {
+      +----------------------------------------------+
+      | 2009 SI-DATA A/S (SID)                       |
+      +----------------------------------------------+
+      | INCADEA ENGINE                               |
+      +----------------------------------------------+
+      No.  Version  Date      ID      Remark
+      01   7.1.5    06.01.18  JRO     Initial Version, copy from cu1057962
+    }
+    END.
+  }
+}
+

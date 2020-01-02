@@ -1,0 +1,322 @@
+OBJECT Page 50006 DeliveryList
+{
+  OBJECT-PROPERTIES
+  {
+    Date=11.12.19;
+    Time=14:35:03;
+    Modified=Yes;
+    Version List=BNH;
+  }
+  PROPERTIES
+  {
+    InsertAllowed=No;
+    DeleteAllowed=No;
+    SourceTable=Table50003;
+    PageType=List;
+    ActionList=ACTIONS
+    {
+      { 1101103026;  ;ActionContainer;
+                      ActionContainerType=ActionItems }
+      { 1101103027;1 ;Action    ;
+                      Name=Update;
+                      CaptionML=[ENU=Update;
+                                 NOR=Oppdater];
+                      RunObject=Codeunit 50008;
+                      Promoted=Yes;
+                      Image=UpdateDescription;
+                      OnAction=VAR
+                                 DeliveryListFuncL@1101103000 : Codeunit 50008;
+                               BEGIN
+                                 DeliveryListFuncL.UpdateDeliveryList();
+
+                                 CurrPage.UPDATE(TRUE);
+                               END;
+                                }
+      { 1101103008;1 ;Action    ;
+                      Name=Vehicle;
+                      CaptionML=[ENU=Vehicle;
+                                 NOR=Kj›ret›y];
+                      Image=Card;
+                      OnAction=VAR
+                                 VehicleL@1101103000 : Record 5025400;
+                               BEGIN
+                                 WITH VehicleL DO BEGIN
+                                   RESET;
+                                     IF VehicleL.GET( Rec.VIN ) THEN
+                                       PAGE.RUN( PAGE::"Vehicle Card", VehicleL )
+                                 END;
+
+                                 CurrPage.UPDATE( FALSE );
+                               END;
+                                }
+      { 1101103010;1 ;Action    ;
+                      Name=Sales order;
+                      CaptionML=[ENU=Sales Order;
+                                 NOR=Salgsordre];
+                      Image=Sales;
+                      OnAction=VAR
+                                 SalesHeaderL@1101103000 : Record 36;
+                                 ArchivedSalesHeaderL@1101103001 : Record 5046905;
+                               BEGIN
+                                 WITH SalesHeaderL DO BEGIN
+                                   RESET;
+                                     IF SalesHeaderL.GET("Document Type"::Order, Rec."No." ) THEN
+                                       BEGIN
+                                       PAGE.RUN( PAGE::"Vehicle Sales Order", SalesHeaderL);
+                                       END ELSE BEGIN
+                                       IF ArchivedSalesHeaderL.GET(ArchivedSalesHeaderL."Document Type"::Order, Rec."No.") THEN
+                                          PAGE.RUN( PAGE::"Vehicle Archived Order", ArchivedSalesHeaderL);
+                                       END;
+                                 END;
+
+                                 CurrPage.UPDATE( FALSE );
+                               END;
+                                }
+      { 1101103011;1 ;Action    ;
+                      Name=Purchase Order;
+                      CaptionML=[ENU=Purchase Order;
+                                 NOR=Kj›ret›y bestilling];
+                      Image=Purchase;
+                      OnAction=VAR
+                                 PurchaseHeaderL@1101103000 : Record 38;
+                               BEGIN
+                                 WITH PurchaseHeaderL DO BEGIN
+                                   RESET;
+                                     IF PurchaseHeaderL.GET( PurchaseHeaderL."Document Type"::Order, Rec."Purch. Document No." ) THEN
+                                       PAGE.RUN( PAGE::"Vehicle Purchase Order", PurchaseHeaderL);
+                                 END;
+
+                                 CurrPage.UPDATE( FALSE );
+                               END;
+                                }
+      { 1101103012;1 ;Action    ;
+                      Name=Service Order;
+                      CaptionML=[ENU=Service Order;
+                                 NOR=Serivceordre];
+                      Image=ServiceTasks;
+                      OnAction=VAR
+                                 ServiceHeaderL@1101103000 : Record 5025624;
+                               BEGIN
+                                 WITH ServiceHeaderL DO BEGIN
+                                   RESET;
+                                     IF ServiceHeaderL.GET( ServiceHeaderL."Document Type"::Order, Rec."Service Order No." ) THEN
+                                       PAGE.RUN( PAGE::"Service Order", ServiceHeaderL);
+                                 END;
+
+                                 CurrPage.UPDATE( FALSE );
+                               END;
+                                }
+      { 1101103013;1 ;Action    ;
+                      Name=Set as Delivered;
+                      CaptionML=[ENU=Set as Delivered Cust.;
+                                 NOR=Sett som levert kunde];
+                      Image=Delivery;
+                      OnAction=BEGIN
+                                 "Delivery ID" := USERID;
+                                 "Delivery Time" := CREATEDATETIME(WORKDATE, TIME);
+                                 MODIFY;
+                               END;
+                                }
+      { 1101103017;1 ;Action    ;
+                      Name=Set Checked Incentives;
+                      CaptionML=[ENU=Set Checked Incentives;
+                                 NOR=Sett sjekket st›tter];
+                      Image=Check;
+                      OnAction=BEGIN
+                                 "Checked Incentives ID" := USERID;
+                                 "Checked Incentives Time" := CREATEDATETIME(WORKDATE, TIME);
+                                 MODIFY;
+                               END;
+                                }
+    }
+  }
+  CONTROLS
+  {
+    { 1101103000;0;Container;
+                ContainerType=ContentArea }
+
+    { 1101103001;1;Group  ;
+                Name=Group;
+                GroupType=Repeater }
+
+    { 1101103018;2;Field  ;
+                SourceExpr="Last Update";
+                Editable=false }
+
+    { 1101103028;2;Field  ;
+                SourceExpr="Location Code" }
+
+    { 1101103025;2;Field  ;
+                SourceExpr=Department;
+                Editable=false }
+
+    { 1101103029;2;Field  ;
+                SourceExpr="No." }
+
+    { 1101103024;2;Field  ;
+                SourceExpr="Order Date" }
+
+    { 1101103014;2;Field  ;
+                SourceExpr="Offer No." }
+
+    { 1101103030;2;Field  ;
+                SourceExpr="Sell-to Customer No." }
+
+    { 1101103031;2;Field  ;
+                SourceExpr="Sell-to Customer Name" }
+
+    { 1000000000;2;Field  ;
+                SourceExpr="Phone No." }
+
+    { 1101103032;2;Field  ;
+                SourceExpr="Registration Date" }
+
+    { 1101103033;2;Field  ;
+                SourceExpr="Delivery Date" }
+
+    { 1101103007;2;Field  ;
+                SourceExpr="Delivery Point" }
+
+    { 1101103034;2;Field  ;
+                SourceExpr="Salesperson Code" }
+
+    { 1101103035;2;Field  ;
+                SourceExpr=Name }
+
+    { 1101103022;2;Field  ;
+                SourceExpr="Salesperson Code 2" }
+
+    { 1101103023;2;Field  ;
+                SourceExpr="Your Reference" }
+
+    { 1101103036;2;Field  ;
+                SourceExpr=Description }
+
+    { 1101103037;2;Field  ;
+                SourceExpr="Sales Line No." }
+
+    { 1101103038;2;Field  ;
+                SourceExpr=VIN }
+
+    { 1101103061;2;Field  ;
+                SourceExpr="Current Book No.";
+                Editable=false }
+
+    { 1101103039;2;Field  ;
+                SourceExpr="License No." }
+
+    { 1101103019;2;Field  ;
+                SourceExpr="Initial Registration" }
+
+    { 1101103020;2;Field  ;
+                SourceExpr="Date of Sale" }
+
+    { 1101103040;2;Field  ;
+                SourceExpr="Import›rnr." }
+
+    { 1101103041;2;Field  ;
+                SourceExpr=Dealer }
+
+    { 1101103042;2;Field  ;
+                SourceExpr="Plassering/Status" }
+
+    { 1101103043;2;Field  ;
+                SourceExpr="Purchase Receipt Date" }
+
+    { 1101103044;2;Field  ;
+                SourceExpr="Incentive Type" }
+
+    { 1101103045;2;Field  ;
+                SourceExpr=Financing }
+
+    { 1101103046;2;Field  ;
+                SourceExpr=Incentive }
+
+    { 1101103002;2;Field  ;
+                SourceExpr="Cruising Range" }
+
+    { 1101103003;2;Field  ;
+                SourceExpr="Make Code" }
+
+    { 1101103004;2;Field  ;
+                SourceExpr="Vehicle Status" }
+
+    { 1101103005;2;Field  ;
+                SourceExpr="Gen. Prod. Posting Group" }
+
+    { 1101103006;2;Field  ;
+                SourceExpr="Inventory Posting Group" }
+
+    { 1101103047;2;Field  ;
+                SourceExpr="Retail/Sell Out" }
+
+    { 1101103048;2;Field  ;
+                SourceExpr="Service Order No." }
+
+    { 1101103049;2;Field  ;
+                SourceExpr="Pickup Date" }
+
+    { 1101103050;2;Field  ;
+                SourceExpr="Status Code" }
+
+    { 1101103051;2;Field  ;
+                SourceExpr="Work Status Code" }
+
+    { 1101103052;2;Field  ;
+                SourceExpr="Arch.Serv. Order No." }
+
+    { 1101103053;2;Field  ;
+                SourceExpr="Reason for Archiving" }
+
+    { 1101103054;2;Field  ;
+                SourceExpr="Purch. Document No." }
+
+    { 1101103055;2;Field  ;
+                SourceExpr="Expected Receipt Date" }
+
+    { 1101103056;2;Field  ;
+                SourceExpr="Vendor Order No." }
+
+    { 1101103009;2;Field  ;
+                SourceExpr=Text }
+
+    { 1101103057;2;Field  ;
+                SourceExpr="Invoice Date";
+                Editable=false }
+
+    { 1101103062;2;Field  ;
+                SourceExpr="Cr. Memo Date";
+                Editable=false }
+
+    { 1101103021;2;Field  ;
+                SourceExpr=Credited;
+                Editable=false }
+
+    { 1101103060;2;Field  ;
+                SourceExpr="Value Posted Sales Incentives" }
+
+    { 1101103058;2;Field  ;
+                SourceExpr="Vehicle Sales Price Group";
+                Editable=false }
+
+    { 1101103015;2;Field  ;
+                SourceExpr="Checked Incentives ID" }
+
+    { 1101103016;2;Field  ;
+                SourceExpr="Checked Incentives Time" }
+
+    { 1000000001;2;Field  ;
+                SourceExpr="Delivery ID" }
+
+    { 1000000002;2;Field  ;
+                SourceExpr="Delivery Time" }
+
+  }
+  CODE
+  {
+
+    BEGIN
+    END.
+  }
+}
+

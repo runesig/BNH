@@ -1,0 +1,124 @@
+OBJECT Page 5231119 BNH Finansposter 2016
+{
+  OBJECT-PROPERTIES
+  {
+    Date=18.11.17;
+    Time=14:41:00;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    SourceTable=Table5231122;
+    PageType=List;
+    ActionList=ACTIONS
+    {
+      { 1101103009;  ;ActionContainer;
+                      ActionContainerType=ActionItems }
+      { 1101103010;1 ;Action    ;
+                      Name=Fyll ut tabell;
+                      OnAction=VAR
+                                 BNHRegnskapsposterL@1101103000 : Record 5231121;
+                                 Bevegelser2016L@1101103001 : Record 5231122;
+                               BEGIN
+                                 BNHRegnskapsposterL.SETFILTER(BilDat, '%1', '*2016*');
+                                 IF BNHRegnskapsposterL.FINDFIRST THEN
+                                   REPEAT
+                                   IF NOT Bevegelser2016L.GET(BNHRegnskapsposterL.Kontonr, BNHRegnskapsposterL.Filial, BNHRegnskapsposterL.Avd, BNHRegnskapsposterL."Int M†ned") THEN
+                                     BEGIN
+                                     Bevegelser2016L.INIT;
+                                     Bevegelser2016L.Konto := BNHRegnskapsposterL.Kontonr;
+                                     Bevegelser2016L.Filial := BNHRegnskapsposterL.Filial;
+                                     Bevegelser2016L.Avdeling := BNHRegnskapsposterL.Avd;
+                                     Bevegelser2016L.Periode := BNHRegnskapsposterL."Int M†ned";
+                                     Bevegelser2016L.INSERT;
+                                     END;
+                                   UNTIL BNHRegnskapsposterL.NEXT = 0;
+
+
+                                 MESSAGE('Oppdatering fullf›rt');
+                               END;
+                                }
+      { 1101103011;1 ;Action    ;
+                      Name=Create record;
+                      Image=UpdateDescription;
+                      OnAction=VAR
+                                 BNHBevegelser2016L@1101103000 : Record 5231122;
+                               BEGIN
+                                 CurrPage.SETSELECTIONFILTER(BNHBevegelser2016L);
+                                 CODEUNIT.RUN( CODEUNIT::"BNH Regnskapsposter 2016", BNHBevegelser2016L);
+                               END;
+                                }
+      { 1101103015;1 ;Action    ;
+                      Name=Journal;
+                      RunObject=Page 39;
+                      Image=JobJournal }
+      { 1101103016;1 ;Action    ;
+                      Name=Clear Status;
+                      OnAction=VAR
+                                 BNHBevegelser2016L@1101103000 : Record 5231122;
+                               BEGIN
+                                 BNHBevegelser2016L.SETFILTER(Status, '<>%1', BNHBevegelser2016L.Status::" ");
+                                 IF BNHBevegelser2016L.FINDFIRST THEN
+                                   REPEAT
+                                   CLEAR(BNHBevegelser2016L.Status);
+                                   CLEAR(BNHBevegelser2016L.Datetime);
+                                   CLEAR(BNHBevegelser2016L."Update message");
+                                   BNHBevegelser2016L.MODIFY;
+                                   UNTIL BNHBevegelser2016L.NEXT = 0;
+
+                                 MESSAGE('Done!');
+
+                                 CurrPage.UPDATE;
+                               END;
+                                }
+    }
+  }
+  CONTROLS
+  {
+    { 1101103000;0;Container;
+                ContainerType=ContentArea }
+
+    { 1101103001;1;Group  ;
+                Name=Group;
+                GroupType=Repeater }
+
+    { 1101103002;2;Field  ;
+                SourceExpr=Konto }
+
+    { 1101103003;2;Field  ;
+                SourceExpr=Filial }
+
+    { 1101103004;2;Field  ;
+                SourceExpr=Avdeling }
+
+    { 1101103005;2;Field  ;
+                SourceExpr=Periode }
+
+    { 1101103006;2;Field  ;
+                SourceExpr="Bel›p" }
+
+    { 1101103007;2;Field  ;
+                SourceExpr="Incadea konto" }
+
+    { 1101103008;2;Field  ;
+                SourceExpr="Incadea merke" }
+
+    { 1101103012;2;Field  ;
+                SourceExpr=Status }
+
+    { 1101103013;2;Field  ;
+                SourceExpr=Datetime }
+
+    { 1101103014;2;Field  ;
+                SourceExpr="Update message" }
+
+  }
+  CODE
+  {
+
+    BEGIN
+    END.
+  }
+}
+

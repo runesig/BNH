@@ -1,0 +1,551 @@
+OBJECT Codeunit 5231104 BB Vehicle Update
+{
+  OBJECT-PROPERTIES
+  {
+    Date=12.12.17;
+    Time=19:58:20;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    TableNo=5231103;
+    OnRun=VAR
+            WorldManufacturerCodeL@1101103000 : Record 5045460;
+          BEGIN
+            BBVehicleG.COPY( Rec );
+
+            WITH BBVehicleG DO BEGIN
+
+              CALCFIELDS("No.");
+
+              CASE TRUE OF
+
+                Status = Status::Ignore:
+                  EXIT;
+                BBVehicleG."BNH VIN" <> '':
+                  ERROR(C_BNHVehicle);
+
+                BBVehicleG.codeVin = '':
+                  ERROR( C_NoVIN );
+
+                STRLEN(codeVin) <> 17:
+                  ERROR(C_LengthVIN);
+
+                NOT WorldManufacturerCodeL.GET(COPYSTR(codeVin, 1, 3)):
+                  ERROR('Finner ikke kode %1 i tabell "World Manufacturer Code"', COPYSTR(codeVin, 1, 3));
+
+                "No." <> '':
+                  ModifyRecord;
+
+                ELSE
+                  InsertRecord;
+
+              END;
+            END;
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      C_ConfirmProcess@1101103000 : TextConst 'ENU=Process %1 records?;NOR=Prosesser %1 poster?';
+      BBVehicleG@1101103001 : Record 5231103;
+      VehicleG@1101103002 : Record 5025400;
+      C_NoVIN@1101103003 : TextConst 'ENU=VIN missing;NOR=Mangler chassisnummer';
+      C_LengthVIN@1101103004 : TextConst 'ENU=VIN is not 17 digits';
+      C_BNHVehicle@1101103005 : TextConst 'ENU=Vehisle already eksit from BNH;NOR=Kjõretõyet eksisterer allerede i BNH';
+
+    PROCEDURE InsertRecord@1101103000();
+    BEGIN
+      CLEAR( VehicleG );
+      WITH VehicleG DO BEGIN
+        INIT;
+        VIN := BBVehicleG.codeVin; // Insert mÜ kjõres etter chassisnr. Hvis ikke overskrives modell bl.a.
+      //  SetFields;
+        INSERT( TRUE );
+        ModifyRecord();
+      END;
+    END;
+
+    PROCEDURE ModifyRecord@1101103001();
+    VAR
+      UpdateL@1101103000 : Boolean;
+    BEGIN
+      WITH VehicleG DO BEGIN
+        BBVehicleG.CALCFIELDS("No.");
+        GET( BBVehicleG."No." );
+        //Start oppdatering fra BB
+        {UpdateL := FALSE;
+        CASE VehicleG."Extra Code 2" OF
+          'MVR2', 'MVR4', 'MVR5', 'MVR8', 'MVR9'  :
+            UpdateL := TRUE;
+        END;
+        CASE VehicleG."Customer No." OF
+          'INTERN', 'CU012513' :
+            UpdateL := TRUE;
+        END;
+        IF VehicleG."Vehicle Status" <> VehicleG."Vehicle Status"::"Customer Vehicle" THEN
+          UpdateL := FALSE;
+
+        IF (VehicleG."Contact No." = 'CO00000') AND (VehicleG."Customer No." = '') THEN
+          UpdateL := TRUE;
+
+        IF UpdateL THEN
+          BEGIN
+         } //Stop
+        IF VehicleG."Vehicle Status" <> VehicleG."Vehicle Status"::"Customer Vehicle" THEN
+          ERROR('Not a Customer Vehicle');
+        SetFields;
+        MODIFY( TRUE );
+      //  BBVehicleG."Update message" := 'Updatet from BB 12/12/17';
+      //  BBVehicleG.MODIFY;
+      //    END; //
+      END;
+    END;
+
+    PROCEDURE SetFields@1101103005();
+    VAR
+      txtHelp@1101103000 : Text[250];
+      ModelL@1101103001 : Record 27;
+    BEGIN
+      WITH VehicleG DO BEGIN
+        IF ModelL.GET(BBVehicleG."Model No.") THEN
+          VALIDATE("Model No.", BBVehicleG."Model No.")
+          ELSE
+          VALIDATE("Model No.", BBVehicleG."Make Code");
+        VALIDATE(Model, BBVehicleG.Model);
+        VALIDATE(Type, BBVehicleG.Type);
+        VALIDATE(Class, BBVehicleG.Class);
+        VALIDATE("Variant Code", BBVehicleG."Variant Code");
+        SetCustomerNo;
+        VALIDATE("License No.", BBVehicleG."License No.");
+        VALIDATE(Mileage, FormatDecimal(BBVehicleG.Mileage));
+        VALIDATE("Annual Mileage", FormatDecimal(BBVehicleG."Annual Mileage"));
+        IF BBVehicleG."Prod. Year" <> '' THEN
+          VALIDATE("Prod. Year", Str2Date(BBVehicleG."Prod. Year", 4));
+        IF BBVehicleG."Initial Registration" <> '' THEN
+          VALIDATE("Initial Registration", Str2Date(BBVehicleG."Initial Registration", 4));
+        VALIDATE("Power (kW)", FormatDecimal(BBVehicleG."Power (kW)"));
+        VALIDATE("Power (hp)", FormatDecimal(BBVehicleG."Power (hp)"));
+        VALIDATE(Tires, BBVehicleG.Tires);
+        VALIDATE("Empty Weight (kg)", FormatDecimal(BBVehicleG."Empty Weight (kg)"));
+        VALIDATE("Total Weight (kg)", FormatDecimal(BBVehicleG."Total Weight (kg)"));
+        VALIDATE("Roof Load (kg)", FormatDecimal(BBVehicleG."Roof Load (kg)"));
+        VALIDATE("Data Processing No.", BBVehicleG."Data Processing No.");
+        VALIDATE("Engine Code", BBVehicleG."Engine Code");
+        VALIDATE("Engine No.", BBVehicleG."Engine No.");
+        IF BBVehicleG."Key No." <> '' THEN
+          CreateProtectedVehCode(VehicleG, BBVehicleG."Key No.", 'NùKKEL');
+        VALIDATE("Vehicle Category Code", BBVehicleG."Vehicle Category Cod");
+        VALIDATE("Emissions Test Category Code", BBVehicleG."Emissions Test Categ");
+        VALIDATE(VehicleG."Cylinder Capacity (ccm)", FormatDecimal(BBVehicleG."Cylinder Capacity (c"));
+        IF BBVehicleG."Customer Registratio" <> '' THEN
+          VALIDATE("Customer Registration Date", Str2Date(BBVehicleG."Customer Registratio", 4));
+        VALIDATE("Model Code", BBVehicleG."Model Code");
+        IF BBVehicleG."Transmission Type Co" <> '' THEN
+          CreateTransmissionCode(BBVehicleG."Transmission Type Co");
+        VALIDATE("Transmission Type Code", BBVehicleG."Transmission Type Co");
+        IF BBVehicleG."Engine Type Code" <> '' THEN
+          CreateEngineTypeCode(BBVehicleG."Engine Type Code");
+        "Engine Type Code" := BBVehicleG."Engine Type Code";
+        //VALIDATE("Engine Type Code", BBVehicleG."Engine Type Code");
+        VALIDATE("No. of Cylinders", FormatDecimal(BBVehicleG."No. of Cylinders"));
+        VALIDATE("Trailer Load (kg)", FormatDecimal(BBVehicleG."Trailer Load (kg)"));
+        VALIDATE("Trailer Tongue Load (kg)", FormatDecimal(BBVehicleG."Trailer Tongue Load"));
+        IF UPPERCASE(BBVehicleG."4WD") = 'NEI' THEN
+          VALIDATE("4WD", FALSE)
+          ELSE
+          VALIDATE("4WD", TRUE);
+        VALIDATE("No. of Axles", FormatDecimal(BBVehicleG."No. of Axles"));
+        VALIDATE("Wheel Distance (mm)", FormatDecimal(BBVehicleG."Wheel Distance (mm)"));
+        VALIDATE("Front Axle Load (kg)", FormatDecimal(BBVehicleG."Front Axle Load (kg)"));
+        VALIDATE("Rear Axle Load (kg)", FormatDecimal(BBVehicleG."Rear Axle Load (kg)"));
+        VALIDATE("No. of Doors", FormatDecimal(BBVehicleG."No. of Doors"));
+        VALIDATE("Purchase Invoice Date", Str2Date(BBVehicleG."Purchase Invoice Dat", 4));
+        //BBVehicleG."Old Customer No.");
+        VALIDATE("Purchase Receipt Date", Str2Date(BBVehicleG."Purchase Receipt Dat", 4));
+      //  BBVehicleG."Current Book No."
+        VALIDATE("Date of Sale", Str2Date(BBVehicleG."Date of Sale", 4));
+
+
+      {
+      //  VIN := BnHVehicleG."CHASSIS-NUMBER";
+
+        // := BnHVehicleG.KEY;
+        // := BnHVehicleG."STATE-CODE";
+        // := BnHVehicleG."TRANSACT-DATE";
+        // := BnHVehicleG.HANDLER;
+        SetCustomerNo;
+        EVALUATE( "License No.", BnHVehicleG."REGISTER-NUMBER" );
+        // := BnHVehicleG."CAR-GROUP";
+        // := BnHVehicleG.STATUS;
+        // := BnHVehicleG."CHASSIS-NUMBER";
+        // := BnHVehicleG."USER-CODE";
+        // := BnHVehicleG."OWNER-CODE";
+        // := BnHVehicleG."UNIT-ACCOUNTING";
+        // := BnHVehicleG."CONTACT-PERSON";
+        "Initial Registration" := EvalDate( BnHVehicleG."FIRST-REG-DATE" );
+        "Customer Registration Date" := EvalDate( BnHVehicleG."LATEST-REG-DATE" );
+        // := BnHVehicleG."FIRST-OCCURRENCE-DAT";
+        // := BnHVehicleG."EXPECTED-ARIVAL-DATE";
+        // := BnHVehicleG."ARIVAL-DATE";
+        // := BnHVehicleG."LAST-OWNER-CHANGE";
+        "Last Purchaser No." := BnHVehicleG."SALESMAN-BUY";
+        "Last Salesperson No." := BnHVehicleG."SALESMAN-SALE";
+        // := BnHVehicleG."RESERVATION-DATE";
+        // := BnHVehicleG.RESERVATION;
+        Model := BnHVehicleG."MODEL-TEXT";
+        // := BnHVehicleG."ORIG-MODEL-CODE1";
+        // := BnHVehicleG."ORIG-MODEL-CODE2";
+        "Model Code" := BnHVehicleG."MODEL-CODE";
+        // := BnHVehicleG.CLASSIFICATION;
+        "Engine No." := BnHVehicleG."MOTOR-NUMBER";
+        IF BnHVehicleG."KEY-CODE" <> '' THEN
+          CreateProtectedVehCode(VehicleG, BnHVehicleG."KEY-CODE", 'NùKKEL') ;
+        BnHVehicleG.CALCFIELDS(Radio);
+        IF BnHVehicleG.Radio <> '' THEN
+          CreateProtectedVehCode(VehicleG, BnHVehicleG.Radio, 'RADIO') ;
+        "Model Year" := BnHVehicleG."YEAR-MODEL";
+        IF EVALUATE( "Cylinder Capacity (ccm)", BnHVehicleG."CYLINDER-VOLUME" ) THEN ;
+        IF EVALUATE( "No. of Seats", BnHVehicleG.SEATS ) THEN ;
+        // := BnHVehicleG."DECLARATION-DATE";
+        // := BnHVehicleG."DECLARATION-PLACE";
+        // := BnHVehicleG."DECLARATION-NUMBER";
+        // := BnHVehicleG."ARRIVAL-SHIP";
+        // := BnHVehicleG."ARRIVAL-NUMBER";
+        // := BnHVehicleG."BIL-OF-LANDING";
+        // := BnHVehicleG."SCRUTINEERING-DATE";
+        // := BnHVehicleG."EQUIPMENT-1";
+        // := BnHVehicleG."EQUIPMENT-2";
+        // := BnHVehicleG."EQUIPMENT-3";
+        // := BnHVehicleG."EQUIPMENT-4";
+        // := BnHVehicleG.INSURANCE;
+        IF EVALUATE( Mileage, BnHVehicleG.MILEAGE ) THEN ;
+        txtHelp := BnHVehicleG."MISC-1" +' / ' + BnHVehicleG."MISC-2" + ' / ' + BnHVehicleG."MISC-3" + ' / ' + BnHVehicleG."MISC-7" ;
+        "Text 4" := COPYSTR(txtHelp,1,30);
+        // := BnHVehicleG."MISC-2";
+        // := BnHVehicleG."MISC-3";
+        // := BnHVehicleG."MISC-4";
+        // := BnHVehicleG."MISC-5";
+        // := BnHVehicleG."MISC-6";
+        // := BnHVehicleG."MISC-7";
+        // := BnHVehicleG."MISC-8";
+        // := BnHVehicleG."MISC-9";
+        // := BnHVehicleG."MISC-10";
+        // := BnHVehicleG."LAST-INVOICE-DTE";
+        // := BnHVehicleG."CONTACT-DATE";
+        // := BnHVehicleG."MAIL-CODE-1";
+        // := BnHVehicleG."MAIL-CODE-2";
+        // := BnHVehicleG."MAIL-CODE-3";
+        // := BnHVehicleG."MAIL-CODE-4";
+        // := BnHVehicleG."MAIL-CODE-5";
+        // := BnHVehicleG."MAIL-CODE-6";
+        // := BnHVehicleG."MAIL-CODE-7";
+        // := BnHVehicleG."MAIL-CODE-8";
+        // := BnHVehicleG."MAIL-CODE-9";
+        // := BnHVehicleG."SALE-THIS-YR";
+        // := BnHVehicleG."SALE-LAST-YR";
+        // := BnHVehicleG."SALE-LAST-YR-1";
+        // := BnHVehicleG."DELETE-PROPOSAL";
+        // := BnHVehicleG.LEASING;
+      //"Color Description" := BnHVehicleG.COLOUR;  //JRO tilleggsfil, mÜ tas som vehicle option
+      BnHVehicleG.CALCFIELDS("Fabrik. fargekode", "Fabrikantens fargenavn", Interiõrkode, Modellkode, Interiõr);
+      IF BnHVehicleG.Modellkode <>'' THEN
+        VALIDATE("Model No.", BnHVehicleG.Modellkode);
+      IF BnHVehicleG."Fabrik. fargekode" <> '' THEN
+       CreateOptions(VehicleG, BnHVehicleG."Fabrik. fargekode", 'Color') ;
+      //IF BnHVehicleG.Interiõrkode <> '' THEN
+      // CreateTrim(VehicleG, BnHVehicleG.Interiõrkode, 'Upholstery') ;
+      IF BnHVehicleG.Interiõr <> ''THEN
+        CreateTrim(VehicleG, BnHVehicleG.Interiõr, 'Upholstery');
+      IF BnHVehicleG."MAIL-CODE-7" <> '' THEN
+        BEGIN
+        CreateExtraCode1(BnHVehicleG."MAIL-CODE-7");
+        VALIDATE("Extra Code 1", BnHVehicleG."MAIL-CODE-7");
+        END;
+      }
+      END;
+    END;
+
+    PROCEDURE SetCustomerNo@1101103002();
+    VAR
+      CustomerL@1101103000 : Record 18;
+      ContactL@1101103001 : Record 5050;
+      VehicleCustomerL@1101103002 : Record 5025469;
+      BBCustomerL@1101103004 : Record 5231104;
+      CustNo@1101103003 : Code[10];
+    BEGIN
+      WITH BBCustomerL DO BEGIN
+        SETCURRENTKEY( "Cust No." );
+        SETRANGE( "Cust No.", BBVehicleG."Customer No." );
+        IF ISEMPTY THEN
+          EXIT
+        ELSE
+          FINDFIRST;
+      END;
+      IF (BBCustomerL."No." = '') AND (BBCustomerL."BNH Kundenr." <> '') THEN
+        CustNo := BBCustomerL."BNH Kundenr."
+        ELSE
+        CustNo := BBCustomerL."No.";
+
+
+
+      WITH CustomerL DO
+        CASE GET( CustNo ) OF
+          FALSE:
+            BEGIN
+              VehicleG."Customer No." := '';
+              VehicleG."Address No." := 0;
+            END;
+          TRUE:
+            BEGIN
+              VehicleG."Customer No." := "No.";
+              VehicleG."Address No." := "Address No.";
+
+              WITH ContactL DO BEGIN
+                SETCURRENTKEY( "Address No.", Type );
+                SETRANGE( "Address No.", VehicleG."Address No." );
+                SETRANGE( "Customer No.", CustomerL."No." );
+                SETRANGE( Type, Type::Company );
+                IF FINDFIRST THEN
+                  VehicleG."Contact No." := "No."
+                ELSE
+                  VehicleG."Contact No." := '';
+              END;
+
+              WITH VehicleCustomerL DO BEGIN
+                RESET;
+                VehicleCustomerL.SETRANGE( VIN, VehicleG.VIN );
+                VehicleCustomerL.SETFILTER( Type, '%1|%2', VehicleCustomerL.Type::Buyer, VehicleCustomerL.Type::Owner );
+                IF VehicleCustomerL.FINDSET THEN
+                  REPEAT
+                    VehicleCustomerL.VALIDATE( "Customer No.", CustomerL."No." );
+                    VehicleCustomerL.MODIFY( TRUE );
+                  UNTIL VehicleCustomerL.NEXT = 0;
+              END;
+            END;
+        END;
+
+      VehicleG.CALCFIELDS( Name );
+    END;
+
+    PROCEDURE CreateProtectedVehCode@1101103009(recP@1101103002 : Record 5025400;CodeP@1101103003 : Text[30];CodeTypeP@1101103004 : Code[10]);
+    VAR
+      ProtectedVehCodeL@1101103000 : Record 5045458;
+      ProtectedVehCode2L@1101103001 : Record 5045458;
+      ProtectedVehCodeTypeL@1101103005 : Record 5045457;
+    BEGIN
+      IF NOT ProtectedVehCodeTypeL.GET(recP."Make Code", CodeTypeP) THEN BEGIN
+        ProtectedVehCodeTypeL.INIT;
+        ProtectedVehCodeTypeL.VALIDATE("Make Code", recP."Make Code");
+        ProtectedVehCodeTypeL.VALIDATE(Code, CodeTypeP);
+        ProtectedVehCodeTypeL.VALIDATE(Description, CodeTypeP);
+        ProtectedVehCodeTypeL.INSERT(TRUE);
+      END;
+      ProtectedVehCode2L.SETRANGE(VIN, recP.VIN);
+      ProtectedVehCode2L.SETRANGE("Code Type", CodeTypeP);
+      ProtectedVehCode2L.SETRANGE(Code, COPYSTR(CodeP, 1, 20));
+      IF NOT ProtectedVehCode2L.FINDFIRST THEN BEGIN
+        ProtectedVehCodeL.INIT;
+        ProtectedVehCodeL.VIN := recP.VIN;
+        ProtectedVehCodeL.VALIDATE("Make Code", recP."Make Code");
+        ProtectedVehCodeL."Code Type" :=  CodeTypeP;
+        IF (ProtectedVehCode2L.FINDLAST) AND (ProtectedVehCode2L.Remark <> CodeP)  THEN
+          ProtectedVehCodeL.VALIDATE("Line No.", ProtectedVehCode2L."Line No." + 10000)
+        ELSE
+          ProtectedVehCodeL.VALIDATE("Line No.", 10000);
+          ProtectedVehCodeL.VALIDATE(Code, COPYSTR(CodeP, 1, 20));
+        IF STRLEN (CodeP) > 20 THEN
+          ProtectedVehCodeL.Remark := CodeP;
+        ProtectedVehCodeL.INSERT(TRUE);
+      END;
+    END;
+
+    PROCEDURE CreateOptions@1101103003(recP@1101103002 : Record 5025400;CodeP@1101103004 : Text[30];CodeTypeP@1101103003 : Code[10]);
+    VAR
+      VehicleOptionL@1101103000 : Record 5025422;
+      VehicleOptionL2@1101103005 : Record 5025422;
+      ManuOptionsL@1101103001 : Record 5025419;
+      Teller@1101103006 : Integer;
+    BEGIN
+      {IF NOT ManuOptionsL.GET(recP."Make Code", recP."Model No.", CodeTypeP) THEN BEGIN
+        ManuOptionsL.INIT;
+        ManuOptionsL.VALIDATE("Make Code", recP."Make Code");
+        ManuOptionsL.VALIDATE("Model No.", recP."Model No.");
+        ManuOptionsL.VALIDATE(Code, BnHVehicleG."Fabrik. fargekode");
+        ManuOptionsL."Option Type" := 1;
+        ManuOptionsL.VALIDATE(Description, BnHVehicleG."Fabrikantens fargenavn");
+        IF NOT ManuOptionsL.INSERT(TRUE) THEN;
+      END;
+      VehicleOptionL.SETRANGE(VIN, recP.VIN);
+      VehicleOptionL.SETRANGE("Make Code", recP."Make Code");
+      VehicleOptionL.SETRANGE("Option Type", 1);
+      IF VehicleOptionL.FINDFIRST THEN BEGIN
+        VehicleOptionL."Option Code" := BnHVehicleG."Fabrik. fargekode";
+        VehicleOptionL.VALIDATE(Description, BnHVehicleG."Fabrikantens fargenavn");
+        VehicleOptionL.MODIFY;
+      END ELSE BEGIN
+        VehicleOptionL2.SETRANGE(VIN, recP.VIN);
+        IF VehicleOptionL2.FINDLAST THEN
+          Teller := VehicleOptionL2."Line No." + 10000;
+        VehicleOptionL.INIT;
+        VehicleOptionL.VIN := recP.VIN;
+        VehicleOptionL.VALIDATE("Line No.", Teller);
+        VehicleOptionL."Make Code" := recP."Make Code";
+        VehicleOptionL.VALIDATE("Model No.", recP."Model No.");
+        VehicleOptionL.VALIDATE(Type, VehicleOptionL.Type::"Manuf. Option");
+        VehicleOptionL."Option Type" := 1;
+        VehicleOptionL."Option Code" := BnHVehicleG."Fabrik. fargekode";
+        VehicleOptionL.VALIDATE(Description, BnHVehicleG."Fabrikantens fargenavn");
+        VehicleOptionL.INSERT;
+      END;
+       }
+    END;
+
+    PROCEDURE CreateTrim@1101103007(recP@1101103002 : Record 5025400;CodeP@1101103001 : Text[30];CodeTypeP@1101103000 : Code[10]);
+    VAR
+      VehicleOptionL@1101103004 : Record 5025422;
+      ManuOptionsL@1101103003 : Record 5025419;
+      VehicleOptionL2@1101103007 : Record 5025422;
+      Teller@1101103005 : Integer;
+    BEGIN
+      IF NOT ManuOptionsL.GET(recP."Make Code", recP."Model No.", CodeTypeP) THEN BEGIN
+        ManuOptionsL.INIT;
+        ManuOptionsL.VALIDATE("Make Code", recP."Make Code");
+        ManuOptionsL.VALIDATE("Model No.", recP."Model No.");
+      //  ManuOptionsL.VALIDATE(Code, BnHVehicleG.Interiõrkode);
+        ManuOptionsL.VALIDATE(Code, 'Int');
+        ManuOptionsL."Option Type" := 2;
+        ManuOptionsL.VALIDATE(Description, 'Interiõrkode');
+        IF NOT ManuOptionsL.INSERT(TRUE) THEN;
+      END;
+      VehicleOptionL.SETRANGE(VIN, recP.VIN);
+      VehicleOptionL.SETRANGE("Make Code", recP."Make Code");
+      VehicleOptionL.SETRANGE("Option Type", 2);
+      IF VehicleOptionL.FINDFIRST THEN BEGIN
+      //  VehicleOptionL."Option Code" := BnHVehicleG.Interiõrkode;
+        VehicleOptionL."Option Code" := 'Int';
+        VehicleOptionL.VALIDATE(Description, CodeP);
+        VehicleOptionL.MODIFY;
+      END ELSE BEGIN
+        VehicleOptionL2.SETRANGE(VIN, recP.VIN);
+        IF VehicleOptionL2.FINDLAST THEN
+          Teller := VehicleOptionL2."Line No." + 10000;
+        VehicleOptionL.INIT;
+        VehicleOptionL.VIN := recP.VIN;
+        VehicleOptionL.VALIDATE("Line No.", Teller);
+        VehicleOptionL."Make Code" := recP."Make Code";
+        VehicleOptionL.VALIDATE("Model No.", recP."Model No.");
+        VehicleOptionL.VALIDATE(Type, VehicleOptionL.Type::"Manuf. Option");
+        VehicleOptionL."Option Type" := 2;
+      //  VehicleOptionL."Option Code" := BnHVehicleG.Interiõrkode;
+      //  VehicleOptionL.VALIDATE(Description, 'Interõrkode');
+        VehicleOptionL."Option Code" := 'Int';
+        VehicleOptionL.VALIDATE(Description, CodeP);
+
+        VehicleOptionL.INSERT;
+      END;
+    END;
+
+    PROCEDURE CreateExtraCode1@1101103006(CodeP@1101103001 : Code[10]);
+    VAR
+      VehicleExtraCode1L@1101103002 : Record 5025447;
+    BEGIN
+      IF NOT VehicleExtraCode1L.GET(CodeP) THEN
+        BEGIN
+        VehicleExtraCode1L.INIT;
+        VehicleExtraCode1L.VALIDATE(Code, CodeP);
+        VehicleExtraCode1L.VALIDATE(Description, CodeP);
+        VehicleExtraCode1L.INSERT(TRUE);
+        END;
+    END;
+
+    PROCEDURE FormatDecimal@1101103008(InputP@1101103000 : Text[30]) ReturnR : Decimal;
+    BEGIN
+      InputP := DELCHR(InputP, '=', 'ò');
+      IF EVALUATE(ReturnR, InputP) THEN
+        EXIT(ReturnR)
+        ELSE
+        EXIT(0);
+    END;
+
+    PROCEDURE Str2Date@1117700019(InnDato@1117700000 : Text[30];InnFormat@1117700001 : Integer) UtDato : Date;
+    VAR
+      Dag@1117700002 : Integer;
+      Mnd@1117700003 : Integer;
+      Aar@1117700004 : Integer;
+    BEGIN
+      IF InnDato = '' THEN EXIT(0D);
+
+      CASE InnFormat OF
+        0: // DD-MM-YYYY
+          BEGIN
+            EVALUATE(Dag, COPYSTR(InnDato,1,2));
+            EVALUATE(Mnd, COPYSTR(InnDato,4,2));
+            EVALUATE(Aar, COPYSTR(InnDato,7,4));
+            UtDato := DMY2DATE(Dag, Mnd, Aar);
+          END;
+        1: // MM-DD-YYYY
+          BEGIN
+            EVALUATE(Dag, COPYSTR(InnDato,4,2));
+            EVALUATE(Mnd, COPYSTR(InnDato,1,2));
+            EVALUATE(Aar, COPYSTR(InnDato,7,4));
+            UtDato := DMY2DATE(Dag, Mnd, Aar);
+          END;
+        2: // DDMMYY
+          BEGIN
+            EVALUATE(Dag, COPYSTR(InnDato,1,2));
+            EVALUATE(Mnd, COPYSTR(InnDato,3,2));
+            EVALUATE(Aar, COPYSTR(InnDato,5,2));
+            UtDato := DMY2DATE(Dag, Mnd, Aar+2000);
+          END;
+        3: // YYYYMMDD
+          BEGIN
+            EVALUATE(Dag, COPYSTR(InnDato,7,2));
+            EVALUATE(Mnd, COPYSTR(InnDato,5,2));
+            EVALUATE(Aar, COPYSTR(InnDato,1,4));
+            UtDato := DMY2DATE(Dag, Mnd, Aar);
+          END;
+        4: // DD-MM-YY
+          BEGIN
+            EVALUATE(Dag, COPYSTR(InnDato,1,2));
+            EVALUATE(Mnd, COPYSTR(InnDato,4,2));
+            EVALUATE(Aar, COPYSTR(InnDato,7,2));
+            UtDato := DMY2DATE(Dag, Mnd, Aar+2000);
+          END;
+
+      END;
+    END;
+
+    PROCEDURE CreateTransmissionCode@1101103004(CodeP@1101103001 : Code[10]);
+    VAR
+      TransmissionTypeL@1101103000 : Record 5025475;
+    BEGIN
+      IF NOT TransmissionTypeL.GET(CodeP) THEN
+        BEGIN
+        TransmissionTypeL.INIT;
+        TransmissionTypeL.Code := CodeP;
+        TransmissionTypeL.Description := 'Opprettet fra Buskerud Bil';
+        TransmissionTypeL.INSERT(TRUE);
+        END;
+    END;
+
+    PROCEDURE CreateEngineTypeCode@1101103010(CodeP@1101103001 : Code[10]);
+    VAR
+      EngineTypeL@1101103000 : Record 5025474;
+    BEGIN
+      IF NOT EngineTypeL.GET(CodeP) THEN
+        BEGIN
+        EngineTypeL.INIT;
+        EngineTypeL.Code := CodeP;
+        EngineTypeL.Description := 'Opprettet fra Buskerud Bil';
+        EngineTypeL.INSERT(TRUE);
+        END;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

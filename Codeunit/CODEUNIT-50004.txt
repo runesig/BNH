@@ -1,0 +1,177 @@
+OBJECT Codeunit 50004 Pre Calc. Vehicle Sale
+{
+  OBJECT-PROPERTIES
+  {
+    Date=21.02.18;
+    Time=10:24:03;
+    Modified=Yes;
+    Version List=BNH;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+
+    PROCEDURE VehiclePrice@1101103000(recP@1101103000 : Record 36) AmountR : Decimal;
+    VAR
+      SalesLineL@1101103001 : Record 37;
+    BEGIN
+      SalesLineL.SETRANGE("Document Type", recP."Document Type");
+      SalesLineL.SETRANGE("Document No.", recP."No.");
+      SalesLineL.SETRANGE("Item Type", SalesLineL."Item Type"::Vehicle);
+      IF SalesLineL.FINDFIRST THEN
+        REPEAT
+        IF SalesLineL."Item Type" = SalesLineL."Item Type"::Vehicle THEN
+          AmountR += SalesLineL.Amount;
+        UNTIL SalesLineL.NEXT = 0;
+      EXIT(AmountR);
+    END;
+
+    PROCEDURE VehicleCost@1101103001(recP@1101103002 : Record 36) UnitCostR : Decimal;
+    VAR
+      SalesLineL@1101103003 : Record 37;
+      ModelL@1101103001 : Record 27;
+      OptionVariantL@1101103000 : Record 5025424;
+      ManufacturerOptionL@1101103004 : Record 5025419;
+    BEGIN
+      SalesLineL.SETRANGE("Document Type", recP."Document Type");
+      SalesLineL.SETRANGE("Document No.", recP."No.");
+      SalesLineL.SETRANGE("Item Type", SalesLineL."Item Type"::Vehicle);
+      IF SalesLineL.FINDFIRST THEN
+        REPEAT
+        IF ModelL.GET(SalesLineL."No.") THEN
+          UnitCostR += ModelL."Unit Cost";
+
+        OptionVariantL.SETRANGE(Area, OptionVariantL.Area::Sale);
+        OptionVariantL.SETRANGE("Document Type", SalesLineL."Document Type");
+        OptionVariantL.SETRANGE("Document No.", SalesLineL."Document No.");
+        OptionVariantL.SETRANGE("Document Line No.", SalesLineL."Line No.");
+        OptionVariantL.SETRANGE(Type, OptionVariantL.Type::"Manuf. Option");
+        IF OptionVariantL.FINDFIRST THEN
+          REPEAT
+          IF ManufacturerOptionL.GET(OptionVariantL."Make Code", OptionVariantL."Model Code", OptionVariantL."Option Code", OptionVariantL."Internal Code") THEN
+            UnitCostR += ManufacturerOptionL."Direct Unit Cost"
+            ELSE
+          IF ManufacturerOptionL.GET(OptionVariantL."Make Code", OptionVariantL."Model Code", OptionVariantL."Option Code", '') THEN
+            UnitCostR += ManufacturerOptionL."Direct Unit Cost";
+          UNTIL OptionVariantL.NEXT = 0;
+        UNTIL SalesLineL.NEXT = 0;
+
+
+      EXIT(UnitCostR);
+    END;
+
+    PROCEDURE SalesIncentive@1101103002(DocTypeP@1101103001 : 'Quote,Order,Invoice,Credit Memo,Blanket Order,Return Order';DocNoP@1101103002 : Code[10]) IncentivR : Decimal;
+    VAR
+      SalesIncentiveLineL@1101103000 : Record 5025486;
+    BEGIN
+      SalesIncentiveLineL.SETRANGE("Document Type", DocTypeP);
+      SalesIncentiveLineL.SETRANGE("Document No.", DocNoP);
+      SalesIncentiveLineL.SETRANGE(Post, TRUE);
+      IF SalesIncentiveLineL.FINDFIRST THEN
+        REPEAT
+        IncentivR += SalesIncentiveLineL.Amount;
+        UNTIL SalesIncentiveLineL.NEXT = 0;
+      EXIT(IncentivR);
+    END;
+
+    PROCEDURE OwnOptionCost@1101103003(recP@1101103002 : Record 36) OwnOptCostR : Decimal;
+    VAR
+      SalesLineL@1101103000 : Record 37;
+      OptionSetupL@1101103001 : Record 5025472;
+    BEGIN
+      OptionSetupL.GET;
+      SalesLineL.SETRANGE("Document Type", recP."Document Type");
+      SalesLineL.SETRANGE("Document No.", recP."No.");
+      SalesLineL.SETRANGE(Type, SalesLineL.Type::Item);
+      SalesLineL.SETRANGE("Item Type", SalesLineL."Item Type"::"Own Option");
+      //SalesLineL.SETRANGE("Gen. Prod. Posting Group", OptionSetupL."Prod. Posting Group Default");
+      IF SalesLineL.FINDFIRST THEN
+        REPEAT
+        IF SalesLineL."Unit Cost (LCY)" = 0 THEN
+        OwnOptCostR += SalesLineL.Amount
+        ELSE
+        OwnOptCostR += SalesLineL."Unit Cost (LCY)";
+        UNTIL SalesLineL.NEXT = 0;
+      EXIT(OwnOptCostR);
+    END;
+
+    PROCEDURE OwnOptionSalesPrice@1101103004(recP@1101103002 : Record 36) OwnOptCostR : Decimal;
+    VAR
+      SalesLineL@1101103000 : Record 37;
+      OptionSetupL@1101103001 : Record 5025472;
+    BEGIN
+      OptionSetupL.GET;
+      SalesLineL.SETRANGE("Document Type", recP."Document Type");
+      SalesLineL.SETRANGE("Document No.", recP."No.");
+      SalesLineL.SETRANGE(Type, SalesLineL.Type::Item);
+      SalesLineL.SETRANGE("Item Type", SalesLineL."Item Type"::"Own Option");
+      //SalesLineL.SETRANGE("Gen. Prod. Posting Group", OptionSetupL."Prod. Posting Group Default");
+      IF SalesLineL.FINDFIRST THEN
+        REPEAT
+        OwnOptCostR += SalesLineL.Amount;
+        UNTIL SalesLineL.NEXT = 0;
+      EXIT(OwnOptCostR);
+    END;
+
+    PROCEDURE PDICost@1101103005(recP@1101103001 : Record 36) PDI : Decimal;
+    VAR
+      SalesLineL@1101103002 : Record 37;
+      CQSModelMasterSetupL@1101103000 : Record 1057640;
+    BEGIN
+      SalesLineL.SETRANGE("Document Type", recP."Document Type");
+      SalesLineL.SETRANGE("Document No.", recP."No.");
+      SalesLineL.SETRANGE("Item Type", SalesLineL."Item Type"::Vehicle);
+      IF SalesLineL.FINDFIRST THEN
+        REPEAT
+        CQSModelMasterSetupL.SETRANGE("Company Name", COMPANYNAME);
+        CQSModelMasterSetupL.SETRANGE("Make Code", SalesLineL."Shortcut Dimension 2 Code");
+        IF CQSModelMasterSetupL.FINDFIRST THEN
+          PDI += (CQSModelMasterSetupL.PDI)
+        UNTIL SalesLineL.NEXT = 0;
+    END;
+
+    PROCEDURE ExpenceCustomer@1101103006(recP@1101103000 : Record 36) ExpenceR : Decimal;
+    VAR
+      SalesLineL@1101103001 : Record 37;
+      CQSSetupL@1101103002 : Record 1057631;
+    BEGIN
+      CQSSetupL.GET;
+      SalesLineL.SETRANGE("Document Type", recP."Document Type");
+      SalesLineL.SETRANGE("Document No.", recP."No.");
+      SalesLineL.SETRANGE("Item Type", SalesLineL."Item Type"::"G/L Account");
+      IF SalesLineL.FINDFIRST THEN
+        REPEAT
+          IF (SalesLineL."No." = CQSSetupL."Vehicle tax/surcharge 1") OR (SalesLineL."No." = CQSSetupL."Vehicle tax/surcharge 6") THEN
+            ExpenceR += SalesLineL.Amount;
+        UNTIL SalesLineL.NEXT = 0;
+
+       EXIT(ExpenceR);
+    END;
+
+    PROCEDURE TotalDiscount@1101103007(recP@1101103000 : Record 36) DiscountR : Decimal;
+    VAR
+      SalesLineL@1101103001 : Record 37;
+    BEGIN
+      SalesLineL.SETRANGE("Document Type", recP."Document Type");
+      SalesLineL.SETRANGE("Document No.", recP."No.");
+      IF SalesLineL.FINDFIRST THEN
+        REPEAT
+        DiscountR += SalesLineL."Line Discount Amount";
+        UNTIL SalesLineL.NEXT = 0;
+
+      EXIT(DiscountR);
+    END;
+
+    BEGIN
+    {
+      Pre Calculation Vehicle sale
+    }
+    END.
+  }
+}
+

@@ -1,0 +1,106 @@
+OBJECT Page 5231099 BNH Salesperson
+{
+  OBJECT-PROPERTIES
+  {
+    Date=11.04.18;
+    Time=21:10:12;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    SourceTable=Table5231119;
+    PageType=List;
+    ActionList=ACTIONS
+    {
+      { 1101103005;  ;ActionContainer;
+                      ActionContainerType=ActionItems }
+      { 1101103006;1 ;Action    ;
+                      Name=Get Salesperson;
+                      OnAction=VAR
+                                 SalespersonPurchaserL@1101103000 : Record 13;
+                                 BNHSalespersonL@1101103001 : Record 5231119;
+                               BEGIN
+                                 IF SalespersonPurchaserL.FINDFIRST THEN
+                                   REPEAT
+                                   IF NOT BNHSalespersonL.GET(SalespersonPurchaserL.Code) THEN
+                                     BEGIN
+                                     BNHSalespersonL.INIT;
+                                     BNHSalespersonL."Salesperson Code" := SalespersonPurchaserL.Code;
+                                     BNHSalespersonL.Name := SalespersonPurchaserL.Name;
+                                     BNHSalespersonL.INSERT;
+                                     END;
+                                   UNTIL SalespersonPurchaserL.NEXT = 0;
+                               END;
+                                }
+      { 1101103009;1 ;Action    ;
+                      Name=Update Contact;
+                      OnAction=BEGIN
+                                 //SETRANGE("Salesperson Code", 'ATME');
+                                 IF FINDFIRST THEN
+                                   REPEAT
+                                   CALCFIELDS("CDK Code", "Antall kunder");
+                                   IF "Antall kunder" > 0 THEN
+                                     FindBNHCutsomer("CDK Code");
+                                   UNTIL NEXT = 0;
+                               END;
+                                }
+    }
+  }
+  CONTROLS
+  {
+    { 1101103000;0;Container;
+                ContainerType=ContentArea }
+
+    { 1101103001;1;Group  ;
+                Name=Group;
+                GroupType=Repeater }
+
+    { 1101103002;2;Field  ;
+                SourceExpr="Salesperson Code" }
+
+    { 1101103004;2;Field  ;
+                SourceExpr=Name }
+
+    { 1101103003;2;Field  ;
+                SourceExpr="CDK Code" }
+
+    { 1101103007;2;Field  ;
+                SourceExpr="Antall kunder" }
+
+    { 1101103008;2;Field  ;
+                SourceExpr="CDK Navn" }
+
+  }
+  CODE
+  {
+
+    PROCEDURE FindBNHCutsomer@1101103000(SalesmanP@1101103000 : Code[10]);
+    VAR
+      BNHCustomerL@1101103001 : Record 5231110;
+    BEGIN
+      BNHCustomerL.SETRANGE(SALESMAN, SalesmanP);
+      BNHCustomerL.SETFILTER("No.", '<>%1', '');
+      IF BNHCustomerL.FINDFIRST THEN
+        REPEAT
+        UpdateCustomer(BNHCustomerL."No.", "Salesperson Code");
+        UNTIL BNHCustomerL.NEXT = 0;
+    END;
+
+    PROCEDURE UpdateCustomer@1101103002(CustNoP@1101103000 : Code[20];SalespersonP@1101103002 : Code[10]);
+    VAR
+      CustomerL@1101103001 : Record 18;
+    BEGIN
+      IF CustomerL.GET(CustNoP) THEN
+        IF CustomerL."Salesperson Code" = '' THEN
+        BEGIN
+        CustomerL.VALIDATE("Salesperson Code", SalespersonP);
+        CustomerL.MODIFY(TRUE);
+        END;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

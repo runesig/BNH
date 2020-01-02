@@ -1,0 +1,123 @@
+OBJECT Codeunit 5231184 Financing Qt Ord. Single Inst2
+{
+  OBJECT-PROPERTIES
+  {
+    Date=23.01.18;
+    Time=13:34:15;
+    Modified=Yes;
+    Version List=BNH;
+  }
+  PROPERTIES
+  {
+    SingleInstance=Yes;
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      QuoteNoG@1101103000 : Code[20];
+      OrgQuoteRecG@1101103002 : Record 36;
+      TmpOrgQuoteRecLineG@1101103001 : TEMPORARY Record 37;
+
+    PROCEDURE SetQuoteNo@1101103000(QuoteNoP@1101103000 : Code[20]);
+    BEGIN
+      QuoteNoG := QuoteNoP;
+    END;
+
+    PROCEDURE GetQuoteNo@1101103001() : Code[20];
+    VAR
+      QuoteNoL@1101103000 : Code[20];
+    BEGIN
+      QuoteNoL := QuoteNoG;
+      QuoteNoG := '';
+
+      EXIT(QuoteNoL);
+    END;
+
+    PROCEDURE SetOrgQuoteRec@1101103002(OrgQuoteRecP@1101103000 : Record 36);
+    VAR
+      OrgQuoteRecLineL@1101103001 : Record 37;
+    BEGIN
+      OrgQuoteRecG := OrgQuoteRecP;
+
+      TmpOrgQuoteRecLineG.RESET;
+      IF TmpOrgQuoteRecLineG.FINDFIRST THEN
+         TmpOrgQuoteRecLineG.DELETEALL;
+
+      CLEAR(OrgQuoteRecLineL);
+      OrgQuoteRecLineL.RESET;
+      OrgQuoteRecLineL.SETCURRENTKEY("Document Type","Document No.","Line No.");
+      OrgQuoteRecLineL.SETRANGE("Document Type", OrgQuoteRecP."Document Type"); // OrgQuoteRecLineL."Document Type"::Quote);
+      OrgQuoteRecLineL.SETRANGE("Document No.", OrgQuoteRecP."No.");
+      IF OrgQuoteRecLineL.FINDSET THEN
+        REPEAT
+          TmpOrgQuoteRecLineG.INIT;
+          TmpOrgQuoteRecLineG.TRANSFERFIELDS(OrgQuoteRecLineL, TRUE);
+          TmpOrgQuoteRecLineG.INSERT;
+        UNTIL OrgQuoteRecLineL.NEXT = 0;
+    END;
+
+    PROCEDURE GetOrgQuoteNo@1101103004() : Code[20];
+    VAR
+      OrgQuoteSalesNOL@1101103000 : Code[20];
+    BEGIN
+      OrgQuoteSalesNOL := OrgQuoteRecG."No.";
+      EXIT(OrgQuoteSalesNOL);
+    END;
+
+    PROCEDURE GetOrgQuoteSalesPriceGroup@1101103003() : Code[20];
+    VAR
+      OrgQuoteVehSalesPriceGroupL@1101103000 : Code[20];
+    BEGIN
+      OrgQuoteVehSalesPriceGroupL := OrgQuoteRecG."Vehicle Sales Price Group";
+      EXIT(OrgQuoteVehSalesPriceGroupL);
+    END;
+
+    PROCEDURE GetOrgQuoteSalesMan@1101103006() : Code[20];
+    VAR
+      OrgQuoteSalesManL@1101103000 : Code[20];
+    BEGIN
+      OrgQuoteSalesManL := OrgQuoteRecG."Salesperson Code";
+      EXIT(OrgQuoteSalesManL);
+    END;
+
+    PROCEDURE OrgSLExist@1101103010(VAR SLDocTypeP@1101103000 : 'Quote,Order,Invoice,Credit Memo,Blanket Order,Return Order';VAR SLDocNoP@1101103001 : Code[20];VAR SLLinenumberP@1101103002 : Integer) : Boolean;
+    BEGIN
+      IF TmpOrgQuoteRecLineG.GET(SLDocTypeP, SLDocNoP, SLLinenumberP) THEN
+        EXIT(TRUE)
+      ELSE
+        EXIT(FALSE);
+    END;
+
+    PROCEDURE GetOrgQuoteSLDescription@1101103009(VAR SLDocTypeP@1101103000 : 'Quote,Order,Invoice,Credit Memo,Blanket Order,Return Order';VAR SLDocNoP@1101103001 : Code[20];VAR SLLinenumberP@1101103002 : Integer) : Text[100];
+    BEGIN
+      IF TmpOrgQuoteRecLineG.GET(SLDocTypeP, SLDocNoP, SLLinenumberP) THEN
+        EXIT(TmpOrgQuoteRecLineG.Description)
+      ELSE
+        EXIT('');
+    END;
+
+    PROCEDURE GetOrgQuoteSLDescription2@1101103014(VAR SLDocTypeP@1101103000 : 'Quote,Order,Invoice,Credit Memo,Blanket Order,Return Order';VAR SLDocNoP@1101103001 : Code[20];VAR SLLinenumberP@1101103002 : Integer) : Text[100];
+    BEGIN
+      IF TmpOrgQuoteRecLineG.GET(SLDocTypeP, SLDocNoP, SLLinenumberP) THEN
+        EXIT(TmpOrgQuoteRecLineG."Description 2")
+      ELSE
+        EXIT('');
+    END;
+
+    BEGIN
+    {
+      +----------------------------------------------+
+      | Copyright ¸ 2017 Incadea                     |
+      +----------------------------------------------+
+      | MYENGINE@INCADEA                             |
+      +----------------------------------------------+
+      No.  Version  Date      ID  Remark
+      ------------------------------------------------
+    }
+    END.
+  }
+}
+

@@ -1,0 +1,76 @@
+OBJECT Page 5231059 Blanket Order Setup
+{
+  OBJECT-PROPERTIES
+  {
+    Date=01.11.17;
+    Time=14:53:23;
+    Modified=Yes;
+    Version List=BlanketOrderBNH;
+  }
+  PROPERTIES
+  {
+    CaptionML=[ENU=Blanket Order Setup;
+               NOR=Rammeordre oppsett];
+    SourceTable=Table5231050;
+    PageType=List;
+  }
+  CONTROLS
+  {
+    { 1101103000;0;Container;
+                ContainerType=ContentArea }
+
+    { 1101103001;1;Group  ;
+                Name=Group;
+                GroupType=Repeater }
+
+    { 1101103002;2;Field  ;
+                SourceExpr=Code }
+
+    { 1101103003;2;Field  ;
+                SourceExpr=Description }
+
+    { 1101103004;2;Field  ;
+                SourceExpr="Date Formula" }
+
+    { 1101103005;2;Field  ;
+                SourceExpr="Create only latest" }
+
+    { 1101103006;2;Field  ;
+                SourceExpr="Start Date" }
+
+    { 1101103007;2;Field  ;
+                SourceExpr="End Date" }
+
+    { 1101103008;2;Field  ;
+                SourceExpr="Order Nos." }
+
+    { 1101103009;2;Field  ;
+                SourceExpr="Invoice Nos." }
+
+    { 1101103010;2;Field  ;
+                SourceExpr="Update Postingdate" }
+
+    { 1101103011;2;Field  ;
+                SourceExpr="Postingdate Formula" }
+
+    { 1101103012;2;Field  ;
+                SourceExpr="Delivery Date Formula" }
+
+    { 1101103013;2;Field  ;
+                SourceExpr="Update Price" }
+
+    { 1101103014;2;Field  ;
+                SourceExpr="Update Quantity" }
+
+    { 1101103015;2;Field  ;
+                SourceExpr="Reset Delivery" }
+
+  }
+  CODE
+  {
+
+    BEGIN
+    END.
+  }
+}
+

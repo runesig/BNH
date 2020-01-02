@@ -1,0 +1,60 @@
+OBJECT Table 5231132 BNH History Line
+{
+  OBJECT-PROPERTIES
+  {
+    Date=29.11.17;
+    Time=21:07:45;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    CaptionML=[ENU=BNH History Line;
+               NOR=BNH Historikklinje];
+  }
+  FIELDS
+  {
+    { 1   ;   ;Q Primary Key       ;Integer       ;CaptionML=[ENU=Primary Key;
+                                                              NOR=Prim‘rn›kkel] }
+    { 2   ;   ;Q Status            ;Option        ;CaptionML=[ENU=Import Status;
+                                                              NOR=Import status];
+                                                   OptionCaptionML=[ENU=" ,Ignore,OK,Error";
+                                                                    NOR=" ,Ignorer,OK,Feil"];
+                                                   OptionString=[ ,Ignore,OK,Error] }
+    { 3   ;   ;Q Datetime          ;DateTime      ;CaptionML=[ENU=Import Time;
+                                                              NOR=Import tidspunkt] }
+    { 4   ;   ;Q Update message    ;Text250       ;CaptionML=[ENU=Update Message;
+                                                              NOR=Oppdateringsmelding] }
+    { 5   ;   ;Q Record ID         ;RecordID      ;CaptionML=[ENU=Created Record;
+                                                              NOR=Opprettet post] }
+    { 7   ;   ;Headers             ;Integer       ;FieldClass=FlowField;
+                                                   CalcFormula=Count("DataMig Legacy Document Header" WHERE (Order No.=FIELD(OrdrNr),
+                                                                                                             Document No.=FIELD(Faktnr),
+                                                                                                             Main Area=FIELD(RegNr)));
+                                                   CaptionML=[ENU=History Headers;
+                                                              NOR=Historikkhode] }
+    { 10  ;   ;RegNr               ;Text50         }
+    { 20  ;   ;OrdrNr              ;Text50         }
+    { 30  ;   ;Faktnr              ;Text50         }
+    { 40  ;   ;LType               ;Text50         }
+    { 50  ;   ;VareNrServNr        ;Text50         }
+    { 60  ;   ;Tekst               ;Text80         }
+    { 70  ;   ;FaktDt              ;Text50         }
+    { 80  ;   ;Upris               ;Text50         }
+    { 90  ;   ;FakAnt              ;Text50         }
+  }
+  KEYS
+  {
+    {    ;Q Primary Key                           ;Clustered=Yes }
+  }
+  FIELDGROUPS
+  {
+  }
+  CODE
+  {
+
+    BEGIN
+    END.
+  }
+}
+

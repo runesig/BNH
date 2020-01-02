@@ -1,0 +1,161 @@
+OBJECT Page 5231112 BNH Guler lapper
+{
+  OBJECT-PROPERTIES
+  {
+    Date=09.12.17;
+    Time=09:18:18;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    SourceTable=Table5231114;
+    PageType=List;
+    ActionList=ACTIONS
+    {
+      { 1101103012;  ;ActionContainer;
+                      ActionContainerType=ActionItems }
+      { 1101103013;1 ;Action    ;
+                      Name=Import Customer file;
+                      RunObject=XMLport 5231114;
+                      Image=XMLFile }
+      { 1101103029;1 ;Action    ;
+                      Name=Import Vehicle file;
+                      RunObject=XMLport 5231119 }
+      { 1101103009;1 ;Action    ;
+                      Name=Create Record;
+                      OnAction=VAR
+                                 BNHGuleLapperL@1101103000 : Record 5231114;
+                               BEGIN
+                                 CurrPage.SETSELECTIONFILTER( BNHGuleLapperL );
+                                 CODEUNIT.RUN( CODEUNIT::"BNH Gule lapper", BNHGuleLapperL );
+                                 CurrPage.UPDATE( FALSE );
+                               END;
+                                }
+      { 1101103030;1 ;Action    ;
+                      Name=Vehicle Card;
+                      OnAction=VAR
+                                 VehicleL@1101103000 : Record 5025400;
+                               BEGIN
+                                 WITH VehicleL DO BEGIN
+                                   RESET;
+                                   SETRANGE( "License No.", "Nr." );
+                                   SETRANGE("License No.", "Nr.");
+                                   CASE TRUE OF
+                                     FINDFIRST:
+                                       PAGE.RUN( PAGE::"Vehicle Card", VehicleL )
+                                   END;
+                                 END;
+
+                                 CurrPage.UPDATE( FALSE );
+                               END;
+                                }
+      { 1101103031;1 ;Action    ;
+                      Name=Customer Card;
+                      OnAction=VAR
+                                 CustomerL@1101103000 : Record 18;
+                               BEGIN
+                                 WITH CustomerL DO BEGIN
+                                   RESET;
+                                   SETRANGE(CustomerL."No.", Kundenr);
+                                   CASE TRUE OF
+                                     FINDFIRST:
+                                       PAGE.RUN( PAGE::"Customer Card", CustomerL )
+                                   END;
+                                 END;
+
+                                 CurrPage.UPDATE( FALSE );
+                               END;
+                                }
+    }
+  }
+  CONTROLS
+  {
+    { 1101103000;0;Container;
+                ContainerType=ContentArea }
+
+    { 1101103001;1;Group  ;
+                Name=Group;
+                GroupType=Repeater }
+
+    { 1101103002;2;Field  ;
+                SourceExpr="Primary Key" }
+
+    { 1101103003;2;Field  ;
+                SourceExpr=Status }
+
+    { 1101103004;2;Field  ;
+                SourceExpr=Datetime }
+
+    { 1101103005;2;Field  ;
+                SourceExpr="Update message" }
+
+    { 1101103006;2;Field  ;
+                SourceExpr="No." }
+
+    { 1101103028;2;Field  ;
+                SourceExpr=Type }
+
+    { 1101103007;2;Field  ;
+                SourceExpr=Prio }
+
+    { 1101103008;2;Field  ;
+                SourceExpr="Nr." }
+
+    { 1101103014;2;Field  ;
+                SourceExpr=Kundenr }
+
+    { 1101103010;2;Field  ;
+                SourceExpr=Tekst1 }
+
+    { 1101103011;2;Field  ;
+                SourceExpr=Notat1 }
+
+    { 1101103015;2;Field  ;
+                SourceExpr=Notat2 }
+
+    { 1101103016;2;Field  ;
+                SourceExpr=Notat3 }
+
+    { 1101103017;2;Field  ;
+                SourceExpr=Notat4 }
+
+    { 1101103018;2;Field  ;
+                SourceExpr=Notat5 }
+
+    { 1101103019;2;Field  ;
+                SourceExpr=Notat6 }
+
+    { 1101103020;2;Field  ;
+                SourceExpr=Notat7 }
+
+    { 1101103021;2;Field  ;
+                SourceExpr=Notat8 }
+
+    { 1101103022;2;Field  ;
+                SourceExpr=Notat9 }
+
+    { 1101103023;2;Field  ;
+                SourceExpr=Notat10 }
+
+    { 1101103024;2;Field  ;
+                SourceExpr=Notat11 }
+
+    { 1101103025;2;Field  ;
+                SourceExpr=Notat12 }
+
+    { 1101103026;2;Field  ;
+                SourceExpr=Notat13 }
+
+    { 1101103027;2;Field  ;
+                SourceExpr=Notat14 }
+
+  }
+  CODE
+  {
+
+    BEGIN
+    END.
+  }
+}
+

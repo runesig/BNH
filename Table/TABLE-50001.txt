@@ -1,0 +1,34 @@
+OBJECT Table 50001 Synkarion Setup
+{
+  OBJECT-PROPERTIES
+  {
+    Date=21.06.17;
+    Time=12:34:56;
+    Modified=Yes;
+    Version List=BNH - Synkarion;
+  }
+  PROPERTIES
+  {
+  }
+  FIELDS
+  {
+    { 1   ;   ;pk                  ;Code10         }
+    { 10  ;   ;EndpointURL         ;Text250        }
+    { 11  ;   ;AuthToken           ;Text250        }
+    { 100 ;   ;Task Type Code Clocking;Code10     ;TableRelation="Task Type".Code }
+  }
+  KEYS
+  {
+    {    ;pk                                      ;Clustered=Yes }
+  }
+  FIELDGROUPS
+  {
+  }
+  CODE
+  {
+
+    BEGIN
+    END.
+  }
+}
+

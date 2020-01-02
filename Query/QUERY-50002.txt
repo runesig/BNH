@@ -1,0 +1,100 @@
+OBJECT Query 50002 Open Customer Entry
+{
+  OBJECT-PROPERTIES
+  {
+    Date=16.05.19;
+    Time=14:40:35;
+    Modified=Yes;
+    Version List=BNH;
+  }
+  PROPERTIES
+  {
+  }
+  ELEMENTS
+  {
+    { 1101103000;;DataItem;                  ;
+               DataItemTable=Table21;
+               Description=Open Customer Entry;
+               DataItemTableFilter=Open=CONST(Yes) }
+
+    { 1101103002;1;Column;                   ;
+               DataSource=Branch Code }
+
+    { 1101103020;1;Column;                   ;
+               DataSource=Global Dimension 1 Code }
+
+    { 1101103011;1;Column;                   ;
+               DataSource=Document Type }
+
+    { 1101103001;1;Column;                   ;
+               DataSource=Customer No. }
+
+    { 1101103003;1;Column;                   ;
+               DataSource=Customer Group Code }
+
+    { 1101103004;1;Column;                   ;
+               DataSource=Customer Posting Group }
+
+    { 1101103005;1;Column;                   ;
+               DataSource=Main Area }
+
+    { 1101103012;1;Column;                   ;
+               DataSource=Posting Date }
+
+    { 1101103013;1;Column;                   ;
+               DataSource=Due Date }
+
+    { 1101103014;1;Column;                   ;
+               DataSource=Document No. }
+
+    { 1101103015;1;Column;                   ;
+               DataSource=VIN }
+
+    { 1101103006;1;Column;                   ;
+               DataSource=Amount }
+
+    { 1101103007;1;Column;                   ;
+               DataSource=Remaining Amount }
+
+    { 1101103008;1;Column;                   ;
+               DataSource=Salesperson Code }
+
+    { 1101103022;1;Column;                   ;
+               DataSource=Message to Recipient }
+
+    { 1101103023;1;Column;                   ;
+               DataSource=Comment }
+
+    { 1101103009;1;DataItem;                 ;
+               DataItemTable=Table13;
+               DataItemLink=Code=Cust_Ledger_Entry."Salesperson Code" }
+
+    { 1101103010;2;Column;SalesPersonName    ;
+               DataSource=Name }
+
+    { 1101103016;2;DataItem;                 ;
+               DataItemTable=Table5025400;
+               DataItemLink=VIN=Cust_Ledger_Entry.VIN }
+
+    { 1101103017;3;Column;                   ;
+               DataSource=License No. }
+
+    { 1101103018;3;DataItem;                 ;
+               DataItemTable=Table18;
+               DataItemLink=No.=Cust_Ledger_Entry."Customer No." }
+
+    { 1101103019;4;Column;CustName           ;
+               DataSource=Name }
+
+    { 1101103021;4;Column;                   ;
+               DataSource=Reminder Terms Code }
+
+  }
+  CODE
+  {
+
+    BEGIN
+    END.
+  }
+}
+

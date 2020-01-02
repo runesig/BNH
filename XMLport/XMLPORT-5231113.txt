@@ -1,0 +1,130 @@
+OBJECT XMLport 5231113 BNH Customer Open Balance
+{
+  OBJECT-PROPERTIES
+  {
+    Date=05.11.17;
+    Time=19:18:10;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    Direction=Import;
+    TextEncoding=WINDOWS;
+    OnPreXMLport=BEGIN
+                   IF GUIALLOWED THEN
+                     DialogG.OPEN( C_INC_Progress );
+
+                   WITH "BNH Customer Open Balance" DO
+                     IF FINDLAST THEN
+                       RecordNoG := "BNH Customer Open Balance"."Primary Key";
+                 END;
+
+    OnPostXMLport=BEGIN
+                    IF GUIALLOWED THEN
+                      DialogG.CLOSE;
+                  END;
+
+    Format=Variable Text;
+    FieldSeparator=[;];
+  }
+  ELEMENTS
+  {
+    { [{F59980B0-F048-48FC-901E-E10602B42EE6}];  ;XML                 ;Element ;Text     }
+
+    { [{9C4A5DBE-38CC-43F6-9C0E-33A678584C74}];1 ;Table               ;Element ;Table   ;
+                                                  SourceTable=Table5231113;
+                                                  Import::OnBeforeInsertRecord=BEGIN
+                                                                                 RecordNoG += 1;
+                                                                                 "BNH Customer Open Balance"."Primary Key" := RecordNoG;
+
+                                                                                 IF RecordNoG MOD 100 = 0 THEN
+                                                                                   DialogG.UPDATE( 1, RecordNoG );
+                                                                               END;
+                                                                                }
+
+    { [{C49F59AF-D274-4A55-8D45-7AEDBF838CF2}];2 ;kundenr             ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Customer Open Balance::kundenr;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{A0FF451F-4528-4A86-BE36-6DE6639B9D7E}];2 ;fakturanr           ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Customer Open Balance::fakturanr;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{AB466D22-6124-4158-A883-FE855AF1C224}];2 ;ordrenr             ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Customer Open Balance::ordrenr;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{8B8FA369-91BC-44A8-A9D9-1D00AF9EE9ED}];2 ;faktura_dato        ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Customer Open Balance::faktura dato;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{E3CE5C84-5153-4DEC-850A-D7F396A1AEE6}];2 ;net.dato            ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Customer Open Balance::net.dato;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{0F79CF37-030B-4456-ABC1-CF4067F7F91A}];2 ;forf.dato           ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Customer Open Balance::forf.dato;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{BB79ACC3-8FFA-4D36-A40F-B3082A767C82}];2 ;mva_kode            ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Customer Open Balance::mva kode;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{BCB23008-51F5-484C-BD5A-4A66BEB05C0E}];2 ;fakt._bel›p         ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Customer Open Balance::fakt. bel›p;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{F164194D-80AA-495C-B124-04BF192D22E5}];2 ;rest_bel›p          ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Customer Open Balance::rest bel›p;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{49CE9431-FA3F-432A-A31C-A71ED0C47595}];2 ;tekst               ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Customer Open Balance::tekst;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+  }
+  EVENTS
+  {
+  }
+  REQUESTPAGE
+  {
+    PROPERTIES
+    {
+    }
+    CONTROLS
+    {
+    }
+  }
+  CODE
+  {
+    VAR
+      C_INC_Progress@1101103000 : TextConst 'ENU=Import in progress...\ \Record No. #1#####;NOR=Import kj›rer...\ \Post nummer #1#####';
+      DialogG@1101103001 : Dialog;
+      RecordNoG@1101103002 : Integer;
+
+    BEGIN
+    END.
+  }
+}
+

@@ -1,0 +1,84 @@
+OBJECT Page 5231117 BNH Konvertering kontonr.
+{
+  OBJECT-PROPERTIES
+  {
+    Date=13.11.17;
+    Time=19:23:01;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    SourceTable=Table5231123;
+    PageType=List;
+    ActionList=ACTIONS
+    {
+      { 1101103012;  ;ActionContainer;
+                      ActionContainerType=ActionItems }
+      { 1101103013;1 ;Action    ;
+                      Name=Import file;
+                      RunObject=XMLport 58065 }
+      { 1101103010;1 ;Action    ;
+                      Name=Update Account with posts;
+                      OnAction=VAR
+                                 BNHRegnskapsposterL@1101103000 : Record 5231121;
+                                 BNHKonverteringKontonrL@1101103001 : Record 5231123;
+                               BEGIN
+                                 BNHRegnskapsposterL.SETCURRENTKEY(BNHRegnskapsposterL."Primary Key");
+                                 BNHRegnskapsposterL.SETFILTER("Dec Bel›p", '<>%1', 0);
+                                 BNHRegnskapsposterL.SETFILTER(Kontonr, '<>%1', 'Kontonr');
+                                 IF BNHRegnskapsposterL.FINDFIRST THEN
+                                   REPEAT
+                                   IF NOT BNHKonverteringKontonrL.GET(BNHRegnskapsposterL.Kontonr) THEN
+                                     BEGIN
+                                     BNHKonverteringKontonrL.INIT;
+                                     BNHKonverteringKontonrL."Dracar kontonr." := BNHRegnskapsposterL.Kontonr;
+                                     BNHKonverteringKontonrL.INSERT;
+                                     END;
+                                   UNTIL BNHRegnskapsposterL.NEXT = 0;
+                               END;
+                                }
+    }
+  }
+  CONTROLS
+  {
+    { 1101103000;0;Container;
+                ContainerType=ContentArea }
+
+    { 1101103001;1;Group  ;
+                Name=Group;
+                GroupType=Repeater }
+
+    { 1101103002;2;Field  ;
+                SourceExpr="Dracar kontonr." }
+
+    { 1101103003;2;Field  ;
+                SourceExpr="Dracar kontobeskrivelse" }
+
+    { 1101103004;2;Field  ;
+                SourceExpr="Incadea kontonr." }
+
+    { 1101103005;2;Field  ;
+                SourceExpr="Incadea merkekode" }
+
+    { 1101103006;2;Field  ;
+                SourceExpr="Incade kontobeskrivelse" }
+
+    { 1101103009;2;Field  ;
+                SourceExpr=Lokasjon }
+
+    { 1101103007;2;Field  ;
+                SourceExpr="Totalbel›p" }
+
+    { 1101103008;2;Field  ;
+                SourceExpr="Antall poster" }
+
+  }
+  CODE
+  {
+
+    BEGIN
+    END.
+  }
+}
+

@@ -1,0 +1,47 @@
+OBJECT Page 50008 Pre Calc. Sales Incentive
+{
+  OBJECT-PROPERTIES
+  {
+    Date=11.11.17;
+    Time=08:18:56;
+    Modified=Yes;
+    Version List=BNH;
+  }
+  PROPERTIES
+  {
+    SourceTable=Table5025486;
+    PageType=List;
+  }
+  CONTROLS
+  {
+    { 1101103000;0;Container;
+                ContainerType=ContentArea }
+
+    { 1101103001;1;Group  ;
+                Name=Group;
+                GroupType=Repeater }
+
+    { 1101103002;2;Field  ;
+                SourceExpr="Line No." }
+
+    { 1101103003;2;Field  ;
+                SourceExpr="Sales Incentive No." }
+
+    { 1101103004;2;Field  ;
+                SourceExpr=Description }
+
+    { 1101103005;2;Field  ;
+                SourceExpr=Manual }
+
+    { 1101103006;2;Field  ;
+                SourceExpr=Amount }
+
+  }
+  CODE
+  {
+
+    BEGIN
+    END.
+  }
+}
+

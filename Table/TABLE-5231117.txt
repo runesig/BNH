@@ -1,0 +1,110 @@
+OBJECT Table 5231117 4754_uttrekk_8100_Biler
+{
+  OBJECT-PROPERTIES
+  {
+    Date=07.11.17;
+    Time=08:44:25;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+  }
+  FIELDS
+  {
+    { 1   ;   ;Primary Key         ;Integer        }
+    { 2   ;   ;Status              ;Option        ;OptionCaptionML=[ENU=" ,Ignore,OK,Error";
+                                                                    NOR=" ,Ignorer,OK,Feil"];
+                                                   OptionString=[ ,Ignore,OK,Error] }
+    { 3   ;   ;Datetime            ;DateTime      ;CaptionML=[ENU=Time;
+                                                              NOR=Tidspunkt] }
+    { 4   ;   ;Update message      ;Text250       ;CaptionML=[ENU=Message;
+                                                              NOR=Melding] }
+    { 5   ;   ;No.                 ;Code20        ;CaptionML=[ENU=Item No.;
+                                                              NOR=Varenr.] }
+    { 9   ;   ;UNIT_NUMBER         ;Text30         }
+    { 10  ;   ;Enhetsnr            ;Text10         }
+    { 20  ;   ;Enhetstype          ;Text10         }
+    { 30  ;   ;Merke               ;Text10         }
+    { 40  ;   ;Modellinje          ;Text50         }
+    { 50  ;   ;Status2             ;Text50         }
+    { 60  ;   ;Chassisnummer       ;Text50         }
+    { 70  ;   ;Reg.nr              ;Text20         }
+    { 80  ;   ;1. reg              ;Text30         }
+    { 90  ;   ;Enhetsgruppe        ;Text50         }
+    { 100 ;   ;Verkstedsmodellkode ;Text50         }
+    { 110 ;   ;Kategori            ;Text50         }
+    { 120 ;   ;Modelltekst         ;Text120        }
+    { 130 ;   ;Bokf.kode           ;Text50         }
+    { 140 ;   ;Avd                 ;Text50         }
+    { 150 ;   ;Lokasjon            ;Text50         }
+    { 170 ;   ;Fabrik.fargekode    ;Text50         }
+    { 180 ;   ;Fabrikantens fargena;Text50         }
+    { 190 ;   ;Interi›rtype        ;Text50         }
+    { 200 ;   ;Motorkode           ;Text50         }
+    { 210 ;   ;Motornummer         ;Text50         }
+    { 220 ;   ;Girkassenummer      ;Text50         }
+    { 230 ;   ;Utstyr 1            ;Text50         }
+    { 240 ;   ;Utstyr 2            ;Text50         }
+    { 250 ;   ;Utstyr 3            ;Text50         }
+    { 260 ;   ;Utstyr 4            ;Text50         }
+    { 270 ;   ;N›kkelnummer        ;Text50         }
+    { 280 ;   ;Radio               ;Text50         }
+    { 290 ;   ;Drivstoff type      ;Text50         }
+    { 300 ;   ;Sti for foto        ;Text100        }
+    { 310 ;   ;Kj›pt av            ;Text50         }
+    { 320 ;   ;Innkj›psavd         ;Text50         }
+    { 330 ;   ;Forventet ankomst   ;Text50         }
+    { 340 ;   ;Ank.dato            ;Text50         }
+    { 350 ;   ;Kj›psdato           ;Text50         }
+    { 360 ;   ;Fakturanummer       ;Text50         }
+    { 370 ;   ;Solgt av            ;Text50         }
+    { 380 ;   ;Salgsavd            ;Text50         }
+    { 390 ;   ;Kundenr             ;Text50         }
+    { 400 ;   ;Fakturanummer2      ;Text50         }
+    { 410 ;   ;Salgsordrenr        ;Text50         }
+    { 420 ;   ;Enhet innbytte      ;Text50         }
+    { 430 ;   ;Reservert           ;Text50         }
+    { 440 ;   ;Reservert til dato  ;Text50         }
+    { 450 ;   ;Reservert av        ;Text50         }
+    { 460 ;   ;Ordrebekr dato      ;Text50         }
+    { 470 ;   ;LevDat              ;Text50         }
+    { 480 ;   ;Enhetsdestinasjon   ;Text50         }
+    { 490 ;   ;Salgsdato           ;Text50         }
+    { 500 ;   ;Budsj salgspris     ;Text50         }
+    { 510 ;   ;Budsj kj›pspris     ;Text50         }
+    { 518 ;   ;MISC_1_CF           ;Text50         }
+    { 519 ;   ;MISC_2_CF           ;Text100        }
+    { 520 ;   ;Diverse 3           ;Text50         }
+    { 530 ;   ;Diverse 10          ;Text50         }
+    { 540 ;   ;Underforhandler     ;Text50         }
+    { 550 ;   ;Forsikringspolisenr.;Text50         }
+    { 560 ;   ;Forsikringsselskap  ;Text50         }
+    { 565 ;   ;EXP_KM_PER_YEAR     ;Text50         }
+    { 570 ;   ;N†v.eier            ;Text50         }
+    { 580 ;   ;Tidligere eier      ;Text50         }
+    { 590 ;   ;Opprettet           ;Text50         }
+    { 600 ;   ;Valgfri dato 1      ;Text50         }
+    { 610 ;   ;Valgfri dato 2      ;Text50         }
+    { 620 ;   ;Internettekst - till;Text50         }
+    { 630 ;   ;Rabattmatrise varer ;Text50         }
+    { 640 ;   ;Rabatt % Service    ;Text50         }
+    { 650 ;   ;EngangAvg           ;Text50         }
+    { 660 ;   ;Kommisjonsnr        ;Text50         }
+    { 670 ;   ;Priskort            ;Text50         }
+  }
+  KEYS
+  {
+    {    ;Primary Key                             ;Clustered=Yes }
+  }
+  FIELDGROUPS
+  {
+  }
+  CODE
+  {
+
+    BEGIN
+    END.
+  }
+}
+

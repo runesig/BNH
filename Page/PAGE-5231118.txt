@@ -1,0 +1,222 @@
+OBJECT Page 5231118 BNH Regnskapsposter
+{
+  OBJECT-PROPERTIES
+  {
+    Date=24.11.17;
+    Time=10:00:58;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    SourceTable=Table5231121;
+    PageType=List;
+    ActionList=ACTIONS
+    {
+      { 1101103023;  ;ActionContainer;
+                      ActionContainerType=ActionItems }
+      { 1101103024;1 ;Action    ;
+                      Name=Import File;
+                      RunObject=XMLport 5231120 }
+      { 1101103025;1 ;Action    ;
+                      Name=Journal;
+                      RunObject=Page 39;
+                      Image=JobJournal }
+      { 1101103026;1 ;Action    ;
+                      Name=Create record;
+                      Image=CreateFinanceChargememo;
+                      OnAction=VAR
+                                 BNHRegnskapsposterL@1101103000 : Record 5231121;
+                               BEGIN
+                                 CurrPage.SETSELECTIONFILTER( BNHRegnskapsposterL );
+                                 CODEUNIT.RUN( CODEUNIT::"BNH Regnskapsposter", BNHRegnskapsposterL );
+                               END;
+                                }
+      { 1101103029;1 ;Action    ;
+                      Name=Delete all record;
+                      OnAction=BEGIN
+                                 IF CONFIRM('Slette ALLE poster?') THEN
+                                   DELETEALL;
+                               END;
+                                }
+      { 1101103030;1 ;Action    ;
+                      Name=Assign Amount / Mounth;
+                      OnAction=VAR
+                                 BNHRegnskapsposterL@1101103000 : Record 5231121;
+                               BEGIN
+                                 IF BNHRegnskapsposterL.FINDFIRST THEN
+                                   REPEAT
+                                   IF EVALUATE(BNHRegnskapsposterL."Dec Bel›p", BNHRegnskapsposterL."Bel›p") THEN;
+                                   IF EVALUATE(BNHRegnskapsposterL."Int M†ned", COPYSTR(BNHRegnskapsposterL.BilDat, 4, 2)) THEN;
+                                   BNHRegnskapsposterL.MODIFY;
+                                   UNTIL BNHRegnskapsposterL.NEXT = 0;
+
+                                 MESSAGE('Oppdatering fullf›rt');
+                               END;
+                                }
+      { 1101103033;1 ;Action    ;
+                      Name=Create Bilagsdato;
+                      OnAction=VAR
+                                 BNHRegnskapsposterL@1101103000 : Record 5231121;
+                               BEGIN
+                                 BNHRegnskapsposterL.SETFILTER(BilDat, '<>%1', 'BilDat');
+                                 BNHRegnskapsposterL.SETRANGE(Bilagsdato, 0D);
+                                 IF BNHRegnskapsposterL.FINDFIRST THEN
+                                   REPEAT
+                                   BNHRegnskapsposterL.Bilagsdato := Str2Date('0' + BNHRegnskapsposterL.BilDat, 0);
+                                   BNHRegnskapsposterL.MODIFY;
+                                   UNTIL BNHRegnskapsposterL.NEXT = 0;
+                               END;
+                                }
+    }
+  }
+  CONTROLS
+  {
+    { 1101103000;0;Container;
+                ContainerType=ContentArea }
+
+    { 1101103001;1;Group  ;
+                Name=Group;
+                GroupType=Repeater }
+
+    { 1101103002;2;Field  ;
+                SourceExpr="Primary Key" }
+
+    { 1101103003;2;Field  ;
+                SourceExpr=Status }
+
+    { 1101103004;2;Field  ;
+                SourceExpr=Datetime }
+
+    { 1101103005;2;Field  ;
+                SourceExpr="Update message" }
+
+    { 1101103006;2;Field  ;
+                SourceExpr="No." }
+
+    { 1101103007;2;Field  ;
+                SourceExpr=Kontonr }
+
+    { 1101103027;2;Field  ;
+                SourceExpr="Incadea kontonr." }
+
+    { 1101103028;2;Field  ;
+                SourceExpr="Incadea merkekode" }
+
+    { 1101103008;2;Field  ;
+                SourceExpr=Filial }
+
+    { 1101103009;2;Field  ;
+                SourceExpr=Avd }
+
+    { 1101103010;2;Field  ;
+                SourceExpr=K }
+
+    { 1101103011;2;Field  ;
+                SourceExpr="Resk/ref" }
+
+    { 1101103012;2;Field  ;
+                SourceExpr=Buntnr }
+
+    { 1101103013;2;Field  ;
+                SourceExpr=BilaNr }
+
+    { 1101103014;2;Field  ;
+                SourceExpr=BilDat }
+
+    { 1101103015;2;Field  ;
+                SourceExpr=Jour }
+
+    { 1101103016;2;Field  ;
+                SourceExpr=M1 }
+
+    { 1101103017;2;Field  ;
+                SourceExpr=BA }
+
+    { 1101103018;2;Field  ;
+                SourceExpr="Bel›p" }
+
+    { 1101103019;2;Field  ;
+                SourceExpr=Motkonto }
+
+    { 1101103020;2;Field  ;
+                SourceExpr=M2 }
+
+    { 1101103021;2;Field  ;
+                SourceExpr=Tekst;
+                OnValidate=BEGIN
+                             Erstatt.ErstattChr(Tekst);
+                           END;
+
+                OnLookup=BEGIN
+                           Erstatt.ErstattChr(Tekst);
+                         END;
+
+                OnControlAddIn=BEGIN
+                                 Erstatt.ErstattChr(Tekst);
+                               END;
+                                }
+
+    { 1101103022;2;Field  ;
+                SourceExpr=M†ned }
+
+    { 1101103031;2;Field  ;
+                SourceExpr="Dec Bel›p" }
+
+    { 1101103032;2;Field  ;
+                SourceExpr="Int M†ned" }
+
+    { 1101103034;2;Field  ;
+                SourceExpr=Bilagsdato }
+
+  }
+  CODE
+  {
+    VAR
+      Erstatt@1101103000 : Codeunit 70901;
+
+    PROCEDURE Str2Date@1117700019(InnDato@1117700000 : Text[30];InnFormat@1117700001 : Integer) UtDato : Date;
+    VAR
+      Dag@1117700002 : Integer;
+      Mnd@1117700003 : Integer;
+      Aar@1117700004 : Integer;
+    BEGIN
+      IF InnDato = '' THEN EXIT(0D);
+
+      CASE InnFormat OF
+        0: // DD-MM-YYYY
+          BEGIN
+            EVALUATE(Dag, COPYSTR(InnDato,2,2));
+            EVALUATE(Mnd, COPYSTR(InnDato,5,2));
+            EVALUATE(Aar, COPYSTR(InnDato,8,4));
+            UtDato := DMY2DATE(Dag, Mnd, Aar);
+          END;
+        1: // MM-DD-YYYY
+          BEGIN
+            EVALUATE(Dag, COPYSTR(InnDato,4,2));
+            EVALUATE(Mnd, COPYSTR(InnDato,1,2));
+            EVALUATE(Aar, COPYSTR(InnDato,7,4));
+            UtDato := DMY2DATE(Dag, Mnd, Aar);
+          END;
+        2: // DDMMYY
+          BEGIN
+            EVALUATE(Dag, COPYSTR(InnDato,1,2));
+            EVALUATE(Mnd, COPYSTR(InnDato,3,2));
+            EVALUATE(Aar, COPYSTR(InnDato,5,2));
+            UtDato := DMY2DATE(Dag, Mnd, Aar+2000);
+          END;
+        3: // YYYYMMDD
+          BEGIN
+            EVALUATE(Dag, COPYSTR(InnDato,7,2));
+            EVALUATE(Mnd, COPYSTR(InnDato,5,2));
+            EVALUATE(Aar, COPYSTR(InnDato,1,4));
+            UtDato := DMY2DATE(Dag, Mnd, Aar);
+          END;
+      END;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

@@ -1,0 +1,470 @@
+OBJECT Codeunit 5231079 Portrait Dialog Export
+{
+  OBJECT-PROPERTIES
+  {
+    Date=29.11.18;
+    Time=10:33:49;
+    Modified=Yes;
+    Version List=BNH Portrait;
+  }
+  PROPERTIES
+  {
+    OnRun=VAR
+            AddressL@1101103005 : Record 5029111;
+            FileManagementL@1101103003 : Codeunit 419;
+            OutStreamL@1101103001 : OutStream;
+            FileL@1101103002 : File;
+            ServerFileNameL@1101103004 : Text;
+            ClientFileNameL@1101103000 : Text;
+          BEGIN
+            RemoveOldFiles;
+            ProduceFiles;
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      C_AddressFileName@1101103009 : TextConst 'ENU=contacts_%1.txt';
+      C_PermissionFileName@1101103010 : TextConst 'ENU=permissions_%1.txt';
+      C_AddressExtraFileName@1101103001 : TextConst 'ENU=contact_extra_fields_%1.txt';
+      C_ReminderFileName@1101103008 : TextConst 'ENU=reminder_%1.txt';
+      C_OrderFileName@1101103005 : TextConst 'ENU=order_%1.txt';
+      C_VehicleFileName@1101103003 : TextConst 'ENU=vehicles_%1.txt';
+      C_OptionFileName@1101103006 : TextConst 'ENU=vehicle_options_%1.txt';
+      C_VehicleExtraFileName@1101103012 : TextConst 'ENU=vehicle_extra_%1.txt';
+      C_CampaignFileName@1101103013 : TextConst 'ENU=campaign_%1.txt';
+      C_Contract@1101103007 : TextConst 'NOR=KONTRAKT';
+      C_Internal@1101103004 : TextConst 'NOR=INTERN';
+      C_FtpCode@1101103000 : TextConst 'ENU=PDIALOG';
+      C_FtpDebug@1101103002 : TextConst 'ENU=FileNameP: %1, FtpSetupL."Target Directory": %2, FtpSetupL."FTP Server": %3, FtpSetupL."FTP User": %4, FtpSetupL."FTP Password": %5';
+      C_FileDeleted@1101103014 : TextConst 'ENU=File deleted: %1';
+      C_FileCreated@1101103015 : TextConst 'ENU=File created: %1';
+      C_FileUploaded@1101103016 : TextConst 'ENU=File uploaded: %1';
+
+    PROCEDURE ProduceFiles@1101103011();
+    BEGIN
+      ProduceAddressFile;
+      ProducePermissionsFile;
+      ProduceAddressExtraFile;
+      ProduceReminderFile;
+      ProduceOrderFile;
+      ProduceVehicleFile;
+      ProduceOptionsFile;
+      ProduceVehicleExtraFile;
+      ProduceCampaignFile;
+    END;
+
+    PROCEDURE RemoveOldFiles@1101103013();
+    VAR
+      ImpExpProcessL@1101103003 : Record 5025702;
+      ImpExpProcessDirectoryL@1101103002 : Record 5025704;
+      CompanyInformationL@1101103000 : Record 79;
+      FileListL@1101103004 : Record 2000000022;
+      FileL@1101103005 : File;
+    BEGIN
+      ImpExpProcessL.SETRANGE("Codeunit No.", CODEUNIT::"Portrait Dialog Export");
+      ImpExpProcessL.FINDFIRST;
+      ImpExpProcessDirectoryL.SETRANGE("Process No.", ImpExpProcessL."Process ID");
+      ImpExpProcessDirectoryL.FINDFIRST;
+
+      FileListL.RESET;
+      FileListL.SETRANGE(Path, ImpExpProcessDirectoryL.Directory);
+      FileListL.SETRANGE("Is a file",TRUE);
+      IF FileListL.FINDSET THEN REPEAT
+        FILE.ERASE(ImpExpProcessDirectoryL.Directory + FileListL.Name);
+        LogMessage( STRSUBSTNO( C_FileDeleted, ImpExpProcessDirectoryL.Directory + FileListL.Name ));
+      UNTIL FileListL.NEXT = 0;
+    END;
+
+    PROCEDURE ProduceAddressFile@1101103007();
+    VAR
+      AddressL@1101103005 : Record 5029111;
+      FileManagementL@1101103004 : Codeunit 419;
+      OutStreamL@1101103003 : OutStream;
+      FileL@1101103002 : File;
+      ServerFileNameL@1101103001 : Text;
+      ClientFileNameL@1101103000 : Text;
+      RemoveControlCharsL@1101103006 : Codeunit 5231080;
+      RecordRefL@1101103007 : RecordRef;
+    BEGIN
+      AddressL.RESET;
+      //AddressL.SETFILTER("Customer Group Code", '10|11');
+
+      RecordRefL.OPEN( DATABASE::Address );
+      RecordRefL.GETTABLE( AddressL );
+      RemoveControlCharsL.SetUserInterface( GUIALLOWED );
+      RemoveControlCharsL.RemoveControlCharsFromTable( RecordRefL );
+
+      ServerFileNameL := FileManagementL.ServerTempFileName('txt');
+      ClientFileNameL := C_AddressFileName;
+      SetClientFilename(ClientFileNameL);
+
+      FileL.CREATE(ServerFileNameL);
+      FileL.CREATEOUTSTREAM(OutStreamL);
+      XMLPORT.EXPORT(XMLPORT::"Portrait Dialog Address Export", OutStreamL, AddressL);
+      FileL.CLOSE;
+      LogMessage( STRSUBSTNO( C_FileCreated, ServerFileNameL ));
+
+      DownloadUploadRemove( ServerFileNameL, ClientFileNameL );
+    END;
+
+    PROCEDURE ProducePermissionsFile@1101103002();
+    VAR
+      DataPrivL@1101103006 : Record 5060972;
+      FileManagementL@1101103004 : Codeunit 419;
+      OutStreamL@1101103003 : OutStream;
+      FileL@1101103002 : File;
+      ServerFileNameL@1101103001 : Text;
+      ClientFileNameL@1101103000 : Text;
+      RemoveControlCharsL@1101103007 : Codeunit 5231080;
+      RecordRefL@1101103005 : RecordRef;
+    BEGIN
+      DataPrivL.RESET;
+
+      RecordRefL.OPEN( DATABASE::"Internat. Data Privacy Query" );
+      RecordRefL.GETTABLE( DataPrivL );
+      RemoveControlCharsL.SetUserInterface( GUIALLOWED );
+      RemoveControlCharsL.RemoveControlCharsFromTable( RecordRefL );
+
+      ServerFileNameL := FileManagementL.ServerTempFileName('txt');
+      ClientFileNameL := C_PermissionFileName;
+      SetClientFilename(ClientFileNameL);
+
+      FileL.CREATE(ServerFileNameL);
+      FileL.CREATEOUTSTREAM(OutStreamL);
+      XMLPORT.EXPORT(XMLPORT::"Portrait Dialog Perm. Export", OutStreamL, DataPrivL);
+      FileL.CLOSE;
+      LogMessage( STRSUBSTNO( C_FileCreated, ServerFileNameL ));
+
+      DownloadUploadRemove( ServerFileNameL, ClientFileNameL );
+    END;
+
+    PROCEDURE ProduceAddressExtraFile@1101103008();
+    VAR
+      AddressL@1101103005 : Record 5029111;
+      AddressExtL@1101103008 : Record 1058077;
+      FileManagementL@1101103004 : Codeunit 419;
+      OutStreamL@1101103003 : OutStream;
+      FileL@1101103002 : File;
+      ServerFileNameL@1101103001 : Text;
+      ClientFileNameL@1101103000 : Text;
+      RemoveControlCharsL@1101103007 : Codeunit 5231080;
+      RecordRefL@1101103006 : RecordRef;
+    BEGIN
+      AddressL.RESET;
+      //AddressL.SETFILTER("Customer Group Code", '10|11');
+
+      RecordRefL.OPEN( DATABASE::"Address Ext." );
+      RecordRefL.GETTABLE( AddressExtL );
+      RemoveControlCharsL.SetUserInterface( GUIALLOWED );
+      RemoveControlCharsL.RemoveControlCharsFromTable( RecordRefL );
+
+      ServerFileNameL := FileManagementL.ServerTempFileName('txt');
+      ClientFileNameL := C_AddressExtraFileName;
+      SetClientFilename(ClientFileNameL);
+
+      FileL.CREATE(ServerFileNameL);
+      FileL.CREATEOUTSTREAM(OutStreamL);
+      XMLPORT.EXPORT(XMLPORT::"Portrait Dialog C.Extra Export", OutStreamL, AddressL);
+      FileL.CLOSE;
+      LogMessage( STRSUBSTNO( C_FileCreated, ServerFileNameL ));
+
+      DownloadUploadRemove( ServerFileNameL, ClientFileNameL );
+    END;
+
+    PROCEDURE ProduceReminderFile@1101103006();
+    VAR
+      WorkshopPlannerL@1101103005 : Record 1057600;
+      FileManagementL@1101103004 : Codeunit 419;
+      OutStreamL@1101103003 : OutStream;
+      FileL@1101103002 : File;
+      ServerFileNameL@1101103001 : Text;
+      ClientFileNameL@1101103000 : Text;
+      RemoveControlCharsL@1101103007 : Codeunit 5231080;
+      RecordRefL@1101103006 : RecordRef;
+    BEGIN
+      WorkshopPlannerL.RESET;
+      //WorkshopPlannerL.SETFILTER(CustContNo, '<>%1', 'MANUELL');
+
+      RecordRefL.OPEN( DATABASE::"WorkshopPlanner - Jobs" );
+      RecordRefL.GETTABLE( WorkshopPlannerL );
+      RemoveControlCharsL.SetUserInterface( GUIALLOWED );
+      RemoveControlCharsL.RemoveControlCharsFromTable( RecordRefL );
+
+      ServerFileNameL := FileManagementL.ServerTempFileName('txt');
+      ClientFileNameL := C_ReminderFileName;
+      SetClientFilename(ClientFileNameL);
+
+      FileL.CREATE(ServerFileNameL);
+      FileL.CREATEOUTSTREAM(OutStreamL);
+      XMLPORT.EXPORT(XMLPORT::"Portrait Dialog Reminder Exp.", OutStreamL, WorkshopPlannerL);
+      FileL.CLOSE;
+      LogMessage( STRSUBSTNO( C_FileCreated, ServerFileNameL ));
+
+      DownloadUploadRemove( ServerFileNameL, ClientFileNameL );
+    END;
+
+    PROCEDURE ProduceOrderFile@1101103005();
+    VAR
+      SalesHeaderL@1101103005 : Record 36;
+      FileManagementL@1101103004 : Codeunit 419;
+      OutStreamL@1101103003 : OutStream;
+      FileL@1101103002 : File;
+      ServerFileNameL@1101103001 : Text;
+      ClientFileNameL@1101103000 : Text;
+      RemoveControlCharsL@1101103007 : Codeunit 5231080;
+      RecordRefL@1101103006 : RecordRef;
+    BEGIN
+      SalesHeaderL.RESET;
+      SalesHeaderL.SETRANGE("Document Type", SalesHeaderL."Document Type"::Quote);
+      SalesHeaderL.SETRANGE("Order Type", SalesHeaderL."Order Type"::"Vehicle Sales & Purchases");
+      SalesHeaderL.SETRANGE("Status Code", C_Contract);
+      SalesHeaderL.SETFILTER(SalesHeaderL."Sell-to Customer No.", '<>%1', '');
+
+      RecordRefL.OPEN( DATABASE::"Sales Header" );
+      RecordRefL.GETTABLE( SalesHeaderL );
+      RemoveControlCharsL.SetUserInterface( GUIALLOWED );
+      RemoveControlCharsL.RemoveControlCharsFromTable( RecordRefL );
+
+      ServerFileNameL := FileManagementL.ServerTempFileName('txt');
+      ClientFileNameL := C_OrderFileName;
+      SetClientFilename(ClientFileNameL);
+
+      FileL.CREATE(ServerFileNameL);
+      FileL.CREATEOUTSTREAM(OutStreamL);
+      XMLPORT.EXPORT(XMLPORT::"Portrait Dialog Order Export", OutStreamL, SalesHeaderL);
+      FileL.CLOSE;
+      LogMessage( STRSUBSTNO( C_FileCreated, ServerFileNameL ));
+
+      DownloadUploadRemove( ServerFileNameL, ClientFileNameL );
+    END;
+
+    PROCEDURE ProduceVehicleFile@1101103004();
+    VAR
+      VehicleL@1101103005 : Record 5025400;
+      FileManagementL@1101103004 : Codeunit 419;
+      OutStreamL@1101103003 : OutStream;
+      FileL@1101103002 : File;
+      ServerFileNameL@1101103001 : Text;
+      ClientFileNameL@1101103000 : Text;
+      RemoveControlCharsL@1101103007 : Codeunit 5231080;
+      RecordRefL@1101103006 : RecordRef;
+    BEGIN
+      VehicleL.RESET;
+      //VehicleL.SETFILTER("Customer No.", '<>%1', C_Internal);
+      VehicleL.SETRANGE("Vehicle Status", VehicleL."Vehicle Status"::"Customer Vehicle");
+
+      RecordRefL.OPEN( DATABASE::Vehicle );
+      RecordRefL.GETTABLE( VehicleL );
+      RemoveControlCharsL.SetUserInterface( GUIALLOWED );
+      RemoveControlCharsL.RemoveControlCharsFromTable( RecordRefL );
+
+      ServerFileNameL := FileManagementL.ServerTempFileName('txt');
+      ClientFileNameL := C_VehicleFileName;
+      SetClientFilename(ClientFileNameL);
+
+      FileL.CREATE(ServerFileNameL);
+      FileL.CREATEOUTSTREAM(OutStreamL);
+      XMLPORT.EXPORT(XMLPORT::"Portrait Dialog Veh. Export", OutStreamL, VehicleL);
+      FileL.CLOSE;
+      LogMessage( STRSUBSTNO( C_FileCreated, ServerFileNameL ));
+
+      DownloadUploadRemove( ServerFileNameL, ClientFileNameL );
+    END;
+
+    PROCEDURE ProduceOptionsFile@1101103000();
+    VAR
+      OptionsL@1101103005 : Record 5025422;
+      FileManagementL@1101103004 : Codeunit 419;
+      OutStreamL@1101103003 : OutStream;
+      FileL@1101103002 : File;
+      ServerFileNameL@1101103001 : Text;
+      ClientFileNameL@1101103000 : Text;
+      RemoveControlCharsL@1101103007 : Codeunit 5231080;
+      RecordRefL@1101103006 : RecordRef;
+    BEGIN
+      OptionsL.RESET;
+      OptionsL.SETFILTER(Type, '<>%1', OptionsL.Type::Vehicle);
+
+      RecordRefL.OPEN( DATABASE::"Vehicle Option" );
+      RecordRefL.GETTABLE( OptionsL );
+      RemoveControlCharsL.SetUserInterface( GUIALLOWED );
+      RemoveControlCharsL.RemoveControlCharsFromTable( RecordRefL );
+
+      ServerFileNameL := FileManagementL.ServerTempFileName('txt');
+      ClientFileNameL := C_OptionFileName;
+      SetClientFilename(ClientFileNameL);
+
+      FileL.CREATE(ServerFileNameL);
+      FileL.CREATEOUTSTREAM(OutStreamL);
+      XMLPORT.EXPORT(XMLPORT::"Portrait Dialog Options Export", OutStreamL, OptionsL);
+      FileL.CLOSE;
+      LogMessage( STRSUBSTNO( C_FileCreated, ServerFileNameL ));
+
+      DownloadUploadRemove( ServerFileNameL, ClientFileNameL );
+    END;
+
+    PROCEDURE ProduceVehicleExtraFile@1101103009();
+    VAR
+      VehicleCustomerL@1101103005 : Record 5025469;
+      ContactL@1101103008 : Record 5050;
+      FileManagementL@1101103004 : Codeunit 419;
+      OutStreamL@1101103003 : OutStream;
+      FileL@1101103002 : File;
+      ServerFileNameL@1101103001 : Text;
+      ClientFileNameL@1101103000 : Text;
+      RemoveControlCharsL@1101103007 : Codeunit 5231080;
+      RecordRefL@1101103006 : RecordRef;
+    BEGIN
+      VehicleCustomerL.RESET;
+
+      RecordRefL.OPEN( DATABASE::"Vehicle Customer" );
+      RecordRefL.GETTABLE( VehicleCustomerL );
+      RemoveControlCharsL.SetUserInterface( GUIALLOWED );
+      RemoveControlCharsL.RemoveControlCharsFromTable( RecordRefL );
+      RecordRefL.CLOSE;
+
+      CLEAR( RemoveControlCharsL );
+      RecordRefL.OPEN( DATABASE::Contact );
+      RecordRefL.GETTABLE( ContactL );
+      RemoveControlCharsL.SetUserInterface( GUIALLOWED );
+      RemoveControlCharsL.RemoveControlCharsFromTable( RecordRefL );
+      RecordRefL.CLOSE;
+
+      ServerFileNameL := FileManagementL.ServerTempFileName('txt');
+      ClientFileNameL := C_VehicleExtraFileName;
+      SetClientFilename(ClientFileNameL);
+
+      FileL.CREATE(ServerFileNameL);
+      FileL.CREATEOUTSTREAM(OutStreamL);
+      XMLPORT.EXPORT(XMLPORT::"Portrait Dialog V.Extra Export", OutStreamL, VehicleCustomerL);
+      FileL.CLOSE;
+      LogMessage( STRSUBSTNO( C_FileCreated, ServerFileNameL ));
+
+      DownloadUploadRemove( ServerFileNameL, ClientFileNameL );
+    END;
+
+    PROCEDURE ProduceCampaignFile@1101103010();
+    VAR
+      CampaignL@1101103005 : Record 5025571;
+      FileManagementL@1101103004 : Codeunit 419;
+      OutStreamL@1101103003 : OutStream;
+      FileL@1101103002 : File;
+      ServerFileNameL@1101103001 : Text;
+      ClientFileNameL@1101103000 : Text;
+      RemoveControlCharsL@1101103007 : Codeunit 5231080;
+      RecordRefL@1101103006 : RecordRef;
+    BEGIN
+      CampaignL.RESET;
+
+      RecordRefL.OPEN( DATABASE::"Serv. Campaign-Affected Veh." );
+      RecordRefL.GETTABLE( CampaignL );
+      RemoveControlCharsL.SetUserInterface( GUIALLOWED );
+      RemoveControlCharsL.RemoveControlCharsFromTable( RecordRefL );
+
+      ServerFileNameL := FileManagementL.ServerTempFileName('txt');
+      ClientFileNameL := C_CampaignFileName;
+      SetClientFilename(ClientFileNameL);
+
+      FileL.CREATE(ServerFileNameL);
+      FileL.CREATEOUTSTREAM(OutStreamL);
+      XMLPORT.EXPORT(XMLPORT::"Portrait Dialog Campaign Exp.", OutStreamL, CampaignL);
+      FileL.CLOSE;
+      LogMessage( STRSUBSTNO( C_FileCreated, ServerFileNameL ));
+
+      DownloadUploadRemove( ServerFileNameL, ClientFileNameL );
+    END;
+
+    PROCEDURE SetClientFilename@1101103001(VAR FileNameP@1101103001 : Text[250]);
+    VAR
+      ImpExpProcessL@1101103003 : Record 5025702;
+      ImpExpProcessDirectoryL@1101103002 : Record 5025704;
+      CompanyInformationL@1101103000 : Record 79;
+    BEGIN
+      ImpExpProcessL.SETRANGE("Codeunit No.", CODEUNIT::"Portrait Dialog Export");
+      ImpExpProcessL.FINDFIRST;
+
+      ImpExpProcessDirectoryL.SETRANGE("Process No.", ImpExpProcessL."Process ID");
+      ImpExpProcessDirectoryL.FINDFIRST;
+
+      FileNameP := STRSUBSTNO(FileNameP,
+      FORMAT(TODAY, 0, '<Year4><Month,2><Day,2>'));
+      //FORMAT(TIME, 0, '<Hours24,2><Filler Character,0><Minutes,2><Seconds,2>'));
+      FileNameP := STRSUBSTNO('%1\%2', DELCHR(ImpExpProcessDirectoryL.Directory, '>', '\'), FileNameP);
+    END;
+
+    PROCEDURE DownloadUploadRemove@1101103018(ServerFileNameP@1101103001 : Text;ClientFileNameP@1101103000 : Text);
+    VAR
+      FileManagementL@1101103002 : Codeunit 419;
+      ServerFileNameL@1101103003 : Text;
+    BEGIN
+      DownloadToClient( ServerFileNameP, ClientFileNameP ); //fails with NAS, upload copy of serverfile instead
+
+      WITH FileManagementL DO BEGIN
+        ServerFileNameL := CombinePath( GetDirectoryName( ServerFileNameP ), GetFileName( ClientFileNameP ));
+        CopyServerFile( ServerFileNameP, ServerFileNameL, TRUE );
+      END;
+
+      UploadToFtp( ServerFileNameL );
+      LogMessage( STRSUBSTNO( C_FileUploaded, ServerFileNameL ));
+
+      FileManagementL.DeleteServerFile( ServerFileNameP );
+      LogMessage( STRSUBSTNO( C_FileDeleted, ServerFileNameP ));
+
+      FileManagementL.DeleteServerFile( ServerFileNameL );
+      LogMessage( STRSUBSTNO( C_FileDeleted, ServerFileNameL ));
+    END;
+
+    PROCEDURE DownloadToClient@1101103003(ServerFileNameP@1101103000 : Text;ClientFileNameP@1101103001 : Text);
+    VAR
+      FileManagementL@1101103002 : Codeunit 419;
+    BEGIN
+      // do not know why this fails with NAS
+      // but do not need local file as we send the serverfile to ftp
+      IF GUIALLOWED THEN
+        FileManagementL.DownloadToFile( ServerFileNameP, ClientFileNameP );
+    END;
+
+    PROCEDURE UploadToFtp@1101103012(ClientFileNamePathP@1101103000 : Text) : Boolean;
+    VAR
+      FtpSetupL@1101103003 : Record 5045179;
+      sFtpL@1101103002 : DotNet "'CoreTechs.Sftp.Client, Version=1.0.0.3, Culture=neutral, PublicKeyToken=null'.CoreTechs.Sftp.Client.Sftp";
+      sFtpServerL@1101103004 : Text;
+    BEGIN
+      IF NOT FtpSetupL.GET('PDIALOG') THEN
+        EXIT(FALSE);
+      //MESSAGE(C_FtpDebug, ClientFileNamePathP, FtpSetupL."Target Directory", FtpSetupL."FTP Server", FtpSetupL."FTP User", FtpSetupL."FTP Password");
+      CLEAR(sFtpL);
+      sFtpServerL := FtpSetupL."FTP Server";
+      IF LOWERCASE( COPYSTR(sFtpServerL, 1, 7 )) IN [ 'sftp:\\', 'sftp://' ] THEN
+        sFtpServerL := DELSTR(FtpSetupL."FTP Server", 1, 7);
+      sFtpL.Host := sFtpServerL;
+      sFtpL.Username := FtpSetupL."FTP User";
+      sFtpL.Password := FtpSetupL."FTP Password";
+      sFtpL.UploadFile(ClientFileNamePathP, TRUE, FtpSetupL."Target Directory");
+      CLEAR(sFtpL);
+      EXIT(TRUE);
+    END;
+
+    PROCEDURE LogMessage@1101103016(MessageP@1101103000 : Text);
+    BEGIN
+      IF NOT GUIALLOWED THEN
+        MESSAGE( CONVERTSTR( MessageP, '\', '/' ));
+    END;
+
+    BEGIN
+    {
+      +----------------------------------------------+
+      | Copyright ¸ 2017 incadea.dms                 |
+      +----------------------------------------------+
+      No.   Version Date      ID    Remark
+      ------------------------------------------------
+                    11.12.17  DHO   Initial Version
+                    15.12.17  ALO   Functions LogMessage, DownloadUploadRemove
+                    29.11.17  ALO   Remove Control Chars from related table Contact in function ProduceVehicleExtraFile
+    }
+    END.
+  }
+}
+

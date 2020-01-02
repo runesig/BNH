@@ -1,0 +1,209 @@
+OBJECT Codeunit 98021 BNH Item Update Backup
+{
+  OBJECT-PROPERTIES
+  {
+    Date=21.02.17;
+    Time=16:24:52;
+    Modified=Yes;
+    Version List=BNH;
+  }
+  PROPERTIES
+  {
+    TableNo=58020;
+    OnRun=BEGIN
+            BnHItemG.COPY( Rec );
+
+            WITH BnHItemG DO BEGIN
+              EvaluateInventory( BnHItemG );
+              CALCFIELDS( "No.", "Max Inventory" );
+
+              "Make Code" := GetMakeCode( BnHItemG );
+
+              CASE TRUE OF
+
+                "Make Code" = '':
+                  ERROR( C_NoMakeCode, BnHItemG."PROD-GRP" );
+
+                "Max Inventory" <= 0:
+                  BEGIN
+                    Status := Status::"1";
+                    "Update message" := C_NoStock;
+                    MODIFY;
+                    EXIT;
+                  END;
+
+                Status = Status::"1":
+                  EXIT;
+
+                "No." <> '':
+                  ModifyRecord;
+
+                ELSE
+                  InsertRecord;
+
+              END;
+            END;
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      C_ConfirmProcess@1101103000 : TextConst 'ENU=Process %1 records?;NOR=Prosesser %1 poster?';
+      BnHItemG@1101103001 : Record 58020;
+      ItemG@1101103002 : Record 27;
+      C_NoStock@1101103003 : TextConst 'ENU=No inventory, item excluded;NOR=Ingen beholdning, vare utelatt';
+      C_NoMakeCode@1101103005 : TextConst 'ENU=No Make Code for Product Group %1.;NOR=Produktgruppe %1 mangler merkekode.';
+
+    PROCEDURE InsertRecord@1101103000();
+    BEGIN
+      CLEAR( ItemG );
+      WITH ItemG DO BEGIN
+        INIT;
+        SetFields;
+        INSERT( TRUE );
+      END;
+    END;
+
+    PROCEDURE ModifyRecord@1101103001();
+    BEGIN
+      WITH ItemG DO BEGIN
+        GET( BnHItemG."No." );
+        SetFields;
+        MODIFY( TRUE );
+      END;
+    END;
+
+    PROCEDURE SetFields@1101103005();
+    VAR
+      ValueL@1101103001 : Text;
+      LastSpacePosL@1101103000 : Integer;
+      ShelfNoL@1101103002 : Text;
+    BEGIN
+      WITH ItemG DO BEGIN
+
+        VALIDATE( "No.", BnHItemG."PROD-CODE" );
+        VALIDATE( Description, BnHItemG."PRODS-NAME" );
+        VALIDATE( "Make Code", BnHItemG."Make Code" );
+        VALIDATE( "Item Type", "Item Type"::Item );
+
+        EVALUATE( "Unit Cost", CONVERTSTR( BnHItemG."RE-PURCHASE-PRICE", '.', ',' ));
+        VALIDATE( "Unit Cost" );
+
+        EVALUATE( "Last Direct Cost", CONVERTSTR( BnHItemG."LATEST-PURCH-PRICE", '.', ',' ));
+        VALIDATE( "Last Direct Cost" );
+
+        EVALUATE( "List Price (LCY)", CONVERTSTR( BnHItemG."PRICE-A", '.', ',' ));
+        VALIDATE( "List Price (LCY)" );
+
+        VALIDATE( "Item Group Code", GetItemGroupCode );
+
+        EVALUATE( "Unit Price", CONVERTSTR( BnHItemG."SALES-PRICE", '.', ',' ));
+        VALIDATE( "Unit Price" );
+
+        "Vendor No." := BnHItemG.SUPPLIER;
+        ShelfNoL := GetShelfNo; //do not save shelf. no. on card - use Item Location
+
+      END;
+    END;
+
+    PROCEDURE GetItemGroupCode@1101103007() : Code[10];
+    VAR
+      ItemGroupL@1101103000 : Record 5025800;
+    BEGIN
+      WITH ItemGroupL DO BEGIN
+        RESET;
+        CASE TRUE OF
+          GET( BnHItemG."Make Code", BnHItemG."DISCOUNT-CODE" ):
+            ;
+        ELSE
+          BEGIN
+            INIT;
+            "Make Code" := BnHItemG."Make Code";
+            Code := BnHItemG."DISCOUNT-CODE";
+            Description := STRSUBSTNO( '%1 %2', "Make Code", Code );
+            INSERT;
+          END;
+        END;
+        EXIT( Code );
+      END;
+    END;
+
+    PROCEDURE GetShelfNo@1101103009() : Code[10];
+    VAR
+      ItemLocationL@1101103000 : Record 5028700;
+    BEGIN
+      WITH ItemLocationL DO BEGIN
+        RESET;
+        CASE TRUE OF
+          GET( ItemG."No.", BnHItemG."Location Code" ):
+            ;
+        ELSE
+          BEGIN
+            INIT;
+            "Item No." := ItemG."No.";
+            "Location Code" := BnHItemG."Location Code";
+            "Shelf No." := BnHItemG."STOCK-ADDR";
+            INSERT;
+          END;
+        END;
+        EXIT( "Shelf No." );
+      END;
+    END;
+
+    PROCEDURE EvaluateInventory@1101103002(BnHItemP@1101103001 : Record 58020);
+    VAR
+      BnHItemL@1101103005 : Record 58020;
+      C_ProgressTitle@1101103003 : TextConst 'ENU=Evaluating inventory;NOR=Evaluerer beholdning';
+      C_InventoryResults@1101103004 : TextConst 'ENU=Evaluated inventory for %1 out of %2 records.;NOR=Evaluert beholdning for %1 av %2 poster.';
+    BEGIN
+      WITH BnHItemL DO BEGIN
+        RESET;
+        SETRANGE( "PROD-CODE", BnHItemP."PROD-CODE" );
+        IF FINDSET THEN
+          REPEAT
+            IF EVALUATE( Inventory, CONVERTSTR( "STOCK-AMOUNT", '.', ',' )) THEN
+              MODIFY;
+          UNTIL NEXT = 0;
+      END;
+    END;
+
+    PROCEDURE GetMakeCode@1101103004(BnHItemP@1101103001 : Record 58020) : Code[10];
+    VAR
+      ItemMasterL@1101103000 : Record 5029101;
+      MakeL@1101103002 : Record 12;
+      BnHMakeL@1101103003 : Record 58021;
+    BEGIN
+      CLEAR( MakeL );
+
+      WITH ItemMasterL DO BEGIN
+        RESET;
+        SETRANGE( "No.", BnHItemP."PROD-CODE" );
+        IF FINDSET THEN
+          REPEAT
+            IF MakeL.GET( ItemMasterL."Make Code" ) THEN
+              MakeL.MARK( TRUE );
+          UNTIL NEXT = 0;
+      END;
+
+      WITH MakeL DO BEGIN
+        MARKEDONLY( TRUE );
+        CASE TRUE OF
+          COUNT = 1:
+            BEGIN
+              FINDFIRST;
+              EXIT( Code );
+            END;
+          BnHMakeL.GET( BnHItemP."PROD-GRP" ):
+            EXIT( BnHMakeL."Make Code" );
+        END;
+      END;
+
+      EXIT( '' );
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

@@ -1,0 +1,128 @@
+OBJECT XMLport 5231119 BNH Gule lapper Vehicle
+{
+  OBJECT-PROPERTIES
+  {
+    Date=09.12.17;
+    Time=08:53:12;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    Direction=Import;
+    TextEncoding=WINDOWS;
+    OnPreXMLport=BEGIN
+                   IF GUIALLOWED THEN
+                     DialogG.OPEN( C_INC_Progress );
+
+                   WITH "BNH Gule lapper" DO
+                     IF FINDLAST THEN
+                       RecordNoG := "BNH Gule lapper"."Primary Key";
+                 END;
+
+    OnPostXMLport=BEGIN
+                    IF GUIALLOWED THEN
+                      DialogG.CLOSE;
+                  END;
+
+    Format=Variable Text;
+    FieldSeparator=[;];
+  }
+  ELEMENTS
+  {
+    { [{F1441A1F-B0B4-499D-BFAC-338E15830AFA}];  ;XML                 ;Element ;Text     }
+
+    { [{8E97DC8B-B5DB-426B-BC2F-FB16DC7C08A5}];1 ;Table               ;Element ;Table   ;
+                                                  SourceTable=Table5231114;
+                                                  Import::OnBeforeInsertRecord=BEGIN
+                                                                                 RecordNoG += 1;
+                                                                                 "BNH Gule lapper"."Primary Key" := RecordNoG;
+
+                                                                                 IF RecordNoG MOD 100 = 0 THEN
+                                                                                   DialogG.UPDATE( 1, RecordNoG );
+                                                                               END;
+
+                                                  Import::OnAfterInsertRecord=BEGIN
+                                                                                "BNH Gule lapper".Type := "BNH Gule lapper".Type::Vehicle;
+                                                                              END;
+
+                                                  Import::OnAfterModifyRecord=BEGIN
+                                                                                "BNH Gule lapper".Type := "BNH Gule lapper".Type::Vehicle;
+                                                                              END;
+                                                                               }
+
+    { [{751AC262-B930-41A5-ABE2-67B85E6E0C25}];2 ;Prio                ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Gule lapper::Prio;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{077B1422-63F6-4FFD-82B9-A32428B08F66}];2 ;Nr                  ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Gule lapper::Nr.;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{9B395F5C-9CF7-412F-9897-1B03E26DBE69}];2 ;Tekst               ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Gule lapper::Tekst1;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{EE230C4C-B476-4DA0-A342-60A08725221F}];2 ;Notat               ;Element ;Text    ;
+                                                  VariableName=Notat;
+                                                  DataType=Text;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded;
+                                                  Import::OnAfterAssignVariable=BEGIN
+                                                                                  "BNH Gule lapper".Notat1 := SplittLine(Notat); //COPYSTR(Notat, 1, 80);
+                                                                                  "BNH Gule lapper".Notat2 := SplittLine(Notat); //COPYSTR(Notat, 81, 80);
+                                                                                  "BNH Gule lapper".Notat3 := SplittLine(Notat); //COPYSTR(Notat, 161, 80);
+                                                                                  "BNH Gule lapper".Notat4 := SplittLine(Notat); //COPYSTR(Notat, 241, 80);
+                                                                                  "BNH Gule lapper".Notat5 := SplittLine(Notat); //COPYSTR(Notat, 321, 80);
+                                                                                  "BNH Gule lapper".Notat6 := SplittLine(Notat); //COPYSTR(Notat, 401, 80);
+                                                                                  "BNH Gule lapper".Notat7 := SplittLine(Notat); //COPYSTR(Notat, 581, 80);
+                                                                                  "BNH Gule lapper".Notat8 := SplittLine(Notat); //COPYSTR(Notat, 661, 80);
+                                                                                  "BNH Gule lapper".Notat9 := SplittLine(Notat); //COPYSTR(Notat, 741, 80);
+                                                                                  "BNH Gule lapper".Notat10 := SplittLine(Notat); //COPYSTR(Notat, 821, 80);
+                                                                                  "BNH Gule lapper".Notat11 := SplittLine(Notat); //COPYSTR(Notat, 901, 80);
+                                                                                  "BNH Gule lapper".Notat12 := SplittLine(Notat); //COPYSTR(Notat, 981, 80);
+                                                                                  "BNH Gule lapper".Notat13 := SplittLine(Notat); //COPYSTR(Notat, 1061, 80);
+                                                                                  "BNH Gule lapper".Notat14 := SplittLine(Notat); //COPYSTR(Notat, 1241, 80);
+                                                                                  //"BNH Gule lapper".MODIFY;
+                                                                                  "BNH Gule lapper".Type := "BNH Gule lapper".Type::Vehicle;
+                                                                                END;
+                                                                                 }
+
+  }
+  EVENTS
+  {
+  }
+  REQUESTPAGE
+  {
+    PROPERTIES
+    {
+    }
+    CONTROLS
+    {
+    }
+  }
+  CODE
+  {
+    VAR
+      C_INC_Progress@1101103000 : TextConst 'ENU=Import in progress...\ \Record No. #1#####;NOR=Import kj›rer...\ \Post nummer #1#####';
+      DialogG@1101103001 : Dialog;
+      RecordNoG@1101103002 : Integer;
+
+    PROCEDURE SplittLine@1101103000(TextP@1101103000 : Text) TextR : Text[80];
+    BEGIN
+      TextR := COPYSTR(TextP, 1, 80);
+      Notat := COPYSTR(Notat, 81);
+      EXIT(TextR);
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

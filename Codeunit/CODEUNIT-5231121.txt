@@ -1,0 +1,182 @@
+OBJECT Codeunit 5231121 BNH Regnskapsposter Update
+{
+  OBJECT-PROPERTIES
+  {
+    Date=26.11.17;
+    Time=10:28:51;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    TableNo=5231121;
+    OnRun=BEGIN
+            BNHRegnskapsposterG.COPY( Rec );
+
+            CASE TRUE OF
+              BNHRegnskapsposterG.Status = Status::Ignore:
+                EXIT;
+              ELSE
+                InsertRecord();
+            END;
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      BNHRegnskapsposterG@1101103000 : Record 5231121;
+      Teller@1101103001 : Integer;
+
+    PROCEDURE InsertRecord@1101103040();
+    VAR
+      GenJournalLineL@1101103001 : Record 81;
+      GenJournalLine2L@1101103002 : Record 81;
+      VendorL@1101103000 : Record 23;
+      tmpDecL@1101103003 : Decimal;
+      Erstatt@1101103004 : Codeunit 5231127;
+    BEGIN
+
+      GenJournalLine2L.SETRANGE("Journal Template Name", 'GENERELT');
+      GenJournalLine2L.SETRANGE("Journal Batch Name", 'HB17_NOV');
+
+      GenJournalLineL.INIT;
+      GenJournalLineL.VALIDATE("Journal Template Name", 'GENERELT');
+      GenJournalLineL.VALIDATE("Journal Batch Name", 'HB17_NOV');
+      IF GenJournalLine2L.FINDLAST THEN
+        GenJournalLineL."Line No." := GenJournalLine2L."Line No." + 10
+        ELSE
+        GenJournalLineL."Line No." := 10;
+
+      GenJournalLineL.VALIDATE("Posting Date", Str2Date('0' + BNHRegnskapsposterG.BilDat, 0));
+      GenJournalLineL.VALIDATE("Document No.", 'x' + BNHRegnskapsposterG.BilaNr);
+      GenJournalLineL.VALIDATE("External Document No.", BNHRegnskapsposterG.BilaNr);
+      BNHRegnskapsposterG.CALCFIELDS("Incadea kontonr.","Incadea merkekode");
+      IF BNHRegnskapsposterG."Incadea kontonr." = '' THEN
+        BNHRegnskapsposterG."Incadea kontonr." := '9998';
+      GenJournalLineL.VALIDATE("Account Type", GenJournalLineL."Account Type"::"G/L Account");
+      GenJournalLineL.VALIDATE("Account No.", BNHRegnskapsposterG."Incadea kontonr.");
+
+      IF BNHRegnskapsposterG."Incadea merkekode" <> '' THEN
+        GenJournalLineL.VALIDATE("Shortcut Dimension 2 Code", BNHRegnskapsposterG."Incadea merkekode");
+
+      EVALUATE(tmpDecL, BNHRegnskapsposterG."Bel›p");
+      GenJournalLineL.VALIDATE(Amount, tmpDecL);
+      GenJournalLineL.VALIDATE("Location Code", '0'+ BNHRegnskapsposterG.Filial);
+      GenJournalLineL.Description := BNHRegnskapsposterG.Tekst + ' ('+ BNHRegnskapsposterG.Kontonr +')';
+      Erstatt.ChrErstatt(GenJournalLineL.Description);
+      CASE BNHRegnskapsposterG.Avd OF
+        '0'   :
+          BNHRegnskapsposterG.Avd := '00';
+        '1'   :
+          BNHRegnskapsposterG.Avd := '01';
+        '10'  :
+          BEGIN
+          BNHRegnskapsposterG.Avd := '10';
+          GenJournalLineL.VALIDATE("Shortcut Dimension 2 Code", 'NISSAN');
+          END;
+        '11'  :
+          BEGIN
+          BNHRegnskapsposterG.Avd := '10';
+          GenJournalLineL.VALIDATE("Shortcut Dimension 2 Code", 'SUBARU');
+          END;
+        '12'  :
+          BNHRegnskapsposterG.Avd := '12';
+        '13'  :
+          BEGIN
+          BNHRegnskapsposterG.Avd := '10';
+          GenJournalLineL.VALIDATE("Shortcut Dimension 2 Code", 'HYUNDAI');
+          END;
+        '15'  :
+          BNHRegnskapsposterG.Avd := '';
+        '20'  :
+          BNHRegnskapsposterG.Avd := '20';
+        '24'  :
+          BNHRegnskapsposterG.Avd := '24';
+        '25'  :
+          BNHRegnskapsposterG.Avd := '25';
+        '26'  :
+          BNHRegnskapsposterG.Avd := '26';
+        '30'  :
+          BNHRegnskapsposterG.Avd := '30';
+        '40'  :
+          BNHRegnskapsposterG.Avd := '40';
+        '50'  :
+          BNHRegnskapsposterG.Avd := '50';
+        '6'   :
+          BNHRegnskapsposterG.Avd := '06';
+        '7'   :
+          BNHRegnskapsposterG.Avd := '07';
+        '8'   :
+          BNHRegnskapsposterG.Avd := '';
+        '9'   :
+          BNHRegnskapsposterG.Avd := '';
+        ''    :
+          BNHRegnskapsposterG.Avd := '';
+      END;
+
+      GenJournalLineL.VALIDATE("Shortcut Dimension 1 Code", BNHRegnskapsposterG.Avd);
+
+      GenJournalLineL."Gen. Prod. Posting Group" := '';
+      GenJournalLineL."VAT Prod. Posting Group" := '';
+      GenJournalLineL."Mva. kode" := '';
+      GenJournalLineL."VAT Amount" := 0;
+      GenJournalLineL."VAT Amount (LCY)" := 0;
+      GenJournalLineL."VAT %" := 0;
+      GenJournalLineL."Motkonto mva. kode" := '';
+      GenJournalLineL."VAT Base Amount (LCY)" := GenJournalLineL.Amount; //XXX
+      GenJournalLineL."Gen. Posting Type" := 0;
+
+      GenJournalLineL.INSERT(TRUE);
+      Teller +=1;
+      IF Teller >1000 THEN BEGIN
+        COMMIT;
+        Teller := 0;
+      END;
+    END;
+
+    PROCEDURE Str2Date@1117700019(InnDato@1117700000 : Text[30];InnFormat@1117700001 : Integer) UtDato : Date;
+    VAR
+      Dag@1117700002 : Integer;
+      Mnd@1117700003 : Integer;
+      Aar@1117700004 : Integer;
+    BEGIN
+      IF InnDato = '' THEN EXIT(0D);
+
+      CASE InnFormat OF
+        0: // DD-MM-YYYY
+          BEGIN
+            EVALUATE(Dag, COPYSTR(InnDato,2,2));
+            EVALUATE(Mnd, COPYSTR(InnDato,5,2));
+            EVALUATE(Aar, COPYSTR(InnDato,8,4));
+            UtDato := DMY2DATE(Dag, Mnd, Aar);
+          END;
+        1: // MM-DD-YYYY
+          BEGIN
+            EVALUATE(Dag, COPYSTR(InnDato,4,2));
+            EVALUATE(Mnd, COPYSTR(InnDato,1,2));
+            EVALUATE(Aar, COPYSTR(InnDato,7,4));
+            UtDato := DMY2DATE(Dag, Mnd, Aar);
+          END;
+        2: // DDMMYY
+          BEGIN
+            EVALUATE(Dag, COPYSTR(InnDato,1,2));
+            EVALUATE(Mnd, COPYSTR(InnDato,3,2));
+            EVALUATE(Aar, COPYSTR(InnDato,5,2));
+            UtDato := DMY2DATE(Dag, Mnd, Aar+2000);
+          END;
+        3: // YYYYMMDD
+          BEGIN
+            EVALUATE(Dag, COPYSTR(InnDato,7,2));
+            EVALUATE(Mnd, COPYSTR(InnDato,5,2));
+            EVALUATE(Aar, COPYSTR(InnDato,1,4));
+            UtDato := DMY2DATE(Dag, Mnd, Aar);
+          END;
+      END;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

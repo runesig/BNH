@@ -1,0 +1,34 @@
+OBJECT Table 5231080 Portrait Order Setup
+{
+  OBJECT-PROPERTIES
+  {
+    Date=31.10.17;
+    Time=09:05:51;
+    Modified=Yes;
+    Version List=BNH Portrait;
+  }
+  PROPERTIES
+  {
+  }
+  FIELDS
+  {
+    { 10  ;   ;Item No.            ;Code20        ;TableRelation=Item.No.;
+                                                   ValidateTableRelation=No }
+    { 20  ;   ;Service Agreement   ;Boolean        }
+    { 30  ;   ;Tire Hotel          ;Boolean        }
+  }
+  KEYS
+  {
+    {    ;Item No.                                ;Clustered=Yes }
+  }
+  FIELDGROUPS
+  {
+  }
+  CODE
+  {
+
+    BEGIN
+    END.
+  }
+}
+

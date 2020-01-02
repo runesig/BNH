@@ -1,0 +1,91 @@
+OBJECT Codeunit 5231132 BNH Open Balance Vendor
+{
+  OBJECT-PROPERTIES
+  {
+    Date=25.11.17;
+    Time=09:03:50;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    TableNo=5231130;
+    OnRun=BEGIN
+            BNHVedorOpenBalanceG.COPY( Rec );
+
+            WITH  BNHVedorOpenBalanceG DO BEGIN
+
+              RecordCountG[9] := COUNT;
+
+              IF GUIALLOWED THEN
+                IF NOT CONFIRM( C_ConfirmProcess, TRUE, RecordCountG[9] ) THEN
+                  EXIT;
+
+              PDMProgressG.Start( C_Progress, RecordCountG[9] );
+
+              IF FINDSET THEN
+                REPEAT
+                  PDMProgressG.Increment( 1 );
+
+                  COMMIT;
+                  CLEARLASTERROR;
+
+                  CASE TRUE OF
+                    Status = Status::Ignore:
+                      ;
+
+                    "lev.nr" = '':
+                      SetStatus( Status::Ignore, C_NoName );
+
+                    CODEUNIT.RUN( CODEUNIT::"BNH Open Balance Vendor Update", BNHVedorOpenBalanceG ):
+                      SetStatus( Status::OK, '' )
+                    ELSE
+                      SetStatus( Status::Error, GETLASTERRORTEXT );
+                  END;
+
+                  RecordCountG[ Status ] +=1;
+
+                UNTIL NEXT = 0;
+
+              PDMProgressG.Stop;
+            END;
+
+            COMMIT;
+            ShowResults;
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      C_ConfirmProcess@1101103000 : TextConst 'ENU=Process %1 records?;NOR=Prosesser %1 poster?';
+      BNHVedorOpenBalanceG@1101103001 : Record 5231130;
+      RecordCountG@1101103002 : ARRAY [9] OF Integer;
+      C_Results@1101103003 : TextConst 'ENU=Results:\ \%1 OK\ \%2 Ignored\ \%3 Failed;NOR=Resultater:\ \%1 OK\ \%2 ignorert\ \%3 feil';
+      PDMProgressG@1101103004 : Codeunit 50009;
+      C_Progress@1101103005 : TextConst 'ENU=Processing...;NOR=Prosesserer...';
+      C_NoName@1101103006 : TextConst 'ENU=Name is missing;NOR=Navn mangler';
+
+    PROCEDURE SetStatus@1101103000(StatusP@1101103000 : Option;MessageP@1101103001 : Text);
+    BEGIN
+      WITH BNHVedorOpenBalanceG DO BEGIN
+        GET( "Primary Key" );
+        Status := StatusP;
+        Datetime := CURRENTDATETIME;
+        "Update message" := COPYSTR( MessageP, 1, MAXSTRLEN( "Update message" ));
+        MODIFY;
+      END;
+    END;
+
+    PROCEDURE ShowResults@1101103003();
+    BEGIN
+      WITH BNHVedorOpenBalanceG DO
+        IF GUIALLOWED THEN
+          MESSAGE( C_Results, RecordCountG[ Status::OK ], RecordCountG[ Status::Ignore ], RecordCountG[ Status::Error ] );
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

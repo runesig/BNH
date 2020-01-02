@@ -1,0 +1,41 @@
+OBJECT Codeunit 5231105 BB Kjûretûy
+{
+  OBJECT-PROPERTIES
+  {
+    Date=19.10.17;
+    Time=21:17:44;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+
+    PROCEDURE CheckIfExist@1101103000();
+    VAR
+      BBVehicleL@1101103000 : Record 5231103;
+      VehicleL@1101103001 : Record 5025400;
+    BEGIN
+      WITH BBVehicleL DO BEGIN
+        IF FINDFIRST THEN
+          REPEAT
+          IF VehicleL.GET(BBVehicleL.codeVin) THEN
+            BEGIN
+            "BNH VIN" := VehicleL.VIN;
+            MODIFY;
+            END;
+          UNTIL NEXT = 0;
+
+      END;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

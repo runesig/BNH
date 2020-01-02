@@ -1,0 +1,242 @@
+OBJECT Page 5231125 BNH History Header
+{
+  OBJECT-PROPERTIES
+  {
+    Date=28.11.17;
+    Time=20:28:04;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    CaptionML=[ENU=BnH History Header;
+               NOR=BnH Historikk hode];
+    SourceTable=Table5231131;
+    PageType=List;
+    ActionList=ACTIONS
+    {
+      { 1101103079;  ;ActionContainer;
+                      ActionContainerType=ActionItems }
+      { 1101103063;1 ;Action    ;
+                      Name=Delete All Records;
+                      CaptionML=[ENU=Delete All Records;
+                                 NOR=Slett alle poster];
+                      Image=DeleteXML;
+                      OnAction=VAR
+                                 QHistoryHeaderL@1101103000 : Record 5231131;
+                               BEGIN
+                                 IF CONFIRM( C_DeleteAllRecords, FALSE ) THEN
+                                   IF CONFIRM( C_Sure, FALSE ) THEN
+                                     QHistoryHeaderL.DELETEALL( FALSE );
+                               END;
+                                }
+      { 1101103061;1 ;Action    ;
+                      Name=Import Data;
+                      CaptionML=[ENU=Import Data;
+                                 NOR=Importer data];
+                      RunObject=XMLport 5231126;
+                      Image=Import;
+                      PromotedCategory=Process }
+      { 1101103080;1 ;Action    ;
+                      Name=Create Records;
+                      CaptionML=[ENU=Create Records;
+                                 NOR=Opprett poster];
+                      Promoted=Yes;
+                      PromotedIsBig=Yes;
+                      Image=TransferOrder;
+                      PromotedCategory=Process;
+                      OnAction=VAR
+                                 QHistoryHeaderL@1101103001 : Record 5231131;
+                               BEGIN
+                                 CurrPage.SETSELECTIONFILTER( QHistoryHeaderL );
+                                 CODEUNIT.RUN( CODEUNIT::"BNH History Header", QHistoryHeaderL );
+                               END;
+                                }
+      { 1101103006;1 ;Action    ;
+                      Name=HistoryList;
+                      CaptionML=[DAN=Deb./k›ret›j - historik - (tidligere anvendt DMS);
+                                 DEU=Deb.-/Fzg.-Hist.(Alts.) šbersicht;
+                                 ENU=Cust./Veh. History (Legacy) List;
+                                 NOR=Kunde/Kj›ret›y historikk oversikt;
+                                 SVE=Kund-/ford. historik (Žrvd DMS) lista];
+                      RunObject=Page 5210187;
+                      Promoted=Yes;
+                      PromotedIsBig=Yes;
+                      Image=ListPage;
+                      PromotedCategory=Process }
+      { 1101103037;1 ;Action    ;
+                      Name=HistoryPage;
+                      CaptionML=[DAN=Deb./k›ret›j - historik - (tidligere anvendt DMS);
+                                 DEU=Deb.-/Fzg.-Historie (Altsyst.);
+                                 ENU=Cust./Veh. History (Legacy DMS);
+                                 NOR=Kunde/Kj›ret›y historikk;
+                                 SVE=Kund-/ford. historik (Žrvd DMS)];
+                      Promoted=Yes;
+                      PromotedIsBig=Yes;
+                      Image=Document;
+                      PromotedCategory=Process;
+                      OnAction=BEGIN
+                                 ShowHistoryHeader;
+                               END;
+                                }
+      { 1101103039;1 ;Action    ;
+                      Name=Nullstill Status;
+                      OnAction=BEGIN
+                                 IF CONFIRM( C_Clear, FALSE ) THEN
+                                   IF CONFIRM( C_Sure, FALSE ) THEN
+
+                                 SETFILTER("Q Status", '%1', "Q Status"::" ");
+                                 IF FINDFIRST THEN
+                                   REPEAT
+                                   CLEAR("Q Primary Key");
+                                   CLEAR("Q Status");
+                                   CLEAR("Q Datetime");
+                                   CLEAR("Q Update message");
+                                   CLEAR("Q Record ID");
+                                   MODIFY;
+                                   UNTIL NEXT = 0;
+                               END;
+                                }
+    }
+  }
+  CONTROLS
+  {
+    { 1101103000;0;Container;
+                ContainerType=ContentArea }
+
+    { 1101103001;1;Group  ;
+                Name=Group;
+                GroupType=Repeater }
+
+    { 1101103002;2;Field  ;
+                SourceExpr="Q Primary Key" }
+
+    { 1101103003;2;Field  ;
+                SourceExpr="Q Status" }
+
+    { 1101103004;2;Field  ;
+                SourceExpr="Q Datetime" }
+
+    { 1101103005;2;Field  ;
+                SourceExpr="Q Update message" }
+
+    { 1101103038;2;Field  ;
+                SourceExpr=VIN }
+
+    { 1101103007;2;Field  ;
+                SourceExpr="DEBIT-CUSTOMER" }
+
+    { 1101103008;2;Field  ;
+                SourceExpr="ORDER-NR" }
+
+    { 1101103009;2;Field  ;
+                SourceExpr="BASIS-NUMBER" }
+
+    { 1101103010;2;Field  ;
+                SourceExpr=DEPARTMENT }
+
+    { 1101103011;2;Field  ;
+                SourceExpr="STATE-CODE" }
+
+    { 1101103012;2;Field  ;
+                SourceExpr="TRANSACT-DATE" }
+
+    { 1101103013;2;Field  ;
+                SourceExpr=HANDLER }
+
+    { 1101103014;2;Field  ;
+                SourceExpr="PROGRAM" }
+
+    { 1101103015;2;Field  ;
+                SourceExpr="FUNCTION" }
+
+    { 1101103016;2;Field  ;
+                SourceExpr=SALESMAN }
+
+    { 1101103017;2;Field  ;
+                SourceExpr="REGISTER-NUMBER" }
+
+    { 1101103018;2;Field  ;
+                SourceExpr="DELIVERY-DATE" }
+
+    { 1101103019;2;Field  ;
+                SourceExpr="INVOICE-DATE" }
+
+    { 1101103020;2;Field  ;
+                SourceExpr="INVOICE-NUMBER" }
+
+    { 1101103021;2;Field  ;
+                SourceExpr=STATUS }
+
+    { 1101103022;2;Field  ;
+                SourceExpr="TAX-CODE" }
+
+    { 1101103023;2;Field  ;
+                SourceExpr="ORDERS-GROSSVALUE" }
+
+    { 1101103024;2;Field  ;
+                SourceExpr=DISCOUNT }
+
+    { 1101103025;2;Field  ;
+                SourceExpr=COSTS }
+
+    { 1101103026;2;Field  ;
+                SourceExpr="PURCH-TAX" }
+
+    { 1101103027;2;Field  ;
+                SourceExpr="TAX-SHARE" }
+
+    { 1101103028;2;Field  ;
+                SourceExpr=REF }
+
+    { 1101103029;2;Field  ;
+                SourceExpr=NOTE }
+
+    { 1101103030;2;Field  ;
+                SourceExpr="DELIVERY-WAY" }
+
+    { 1101103031;2;Field  ;
+                SourceExpr="DELIVERY-TERM" }
+
+    { 1101103032;2;Field  ;
+                SourceExpr="CAR-IN-CHANGE-C-U" }
+
+    { 1101103033;2;Field  ;
+                SourceExpr="ORDER-DATE" }
+
+    { 1101103034;2;Field  ;
+                SourceExpr=MILEAGE }
+
+    { 1101103035;2;Field  ;
+                SourceExpr="REDUCTION-CODES" }
+
+    { 1101103036;2;Field  ;
+                SourceExpr="REPAIR-CODES" }
+
+  }
+  CODE
+  {
+    VAR
+      CustomerG@1101103001 : Record 18;
+      C_DeleteAllRecords@1101103000 : TextConst 'ENU=Delete All Records?;NOR=Slett alle poster?';
+      C_Sure@1101103002 : TextConst 'ENU=Sure?;NOR=Sikker?';
+      C_Clear@1101103003 : TextConst 'ENU=Clear importstatus';
+
+    PROCEDURE ShowHistoryHeader@1101103000();
+    VAR
+      RecordIDL@1101103002 : RecordID;
+      RecordRefL@1101103001 : RecordRef;
+      CustVehHistHdrLegacyDMSL@1101103000 : Record 5029010;
+    BEGIN
+      RecordIDL := "Q Record ID";
+      RecordRefL.OPEN( DATABASE::"KillMe T5029010" );
+      RecordRefL := RecordIDL.GETRECORD;
+      RecordRefL.SETTABLE( CustVehHistHdrLegacyDMSL );
+      PAGE.RUN( PAGE::"KillMe P5029010", CustVehHistHdrLegacyDMSL );
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

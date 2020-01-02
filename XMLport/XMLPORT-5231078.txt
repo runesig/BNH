@@ -1,0 +1,177 @@
+OBJECT XMLport 5231078 Portrait Dialog Order Export
+{
+  OBJECT-PROPERTIES
+  {
+    Date=24.11.17;
+    Time=08:12:46;
+    Modified=Yes;
+    Version List=BNH Portrait;
+  }
+  PROPERTIES
+  {
+    CaptionML=ENU=Portrait Dialog Options Export;
+    Direction=Export;
+    TextEncoding=WINDOWS;
+    Format=Variable Text;
+    FieldDelimiter=<None>;
+    FieldSeparator=<TAB>;
+    TableSeparator=<NewLine>;
+    UseRequestPage=Yes;
+  }
+  ELEMENTS
+  {
+    { [{C19D763B-C1F1-473D-8D3E-3640AD129D95}];  ;root                ;Element ;Text    ;
+                                                  MinOccurs=Zero }
+
+    { [{81B82F2C-CB05-41E2-8925-E5AD58B43EC2}];1 ;Header              ;Element ;Table   ;
+                                                  SourceTable=Table98 }
+
+    { [{FF5CB22C-2532-446C-BBDB-6F92301BAC35}];2 ;DocTypeHeader       ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 DocTypeHeader := 'Document_Type';
+                                                                               END;
+                                                                                }
+
+    { [{C5160549-BBDB-4C2D-88A3-0A118CB18EA3}];2 ;DocNoHeader         ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 DocNoHeader := 'Document_Id';
+                                                                               END;
+                                                                                }
+
+    { [{0738E8FA-D803-487F-8429-BA1CE1D0AD0D}];2 ;AddressNoHeader     ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 AddressNoHeader := 'Record_Id';
+                                                                               END;
+                                                                                }
+
+    { [{0A25EF0F-D350-43E4-B846-11DB418ED3BE}];2 ;VinHeader           ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 VinHeader := 'VIN';
+                                                                               END;
+                                                                                }
+
+    { [{7A52B0B3-9B35-4A9D-B390-D8159B49F66A}];2 ;ContractDateHeader  ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 ContractDateHeader := 'Contract_date';
+                                                                               END;
+                                                                                }
+
+    { [{5EB189C8-AE27-43ED-AB61-680C6979EA90}];2 ;TireHotelHeader     ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 TireHotelHeader := 'Tire_Hotel';
+                                                                               END;
+                                                                                }
+
+    { [{E52B7E43-33C7-4D94-97D0-81DF1AD0BD71}];2 ;ServiceAgreementHeader;Element;Text   ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 ServiceAgreementHeader := 'Service_Agreement';
+                                                                               END;
+                                                                                }
+
+    { [{11AD1399-C310-4CF6-81FD-6AF703D5BADB}];2 ;RecordOperationHeader;Element;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 RecordOperationHeader := 'Record_Operation';
+                                                                               END;
+                                                                                }
+
+    { [{8269B823-3137-4145-BB91-369522AEC16F}];1 ;SalesHeader         ;Element ;Table   ;
+                                                  SourceTable=Table36;
+                                                  Export::OnAfterGetRecord=BEGIN
+                                                                             StatusHistG.RESET;
+                                                                             StatusHistG.SETRANGE("Document Type", "Sales Header"."Document Type");
+                                                                             StatusHistG.SETRANGE("Document No.", "Sales Header"."No.");
+                                                                             IF StatusHistG.FINDFIRST THEN
+                                                                               ContractDate := FORMAT(StatusHistG."Modification Date", 0, '<Day,2>.<Month,2>.<Year4>')
+                                                                             ELSE
+                                                                               ContractDate := FORMAT("Sales Header"."Order Date", 0, '<Day,2>.<Month,2>.<Year4>');
+
+                                                                             SalesLineG.RESET;
+                                                                             SalesLineG.SETRANGE("Document Type", "Sales Header"."Document Type");
+                                                                             SalesLineG.SETRANGE("Document No.", "Sales Header"."No.");
+                                                                             TireHotel := '0';
+                                                                             ServiceAgreement := '0';
+                                                                             IF SalesLineG.FINDSET THEN REPEAT
+                                                                               IF STRLEN(SalesLineG.VIN) > 2 THEN
+                                                                                 Vin := SalesLineG.VIN;
+                                                                               PortraitOrderSetupG.RESET;
+                                                                               PortraitOrderSetupG.SETRANGE("Item No.", SalesLineG."No.");
+                                                                               IF PortraitOrderSetupG.FINDFIRST THEN BEGIN
+                                                                                 IF PortraitOrderSetupG."Tire Hotel" THEN
+                                                                                   TireHotel := '1';
+                                                                                 IF PortraitOrderSetupG."Service Agreement" THEN
+                                                                                   ServiceAgreement := '1';
+                                                                               END;
+                                                                             UNTIL SalesLineG.NEXT = 0;
+                                                                           END;
+                                                                            }
+
+    { [{FA9270E8-FA32-4AD0-BC52-B5087EEB85B0}];2 ;DocType             ;Element ;Field   ;
+                                                  DataType=Option;
+                                                  SourceField=Sales Header::Document Type }
+
+    { [{20BB1AF9-6DAF-45BC-B6D4-3486FA479121}];2 ;DocNo               ;Element ;Field   ;
+                                                  DataType=Code;
+                                                  SourceField=Sales Header::No. }
+
+    { [{638F9185-B90D-43D4-8FC8-9AAB9C1723B2}];2 ;AddressNo           ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=VAR
+                                                                                 CustomerL@1101103000 : Record 18;
+                                                                               BEGIN
+                                                                                 CustomerL.RESET;
+                                                                                 CustomerL.SETRANGE("No.", "Sales Header"."Sell-to Customer No.");
+                                                                                 IF CustomerL.FINDFIRST THEN
+                                                                                   AddressNo := FORMAT(CustomerL."Address No.")
+                                                                                 ELSE
+                                                                                   AddressNo := FORMAT("Sales Header"."Sell-to Address No.");
+                                                                               END;
+                                                                                }
+
+    { [{E0BF0FB5-497B-49A2-B484-A2FDE2CDDB11}];2 ;Vin                 ;Element ;Text     }
+
+    { [{C6232ED6-41AB-4839-8527-B7906DAB58A0}];2 ;ContractDate        ;Element ;Text    ;
+                                                  DataType=Option }
+
+    { [{B28130DE-D879-4267-9298-0F125FDD4DB2}];2 ;TireHotel           ;Element ;Text     }
+
+    { [{C82089EA-C98C-471E-8076-2BC530428C65}];2 ;ServiceAgreement    ;Element ;Text     }
+
+    { [{5ADA03EC-5BA5-4BB4-8179-5184095F08A2}];2 ;RecordOperation     ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 RecordOperation := 'U';
+                                                                               END;
+                                                                                }
+
+  }
+  EVENTS
+  {
+  }
+  REQUESTPAGE
+  {
+    PROPERTIES
+    {
+    }
+    CONTROLS
+    {
+    }
+  }
+  CODE
+  {
+    VAR
+      C_NoData@1101103000 : TextConst 'ENU=" ";NOR=" "';
+      StatusHistG@1101103001 : Record 5206375;
+      SalesLineG@1101103002 : Record 37;
+      PortraitOrderSetupG@1101103003 : Record 5231080;
+
+    BEGIN
+    {
+      +----------------------------------------------+
+      | Copyright ¸ 2017   incadea.dms               |
+      +----------------------------------------------+
+      No.   Version Date      ID    Remark
+      ------------------------------------------------
+                    31.10.17  DHO   Initial Version
+    }
+    END.
+  }
+}
+

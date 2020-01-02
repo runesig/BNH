@@ -1,0 +1,422 @@
+OBJECT Codeunit 50008 DeliveryListFunc
+{
+  OBJECT-PROPERTIES
+  {
+    Date=30.11.18;
+    Time=11:01:17;
+    Modified=Yes;
+    Version List=BNH;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+            //UpdateDeliveryList();
+            //MESSAGE('Oppdatering er ferdig');
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      CQSPDMProgressG@1101103000 : Codeunit 1057645;
+      C_SID001@1101103001 : TextConst 'ENU=Update informtions;NOR=Oppdaterer informasjonen';
+
+    PROCEDURE UpdateDeliveryList@1101103000();
+    VAR
+      DeliveryListL@1101103007 : Record 50003;
+      SalesHeaderL@1101103000 : Record 36;
+      SalespersonPurchaserL@1101103001 : Record 13;
+      SalesLineL@1101103002 : Record 37;
+      ArcSalesLineL@1101103008 : Record 5046906;
+      ArcSalesHeaderL@1101103009 : Record 5046905;
+      VehicleL@1101103003 : Record 5025400;
+      ServiceHeaderL@1101103004 : Record 5025624;
+      ArchivedServiceHeaderL@1101103005 : Record 5025636;
+      PurchaseLineL@1101103006 : Record 39;
+    BEGIN
+      //Insert new lines
+      SalesLineL.RESET;
+      SalesLineL.SETRANGE("Document Type", SalesLineL."Document Type"::Order);
+      SalesLineL.SETRANGE("Item Type", SalesLineL."Item Type"::Vehicle);
+      IF SalesLineL.FINDFIRST THEN
+        REPEAT
+          IF NOT DeliveryListL.GET(SalesLineL."Document No.", SalesLineL."Line No.") THEN BEGIN
+             DeliveryListL.INIT;
+             DeliveryListL."No." := SalesLineL."Document No.";
+             DeliveryListL."Sales Line No." := SalesLineL."Line No.";
+             DeliveryListL.INSERT;
+          END;
+          UNTIL SalesLineL.NEXT = 0;
+
+      //Fill from order or arc.order
+      //DeliveryListL.SETRANGE("No.", 'KSO00942');  //TEST
+      IF DeliveryListL.FINDFIRST THEN
+        BEGIN
+        CQSPDMProgressG.Start(C_SID001, DeliveryListL.COUNT);
+          REPEAT
+           SalesLineL.SETRANGE("Document No.", DeliveryListL."No.");
+           SalesLineL.SETRANGE("Line No.", DeliveryListL."Sales Line No.");
+           IF SalesLineL.FINDFIRST THEN
+             FillFromOrder(DeliveryListL, SalesLineL)
+           ELSE BEGIN
+             ArcSalesLineL.SETRANGE("Document Type", SalesLineL."Document Type"::Order);
+             ArcSalesLineL.SETRANGE("Item Type", SalesLineL."Item Type"::Vehicle);
+             ArcSalesLineL.SETRANGE("Document No.", DeliveryListL."No.");
+             ArcSalesLineL.SETRANGE("Line No.", DeliveryListL."Sales Line No.");
+             IF ArcSalesLineL.FINDFIRST THEN
+              IF ArcSalesHeaderL.GET(ArcSalesHeaderL."Document Type"::Order, ArcSalesLineL."Document No.") THEN
+                IF ArcSalesHeaderL."Reason for Archiving" = ArcSalesHeaderL."Reason for Archiving"::"Delete Manually" THEN
+                  DeliveryListL.DELETE
+                  ELSE
+                  FillFromArcOrder(DeliveryListL, ArcSalesLineL);
+             IF ArcSalesLineL.COUNT =  0 THEN
+               DeliveryListL.DELETE;
+           END;
+          CQSPDMProgressG.Increment( 1 );
+        //     DeliveryListL.MODIFY;
+          UNTIL DeliveryListL.NEXT = 0;
+          CQSPDMProgressG.Stop;
+        END;
+    END;
+
+    PROCEDURE FillFromOrder@1101103001(VAR InDelivery@1101103009 : Record 50003;inSalesLine@1101103010 : Record 37);
+    VAR
+      DeliveryListL@1101103008 : Record 50003;
+      SalesHeaderL@1101103007 : Record 36;
+      SalespersonPurchaserL@1101103006 : Record 13;
+      SalesLineL@1101103005 : Record 37;
+      ArcSalesLineL@1101103004 : Record 5046906;
+      VehicleL@1101103003 : Record 5025400;
+      ServiceHeaderL@1101103002 : Record 5025624;
+      ArchivedServiceHeaderL@1101103001 : Record 5025636;
+      PurchaseLineL@1101103000 : Record 39;
+    BEGIN
+      DeliveryListL := InDelivery;
+
+      //Sales Header
+      IF SalesHeaderL.GET(SalesHeaderL."Document Type"::Order, inSalesLine."Document No.") THEN BEGIN
+         DeliveryListL."Location Code" := SalesHeaderL."Location Code";
+         DeliveryListL.Department := SalesHeaderL."Shortcut Dimension 1 Code";
+         DeliveryListL."Sell-to Customer No." := SalesHeaderL."Sell-to Customer No.";
+         DeliveryListL."Phone No." := GetPhone(DeliveryListL."Sell-to Customer No.");
+         DeliveryListL."Sell-to Customer Name" := SalesHeaderL."Sell-to Customer Name";
+         DeliveryListL."Registration Date" := SalesHeaderL."Date 1";
+         DeliveryListL."Delivery Date" := SalesHeaderL."Date 2";
+         DeliveryListL."Salesperson Code" := SalesHeaderL."Salesperson Code";
+         DeliveryListL."Delivery Point" := SalesHeaderL."Extra Code 1";
+         DeliveryListL."Offer No." := SalesHeaderL."External Document No.";
+         DeliveryListL."Vehicle Sales Price Group" := SalesHeaderL."Vehicle Sales Price Group";
+         DeliveryListL."Vehicle Status" := inSalesLine."Vehicle Status";
+         DeliveryListL."Gen. Prod. Posting Group" := inSalesLine."Gen. Prod. Posting Group";
+         DeliveryListL."Inventory Posting Group" := inSalesLine."Posting Group";
+         DeliveryListL."Salesperson Code 2" := SalesHeaderL."Salesperson Code 2";
+         DeliveryListL."Order Date" := SalesHeaderL."Order Date";
+         DeliveryListL."Your Reference" := SalesHeaderL."Your Reference";
+
+       END;
+       //Salesperson/Purchaser
+       IF SalespersonPurchaserL.GET(SalesHeaderL."Salesperson Code") THEN
+         DeliveryListL.Name := SalespersonPurchaserL.Name;
+       //Sales Line
+       DeliveryListL.Description := inSalesLine.Description;
+       // JRO 071118 Start
+       IF (inSalesLine.VIN <> DeliveryListL.VIN) AND (DeliveryListL.VIN <> '') THEN
+          DeliveryListL.VIN := inSalesLine.VIN;
+       // JRO 071118 Stop
+
+       //Vehicle
+       IF (VehicleL.GET(inSalesLine.VIN)) OR VehicleL.GET(DeliveryListL.VIN)  THEN BEGIN
+         IF inSalesLine.VIN = '' THEN
+          BEGIN
+          DeliveryListL.VIN := '';
+          DeliveryListL."License No." := '';
+          DeliveryListL."Import›rnr." := '';
+          DeliveryListL."Incentive Type" := '';
+          DeliveryListL."Retail/Sell Out" := 0D;
+          DeliveryListL.Dealer := '';
+          DeliveryListL."Plassering/Status" := '';
+          DeliveryListL."Purchase Receipt Date" := 0D;
+          DeliveryListL.Financing := '';
+          DeliveryListL.Incentive := '';
+          DeliveryListL."Cruising Range" := '';
+          DeliveryListL."Make Code" := '';
+          END ELSE BEGIN
+          DeliveryListL.VIN := VehicleL.VIN;
+          DeliveryListL."License No." := VehicleL."License No.";
+          DeliveryListL."Import›rnr." := VehicleL."Text 1";
+          DeliveryListL."Incentive Type" := VehicleL."Text 2";
+          DeliveryListL."Retail/Sell Out" := VehicleL."Date 1";
+          DeliveryListL.Dealer := VehicleL."Extra Code 1";
+          DeliveryListL."Plassering/Status" := VehicleL."Extra Code 2";
+          DeliveryListL."Purchase Receipt Date" := VehicleL."Purchase Receipt Date";
+          DeliveryListL.Financing := VehicleL."Text 3";
+          DeliveryListL.Incentive := VehicleL."Text 4";
+          DeliveryListL."Cruising Range" := VehicleL."Cruising Range";
+          DeliveryListL."Make Code" := VehicleL."Make Code";
+
+       //   IF VehicleL."Vehicle Status" <> VehicleL."Vehicle Status"::"Customer Vehicle" THEN BEGIN
+       //     DeliveryListL."Vehicle Status" := VehicleL."Vehicle Status";
+       //     DeliveryListL."Gen. Prod. Posting Group" := VehicleL."Gen. Prod. Posting Group";
+       //     DeliveryListL."Inventory Posting Group" := VehicleL."Inventory Posting Group";
+          END;
+         END ELSE BEGIN
+         DeliveryListL.VIN := '';
+         DeliveryListL."Incentive Type" := GetInformationFromPurchOrder(DeliveryListL."Purch. Document No.", 0);
+         DeliveryListL.Incentive := GetInformationFromPurchOrder(DeliveryListL."Purch. Document No.", 1);
+         DeliveryListL.Dealer := GetInformationFromPurchOrder(DeliveryListL."Purch. Document No.", 2);
+         DeliveryListL."Retail/Sell Out" := GetInformationFromPurchOrder2(DeliveryListL."Purch. Document No.", 0);
+         DeliveryListL."Import›rnr." := GetInformationFromPurchOrder(DeliveryListL."Purch. Document No.", 3);
+       END;
+       //Service Header
+       ServiceHeaderL.RESET;
+       ServiceHeaderL.SETRANGE("Extra Code 1", inSalesLine."Document No.");
+       IF ServiceHeaderL.FINDFIRST THEN BEGIN
+         DeliveryListL."Service Order No." := ServiceHeaderL."No.";
+         DeliveryListL."Pickup Date" := ServiceHeaderL."Pickup Date";
+         DeliveryListL."Status Code" := ServiceHeaderL."Status Code";
+         DeliveryListL."Work Status Code" := ServiceHeaderL."Work Status Code";
+       END ELSE BEGIN
+         DeliveryListL."Service Order No." := '';
+         DeliveryListL."Pickup Date" := 0D;
+         DeliveryListL."Status Code" := '';
+         DeliveryListL."Work Status Code" := '';
+       END;
+
+       //Archived Service Header
+       ArchivedServiceHeaderL.RESET;
+       ArchivedServiceHeaderL.SETRANGE(ArchivedServiceHeaderL."Extra Code 1", inSalesLine."Document No.");
+       IF ArchivedServiceHeaderL.FINDFIRST THEN BEGIN
+         DeliveryListL."Arch.Serv. Order No." := ArchivedServiceHeaderL."No.";
+         DeliveryListL."Reason for Archiving" := ArchivedServiceHeaderL."Reason for Archiving";
+       END;
+       //Purchase Line
+       IF PurchaseLineL.GET(inSalesLine."From Purch. Document Type", inSalesLine."From Purch. Document No.", inSalesLine."From Purch. Line No.") THEN BEGIN
+         DeliveryListL."Purch. Document No." := PurchaseLineL."Document No.";
+         DeliveryListL."Expected Receipt Date" := PurchaseLineL."Expected Receipt Date";
+         DeliveryListL."Vendor Order No." := PurchaseLineL."Vendor Order No.";
+         IF NOT VehicleL.GET(inSalesLine.VIN) THEN BEGIN
+           DeliveryListL."Cruising Range" := PurchaseLineL."Cruising Range";
+           DeliveryListL."Make Code" := PurchaseLineL."Shortcut Dimension 2 Code";
+         END;
+       END ELSE BEGIN
+         DeliveryListL."Purch. Document No." := '';
+         DeliveryListL."Expected Receipt Date" := 0D;
+         DeliveryListL."Vendor Order No." := '';
+       END;
+      DeliveryListL."Last Update" := CREATEDATETIME(WORKDATE, TIME);
+      DeliveryListL.MODIFY;
+    END;
+
+    PROCEDURE FillFromArcOrder@1101103002(VAR InDelivery@1101103009 : Record 50003;InArcSalesLine@1101103010 : Record 5046906);
+    VAR
+      DeliveryListL@1101103008 : Record 50003;
+      ArcSalesHeaderL@1101103007 : Record 5046905;
+      SalespersonPurchaserL@1101103006 : Record 13;
+      ArcSalesLineL@1101103005 : Record 5046906;
+      ArcSalesLine2L@1101103004 : Record 5046906;
+      VehicleL@1101103003 : Record 5025400;
+      ArcServiceHeaderL@1101103002 : Record 5025636;
+      ArchivedServiceHeaderL@1101103001 : Record 5025636;
+      ArcPurchaseLineL@1101103000 : Record 5046909;
+      ServiceHeaderL@1101103011 : Record 5025624;
+    BEGIN
+      DeliveryListL := InDelivery;
+
+      //Sales Header
+      IF ArcSalesHeaderL.GET(ArcSalesHeaderL."Document Type"::Order, InArcSalesLine."Document No.") THEN BEGIN
+        DeliveryListL."Location Code" := ArcSalesHeaderL."Location Code";
+        DeliveryListL.Department := ArcSalesHeaderL."Department Code";
+        DeliveryListL."Sell-to Customer No." := ArcSalesHeaderL."Sell-to Customer No.";
+        DeliveryListL."Phone No." := GetPhone(DeliveryListL."Sell-to Customer No.");
+        DeliveryListL."Sell-to Customer Name" := ArcSalesHeaderL."Sell-to Customer Name";
+        DeliveryListL."Registration Date" := ArcSalesHeaderL."Date 1";
+        DeliveryListL."Delivery Date" := ArcSalesHeaderL."Date 2";
+        DeliveryListL."Salesperson Code" := ArcSalesHeaderL."Salesperson Code";
+        DeliveryListL."Delivery Point" := ArcSalesHeaderL."Extra Code 1";
+        DeliveryListL."Offer No." := ArcSalesHeaderL."External Document No.";
+        DeliveryListL."Vehicle Sales Price Group" := ArcSalesHeaderL."Vehicle Sales Price Group";
+        DeliveryListL."Invoice Date" := GetInvoiceDate(DeliveryListL."No.");
+        IF DeliveryListL."Invoice Date" <> 0D THEN
+          DeliveryListL."Cr. Memo Date" := GetCrMemoDate(DeliveryListL."No.");
+        IF DeliveryListL."Cr. Memo Date" <> 0D THEN
+          DeliveryListL.Credited := TRUE;
+        DeliveryListL."Vehicle Status" := InArcSalesLine."Vehicle Status";
+        DeliveryListL."Gen. Prod. Posting Group" := InArcSalesLine."Gen. Prod. Posting Group";
+        DeliveryListL."Inventory Posting Group" := InArcSalesLine."Posting Group";
+        DeliveryListL."Salesperson Code 2" := ArcSalesHeaderL."Salesperson Code 2";
+        DeliveryListL."Order Date" := ArcSalesHeaderL."Order Date";
+        DeliveryListL."Your Reference" := ArcSalesHeaderL."Your Reference";
+
+       END;
+       //Salesperson/Purchaser
+       IF SalespersonPurchaserL.GET(ArcSalesHeaderL."Salesperson Code") THEN
+         DeliveryListL.Name := SalespersonPurchaserL.Name;
+       //Sales Line
+       DeliveryListL.Description := InArcSalesLine.Description;
+       //Vehicle
+       IF (VehicleL.GET(InArcSalesLine.VIN)) OR VehicleL.GET(DeliveryListL.VIN)  THEN BEGIN
+       IF InArcSalesLine.VIN = '' THEN
+        BEGIN
+        DeliveryListL.VIN := '';
+        DeliveryListL."License No." := '';
+        DeliveryListL."Import›rnr." := '';
+        DeliveryListL."Incentive Type" := '';
+        DeliveryListL."Retail/Sell Out" := 0D;
+        DeliveryListL.Dealer := '';
+        DeliveryListL."Plassering/Status" := '';
+        DeliveryListL."Purchase Receipt Date" := 0D;
+        DeliveryListL.Financing := '';
+        DeliveryListL.Incentive := '';
+        DeliveryListL."Cruising Range" := '';
+        DeliveryListL."Make Code" := '';
+        END ELSE BEGIN
+        DeliveryListL.VIN := VehicleL.VIN;
+        DeliveryListL."License No." := VehicleL."License No.";
+        DeliveryListL."Import›rnr." := VehicleL."Text 1";
+        DeliveryListL."Incentive Type" := VehicleL."Text 2";
+        DeliveryListL."Retail/Sell Out" := VehicleL."Date 1";
+        DeliveryListL.Dealer := VehicleL."Extra Code 1";
+        DeliveryListL."Plassering/Status" := VehicleL."Extra Code 2";
+        DeliveryListL."Purchase Receipt Date" := VehicleL."Purchase Receipt Date";
+        DeliveryListL.Financing := VehicleL."Text 3";
+        DeliveryListL.Incentive := VehicleL."Text 4";
+        DeliveryListL."Cruising Range" := VehicleL."Cruising Range";
+        DeliveryListL."Make Code" := VehicleL."Make Code";
+        END;
+       END;
+       //Service Header
+       ServiceHeaderL.RESET;
+       ServiceHeaderL.SETRANGE("Extra Code 1", InArcSalesLine."Document No.");
+       IF ServiceHeaderL.FINDFIRST THEN BEGIN
+         DeliveryListL."Service Order No." := ServiceHeaderL."No.";
+         DeliveryListL."Pickup Date" := ServiceHeaderL."Pickup Date";
+         DeliveryListL."Status Code" := ServiceHeaderL."Status Code";
+         DeliveryListL."Work Status Code" := ServiceHeaderL."Work Status Code";
+       END ELSE BEGIN
+         DeliveryListL."Service Order No." := '';
+         DeliveryListL."Pickup Date" := 0D;
+         DeliveryListL."Status Code" := '';
+         DeliveryListL."Work Status Code" := '';
+       END;
+
+       ArchivedServiceHeaderL.RESET;
+       ArchivedServiceHeaderL.SETRANGE(ArchivedServiceHeaderL."Extra Code 1", InArcSalesLine."Document No.");
+       IF ArchivedServiceHeaderL.FINDFIRST THEN BEGIN
+         DeliveryListL."Arch.Serv. Order No." := ArchivedServiceHeaderL."No.";
+         DeliveryListL."Reason for Archiving" := ArchivedServiceHeaderL."Reason for Archiving";
+       END;
+
+      // ArcServiceHeaderL.RESET;
+      // ArcServiceHeaderL.SETRANGE("Extra Code 1", InArcSalesLine."Document No.");
+      // IF ArcServiceHeaderL.FINDFIRST THEN BEGIN
+      //   DeliveryListL."Service Order No." := ArcServiceHeaderL."No.";
+      //   DeliveryListL."Pickup Date" := ArcServiceHeaderL."Pickup Date";
+      //   DeliveryListL."Status Code" := ArcServiceHeaderL."Status Code";
+      //   DeliveryListL."Work Status Code" := ArcServiceHeaderL."Work Status Code";
+      // END ELSE BEGIN
+      //   DeliveryListL."Service Order No." := '';
+      //   DeliveryListL."Pickup Date" := 0D;
+      //   DeliveryListL."Status Code" := '';
+      //   DeliveryListL."Work Status Code" := '';
+      // END;
+
+       //Archived Service Header
+       ArchivedServiceHeaderL.RESET;
+       ArchivedServiceHeaderL.SETRANGE(ArchivedServiceHeaderL."Extra Code 1", InArcSalesLine."Document No.");
+       IF ArchivedServiceHeaderL.FINDFIRST THEN BEGIN
+         DeliveryListL."Arch.Serv. Order No." := ArchivedServiceHeaderL."No.";
+         DeliveryListL."Reason for Archiving" := ArchivedServiceHeaderL."Reason for Archiving";
+       END;
+       //Purchase Line
+       IF ArcPurchaseLineL.GET(InArcSalesLine."From Purch. Document Type", InArcSalesLine."From Purch. Document No.", InArcSalesLine."From Purch. Line No.") THEN BEGIN
+         DeliveryListL."Purch. Document No." := ArcPurchaseLineL."Document No.";
+         DeliveryListL."Expected Receipt Date" := ArcPurchaseLineL."Expected Receipt Date";
+         DeliveryListL."Vendor Order No." := ArcPurchaseLineL."Vendor Order No.";
+         IF NOT VehicleL.GET(InArcSalesLine.VIN) THEN BEGIN
+           DeliveryListL."Cruising Range" := ArcPurchaseLineL."Cruising Range";
+           DeliveryListL."Make Code" := ArcPurchaseLineL."Make Code";
+         END;
+       END ELSE BEGIN
+         DeliveryListL."Purch. Document No." := '';
+         DeliveryListL."Expected Receipt Date" := 0D;
+         DeliveryListL."Vendor Order No." := '';
+       END;
+      DeliveryListL."Last Update" := CREATEDATETIME(WORKDATE, TIME);
+      DeliveryListL.MODIFY;
+    END;
+
+    PROCEDURE GetPhone@1101103003(CustNoP@1101103000 : Code[20]) : Text[30];
+    VAR
+      CustomerL@1101103001 : Record 18;
+    BEGIN
+      CustomerL.GET(CustNoP);
+      IF CustomerL."Mobile Phone No." <> '' THEN
+        EXIT(CustomerL."Mobile Phone No.")
+        ELSE
+        IF CustomerL."Phone No." <> '' THEN
+          EXIT(CustomerL."Phone No.");
+    END;
+
+    PROCEDURE GetInformationFromPurchOrder@1101103004(PurchOrderP@1101103000 : Code[20];Type@1101103001 : 'IncentiveType,Incentive,Dealer,ImporterNo') : Text[50];
+    VAR
+      PurchaseHeaderL@1101103002 : Record 38;
+    BEGIN
+      IF PurchaseHeaderL.GET(PurchaseHeaderL."Document Type"::Order, PurchOrderP) THEN
+        BEGIN
+        CASE Type OF
+          Type::IncentiveType :
+            EXIT(PurchaseHeaderL."Text 2");
+          Type::Incentive :
+            EXIT(PurchaseHeaderL."Text 4");
+          Type::Dealer  :
+            EXIT(PurchaseHeaderL."Extra Code 1");
+          Type::ImporterNo :
+            EXIT(PurchaseHeaderL."Vendor Order No.");
+        END;
+        END;
+    END;
+
+    PROCEDURE GetInformationFromPurchOrder2@1101103005(PurchOrderP@1101103000 : Code[20];Type@1101103001 : 'RetailSellOut') : Date;
+    VAR
+      PurchaseHeaderL@1101103002 : Record 38;
+    BEGIN
+      IF PurchaseHeaderL.GET(PurchaseHeaderL."Document Type"::Order, PurchOrderP) THEN
+        BEGIN
+        CASE Type OF
+          Type::RetailSellOut  :
+            EXIT(PurchaseHeaderL."Date 1");
+        END;
+        END;
+    END;
+
+    PROCEDURE GetInvoiceDate@1101103006(OrderNoP@1101103001 : Code[20]) : Date;
+    VAR
+      SalesInvoiceHeaderL@1101103000 : Record 112;
+    BEGIN
+      SalesInvoiceHeaderL.SETRANGE("Order No.", OrderNoP);
+      IF SalesInvoiceHeaderL.FINDLAST THEN
+        EXIT(SalesInvoiceHeaderL."Posting Date");
+    END;
+
+    PROCEDURE GetCrMemoDate@1101103007(OrderNoP@1101103003 : Code[20]) : Date;
+    VAR
+      SalesCreditMemoHeaderL@1101103000 : Record 114;
+      SalesInvoiceHeaderL@1101103002 : Record 112;
+    BEGIN
+      SalesInvoiceHeaderL.SETRANGE("Order No.", OrderNoP);
+      IF SalesInvoiceHeaderL.FINDLAST THEN
+        BEGIN
+        SalesCreditMemoHeaderL.SETRANGE("Applies-to Doc. Type", SalesCreditMemoHeaderL."Applies-to Doc. Type"::Invoice);
+        SalesCreditMemoHeaderL.SETRANGE("Applies-to Doc. No.", SalesInvoiceHeaderL."No.");
+        IF SalesCreditMemoHeaderL.FINDLAST THEN
+          EXIT(SalesCreditMemoHeaderL."Posting Date")
+          ELSE
+          EXIT(0D);
+        END;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

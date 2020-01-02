@@ -1,0 +1,110 @@
+OBJECT XMLport 5231129 BB Historic Line Inv
+{
+  OBJECT-PROPERTIES
+  {
+    Date=13.12.17;
+    Time=19:34:14;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    Direction=Import;
+    OnPreXMLport=BEGIN
+                   IF GUIALLOWED THEN
+                     DialogG.OPEN( C_INC_Progress );
+
+                   WITH "BB History Line" DO
+                     IF FINDLAST THEN
+                       RecordNoG := "Q Primary Key";
+                 END;
+
+    OnPostXMLport=BEGIN
+                    IF GUIALLOWED THEN
+                      DialogG.CLOSE;
+                  END;
+
+    Format=Variable Text;
+    FieldDelimiter=|;
+  }
+  ELEMENTS
+  {
+    { [{09CED764-E19D-4C9A-A70A-7209679A9B53}];  ;XML                 ;Element ;Text     }
+
+    { [{78F85D2D-1913-449E-82EF-219E66F1002A}];1 ;Line                ;Element ;Table   ;
+                                                  SourceTable=Table5231136;
+                                                  Import::OnBeforeInsertRecord=BEGIN
+                                                                                 RecordNoG += 1;
+                                                                                 "BB History Line"."Q Primary Key" := RecordNoG;
+
+                                                                                 IF RecordNoG MOD 100 = 0 THEN
+                                                                                   DialogG.UPDATE( 1, RecordNoG );
+                                                                               END;
+                                                                                }
+
+    { [{78DAAC0D-8EC7-4AEE-9B2E-351E7EAB51E3}];2 ;A                   ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB History Line::regnr;
+                                                  Import::OnAfterAssignField=BEGIN
+                                                                               "BB History Line".Type := "BB History Line".Type::Invoice;
+                                                                               "BB History Line".regnr := DELCHR("BB History Line".regnr, '=', '|');
+                                                                             END;
+                                                                              }
+
+    { [{0DA9ADD1-63F8-4179-BCBB-A2058B43BE00}];2 ;B                   ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB History Line::txtOrdrenr }
+
+    { [{6A3EB7C2-12AB-4F9D-B1C2-8025CD5959A2}];2 ;C                   ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB History Line::Document No. }
+
+    { [{418E6B6E-F3B4-48EB-A2FF-111BA0DA0649}];2 ;D                   ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB History Line::Lt (Linjetype) }
+
+    { [{9D0A49A2-2419-4194-B6AD-CF808F329071}];2 ;E                   ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB History Line::Nr }
+
+    { [{C3554336-1B6E-429D-B41A-8839C0519849}];2 ;F                   ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB History Line::Description }
+
+    { [{E19C8333-D592-4E18-8215-06602370F280}];2 ;G                   ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB History Line::Posting Date }
+
+    { [{1F3BE88F-D46F-4257-A7A0-42671B7F95C5}];2 ;H                   ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB History Line::Amount }
+
+    { [{8B5A92D6-E41D-4A23-901E-8250F83D703A}];2 ;I                   ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BB History Line::Quantity }
+
+  }
+  EVENTS
+  {
+  }
+  REQUESTPAGE
+  {
+    PROPERTIES
+    {
+    }
+    CONTROLS
+    {
+    }
+  }
+  CODE
+  {
+    VAR
+      DialogG@1101103001 : Dialog;
+      RecordNoG@1101103000 : Integer;
+      C_INC_Progress@1101103002 : TextConst 'ENU=Import in progress...\ \Record No. #1#####;NOR=Import kj›rer...\ \Post nummer #1#####';
+
+    BEGIN
+    END.
+  }
+}
+

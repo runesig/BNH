@@ -1,0 +1,264 @@
+OBJECT Table 50003 DeliveryList
+{
+  OBJECT-PROPERTIES
+  {
+    Date=30.11.18;
+    Time=10:50:05;
+    Modified=Yes;
+    Version List=BNH;
+  }
+  PROPERTIES
+  {
+  }
+  FIELDS
+  {
+    { 1   ;   ;Location Code       ;Code10        ;CaptionML=[DAN=Lokationskode;
+                                                              DEU=Lagerortcode;
+                                                              ENU=Location Code;
+                                                              NOR=Lokasjonskode;
+                                                              SVE=Lagerortskod];
+                                                   Description=Sh;
+                                                   Editable=No }
+    { 2   ;   ;No.                 ;Code20        ;TableRelation="Sales Header".No. WHERE (Document Type=CONST(Order));
+                                                   CaptionML=[DAN=Nummer;
+                                                              DEU=Nr.;
+                                                              ENU=No.;
+                                                              NOR=Nr.;
+                                                              SVE=Nr];
+                                                   Description=Sh;
+                                                   Editable=No }
+    { 3   ;   ;Sell-to Customer No.;Code20        ;CaptionML=[ENU=Sell-to Customer No.;
+                                                              NOR=Salg til kundenr.];
+                                                   Description=Sh;
+                                                   Editable=No }
+    { 4   ;   ;Sell-to Customer Name;Text50       ;CaptionML=[ENU=Sell-to Customer Name;
+                                                              NOR=Salg til kundenavn];
+                                                   Description=Sh;
+                                                   Editable=No }
+    { 6   ;   ;Registration Date   ;Date          ;CaptionML=[ENU=Registration Date;
+                                                              NOR=Registreringsdato];
+                                                   Description=Sh;
+                                                   Editable=No }
+    { 7   ;   ;Delivery Date       ;Date          ;CaptionML=[ENU=Delivery Date;
+                                                              NOR=Leveringsdato];
+                                                   Description=Sh;
+                                                   Editable=No }
+    { 8   ;   ;Salesperson Code    ;Code10        ;CaptionML=[ENU=Salesperson Code;
+                                                              NOR=Salgsperson kode];
+                                                   Description=Sh;
+                                                   Editable=No }
+    { 9   ;   ;Name                ;Text50        ;CaptionML=[ENU=Name;
+                                                              NOR=Navn];
+                                                   Description=SP;
+                                                   Editable=No }
+    { 10  ;   ;Salesperson Code 2  ;Code10        ;CaptionML=[ENU=Salesperson Code 2;
+                                                              NOR=Selgerkode 2] }
+    { 11  ;   ;Order Date          ;Date          ;CaptionML=[ENU=Order Date;
+                                                              NOR=Ordredato] }
+    { 12  ;   ;Your Reference      ;Text35        ;CaptionML=[ENU=Your Reference;
+                                                              NOR=Deres referanse] }
+    { 20  ;   ;Description         ;Text50        ;CaptionML=[ENU=Description;
+                                                              NOR=Beskrivelse];
+                                                   Description=Sl;
+                                                   Editable=No }
+    { 21  ;   ;Sales Line No.      ;Integer       ;CaptionML=[ENU=Sales Line No.;
+                                                              NOR=Salgslinjenr.];
+                                                   Editable=No }
+    { 31  ;   ;VIN                 ;Code20        ;CaptionML=[ENU=VIN;
+                                                              NOR=Chassisnr.];
+                                                   Description=V;
+                                                   Editable=No }
+    { 32  ;   ;License No.         ;Code11        ;CaptionML=[ENU=License No.;
+                                                              NOR=Registreringsnr.];
+                                                   Description=V;
+                                                   Editable=No }
+    { 33  ;   ;Import›rnr.         ;Text30        ;CaptionML=[ENU=Importer No.;
+                                                              NOR=Import›rnr.];
+                                                   Description=V Text 1;
+                                                   Editable=No }
+    { 34  ;   ;Dealer              ;Code10        ;CaptionML=[ENU=Dealer No.;
+                                                              NOR=Forhandlernr.];
+                                                   Description=V Extra Code 1;
+                                                   Editable=No }
+    { 35  ;   ;Plassering/Status   ;Code10        ;CaptionML=[ENU=Location/Status;
+                                                              NOR=Plassering/Status];
+                                                   Description=V Extra Code 2;
+                                                   Editable=No }
+    { 36  ;   ;Purchase Receipt Date;Date         ;CaptionML=[ENU=Purchase Receipt Date;
+                                                              NOR=Mottaksdato];
+                                                   Description=V;
+                                                   Editable=No }
+    { 37  ;   ;Incentive Type      ;Text50        ;CaptionML=[ENU=Incentive Type;
+                                                              NOR=Type st›tte];
+                                                   Description=V Text 2 x;
+                                                   Editable=No }
+    { 38  ;   ;Financing           ;Text30        ;CaptionML=[ENU=Financing;
+                                                              NOR=Finansiering];
+                                                   Description=V Text 3 x;
+                                                   Editable=No }
+    { 39  ;   ;Incentive           ;Text50        ;CaptionML=[ENU=Incentive;
+                                                              NOR=St›tte];
+                                                   Description=V Text 4 x;
+                                                   Editable=No }
+    { 40  ;   ;Retail/Sell Out     ;Date          ;CaptionML=[ENU=Retail/Sell Out;
+                                                              NOR=Retail/Sell Out];
+                                                   Description=V Date 1;
+                                                   Editable=No }
+    { 41  ;   ;Service Order No.   ;Code20        ;TableRelation="Service Header".No. WHERE (Extra Code 1=FIELD(No.));
+                                                   CaptionML=[ENU=Service Order No.;
+                                                              NOR=Serviceordrenr.];
+                                                   Description=SerH;
+                                                   Editable=No }
+    { 42  ;   ;Pickup Date         ;Date          ;CaptionML=[ENU=Pickup Date;
+                                                              NOR=Ferdigdato];
+                                                   Description=SerH;
+                                                   Editable=No }
+    { 43  ;   ;Status Code         ;Code20        ;CaptionML=[ENU=Status Code;
+                                                              NOR=Statuskode];
+                                                   Description=SerH;
+                                                   Editable=No }
+    { 44  ;   ;Work Status Code    ;Code20        ;CaptionML=ENU=Work Status Code;
+                                                   Description=SerH;
+                                                   Editable=No }
+    { 51  ;   ;Arch.Serv. Order No.;Code20        ;CaptionML=[ENU=Arch.Serv. Order No.;
+                                                              NOR=Ark. serviceordrenr.];
+                                                   Description=ASh;
+                                                   Editable=No }
+    { 52  ;   ;Reason for Archiving;Option        ;CaptionML=[ENU=Reason for Archiving;
+                                                              NOR=Arkiveringsgrunn];
+                                                   OptionCaptionML=NOR=" ,Slett manuellt,Bokf›r,Slett fullf›rte dokument,Opprett tilh›rende dokument,Slett manuellt uten † bokf›re";
+                                                   OptionString=[ ,Delete Manually,Post,Delete Completed Document,Create Subsequent Document,Delete Manually without Posting];
+                                                   Description=ASh;
+                                                   Editable=No }
+    { 61  ;   ;Purch. Document No. ;Code20        ;TableRelation="Purchase Header".No. WHERE (Document Type=CONST(Order));
+                                                   CaptionML=[ENU=Purch. Document No.;
+                                                              NOR=Kj›psordrenr.];
+                                                   Description=Pl;
+                                                   Editable=No }
+    { 62  ;   ;Expected Receipt Date;Date         ;CaptionML=[ENU=Expected Receipt Date;
+                                                              NOR=Forventet leveringsdato];
+                                                   Description=Pl;
+                                                   Editable=No }
+    { 63  ;   ;Vendor Order No.    ;Code20        ;CaptionML=[ENU=Vendor Order No.;
+                                                              NOR=Lev. ordrenr.];
+                                                   Description=Pl;
+                                                   Editable=No }
+    { 64  ;   ;Cruising Range      ;Code20        ;CaptionML=[ENU=Cruising Range;
+                                                              NOR=Cruising Range];
+                                                   Description=V;
+                                                   Editable=No }
+    { 65  ;   ;Make Code           ;Code20        ;TableRelation=Make;
+                                                   CaptionML=[DAN=M‘rkekode;
+                                                              DEU=Markencode;
+                                                              ENU=Make Code;
+                                                              NOR=Merkekode;
+                                                              SVE=M„rkeskod];
+                                                   Description=V;
+                                                   Editable=No }
+    { 66  ;   ;Vehicle Status      ;Option        ;CaptionML=[DAN=K›ret›jsstatus;
+                                                              DEU=Fahrzeugstatus;
+                                                              ENU=Vehicle Status;
+                                                              NOR=Kj›ret›ystatus;
+                                                              SVE=Fordonstatus];
+                                                   OptionCaptionML=[ENU=,New Vehicle,Used Vehicle,Demo Vehicle,,Consigment Vehicle";
+                                                                    NOR=,Nytt kj›ret›y,Brukt kj›ret›y,Demokj›ret›y,,Kommisjonskj›ret›y];
+                                                   OptionString=,New Vehicle,Used Vehicle,Demo Vehicle,,Consigment Vehicle";
+                                                   Description=V;
+                                                   Editable=No }
+    { 67  ;   ;Gen. Prod. Posting Group;Code10    ;TableRelation="Gen. Product Posting Group";
+                                                   CaptionML=[DAN=Produktbogf›ringsgruppe;
+                                                              DEU=Produktbuchungsgruppe;
+                                                              ENU=Gen. Prod. Posting Group;
+                                                              NOR=Bokf›ringsgruppe - Vare;
+                                                              SVE=Produktbokf”ringsmall];
+                                                   Description=V;
+                                                   Editable=No }
+    { 68  ;   ;Inventory Posting Group;Code10     ;TableRelation="Inventory Posting Group";
+                                                   CaptionML=[DAN=Varebogf›ringsgruppe;
+                                                              DEU=Lagerbuchungsgruppe;
+                                                              ENU=Inventory Posting Group;
+                                                              NOR=Bokf›ringsgruppe - lager;
+                                                              SVE=Lagerbokf”ringsmall];
+                                                   Description=V;
+                                                   Editable=No }
+    { 69  ;   ;Delivery Point      ;Code20        ;CaptionML=[ENU=Delivery Point;
+                                                              NOR=Utleveringssted];
+                                                   Description=[ Extrak Code 1, T36];
+                                                   Editable=No }
+    { 70  ;   ;Text                ;Text80        ;CaptionML=[ENU=Text;
+                                                              NOR=Tekst] }
+    { 71  ;   ;Phone No.           ;Text30        ;CaptionML=[ENU=Phone No.;
+                                                              NOR=Telefonnr.];
+                                                   Editable=No }
+    { 72  ;   ;Delivery ID         ;Code20        ;CaptionML=[ENU=Delivery ID;
+                                                              NOR=Levert ID] }
+    { 73  ;   ;Delivery Time       ;DateTime      ;CaptionML=[ENU=Delivery Time;
+                                                              NOR=Levert dato/tid] }
+    { 74  ;   ;Offer No.           ;Code20        ;CaptionML=[ENU=Offer No.;
+                                                              NOR=Tilbudsnr.];
+                                                   Editable=No }
+    { 75  ;   ;Checked Incentives ID;Code20       ;CaptionML=[ENU=Checked Incentives ID;
+                                                              NOR=Sjekket st›tter ID] }
+    { 76  ;   ;Checked Incentives Time;DateTime   ;CaptionML=[ENU=Checked Incentives Time;
+                                                              NOR=Sjekket st›tter dato/tid] }
+    { 77  ;   ;Last Update         ;DateTime      ;CaptionML=[ENU=Last Update;
+                                                              NOR=Sist oppdatert] }
+    { 78  ;   ;Initial Registration;Date          ;FieldClass=FlowField;
+                                                   CalcFormula=Lookup(Vehicle."Initial Registration" WHERE (VIN=FIELD(VIN)));
+                                                   CaptionML=[ENU=Initial Registration;
+                                                              NOR=F›rste reg. dato];
+                                                   Editable=No }
+    { 79  ;   ;Date of Sale        ;Date          ;FieldClass=FlowField;
+                                                   CalcFormula=Lookup(Vehicle."Date of Sale" WHERE (VIN=FIELD(VIN)));
+                                                   CaptionML=[ENU=Date of Sale;
+                                                              NOR=Salgsdato];
+                                                   Editable=No }
+    { 84  ;   ;Department          ;Code10        ;CaptionML=[ENU=Department;
+                                                              NOR=Avdeling] }
+    { 85  ;   ;Invoice Date        ;Date          ;FieldClass=Normal;
+                                                   CaptionML=[ENU=Invoice Date;
+                                                              NOR=Fakturadato] }
+    { 86  ;   ;Cr. Memo Date       ;Date          ;CaptionML=[ENU=Cr. Memo Date;
+                                                              NOR=Kreditnota dato] }
+    { 87  ;   ;Vehicle Sales Price Group;Code10   ;CaptionML=[ENU=Vehicle Sales Price Group;
+                                                              NOR=Fl†tekode] }
+    { 89  ;   ;Value Posted Sales Incentives;Decimal;
+                                                   FieldClass=FlowField;
+                                                   CalcFormula=Sum("Posted Sales Incentive Line"."Amount (LCY)" WHERE (VIN=FIELD(VIN),
+                                                                                                                       Canceled=CONST(No),
+                                                                                                                       Posted=CONST(Yes)));
+                                                   OnLookup=VAR
+                                                              SalIncOverviewMgmtL@1101103000 : Codeunit 5205920;
+                                                              VehicleL@1101103001 : Record 5025400;
+                                                            BEGIN
+                                                              VehicleL.GET(VIN);
+                                                              SalIncOverviewMgmtL.ShowSalesIncentForVehicle(VehicleL);
+                                                            END;
+
+                                                   CaptionML=[ENU=Value Posted Sales Incentives;
+                                                              NOR=Verdi bokf›rte salgsst›tter];
+                                                   Editable=No }
+    { 91  ;   ;Credited            ;Boolean       ;CaptionML=[ENU=Credited;
+                                                              NOR=Kreditert] }
+    { 92  ;   ;Current Book No.    ;Code10        ;FieldClass=FlowField;
+                                                   CalcFormula=Lookup(Vehicle."Current Book No." WHERE (VIN=FIELD(VIN)));
+                                                   CaptionML=[ENU=Current Book No.;
+                                                              NOR=Gjeldende prosjektnr.] }
+  }
+  KEYS
+  {
+    {    ;No.,Sales Line No.                      ;Clustered=Yes }
+    {    ;Make Code,Vehicle Status,Gen. Prod. Posting Group }
+    {    ;Salesperson Code,Registration Date       }
+  }
+  FIELDGROUPS
+  {
+  }
+  CODE
+  {
+
+    BEGIN
+    END.
+  }
+}
+

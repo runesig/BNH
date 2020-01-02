@@ -1,0 +1,94 @@
+OBJECT Codeunit 5231134 BNH History Header
+{
+  OBJECT-PROPERTIES
+  {
+    Date=28.11.17;
+    Time=20:29:08;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    TableNo=5231131;
+    OnRun=BEGIN
+            QHistoryHeaderG.COPY( Rec );
+            ConfirmProcessing;
+            ProcessRecords;
+            ShowResults;
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      C_ConfirmProcess@1101103000 : TextConst 'ENU=Process %1 records?;NOR=Prosesser %1 poster?';
+      QHistoryHeaderG@1101103001 : Record 5231131;
+      C_ProcessCancelled@1101103006 : TextConst 'ENU=Processing Cancelled;NOR=Prosessering avbrutt';
+      C_Results@1101103003 : TextConst 'ENU=Results:\ \%1 OK\ \%2 Ignored\ \%3 Failed;NOR=Resultater:\ \%1 OK\ \%2 ignorert\ \%3 feil';
+      RecordCountG@1101103004 : ARRAY [9] OF Integer;
+      PDMProgressG@1101103002 : Codeunit 50009;
+      C_Progress@1101103005 : TextConst 'ENU=Processing...;NOR=Prosesserer...';
+
+    PROCEDURE ConfirmProcessing@1101103006();
+    BEGIN
+      WITH QHistoryHeaderG DO BEGIN
+        RecordCountG[9] := COUNT;
+        IF GUIALLOWED THEN
+          IF NOT CONFIRM( C_ConfirmProcess, TRUE, RecordCountG[9] ) THEN
+            ERROR( C_ProcessCancelled );
+      END;
+    END;
+
+    PROCEDURE ProcessRecords@1101103004();
+    BEGIN
+      WITH QHistoryHeaderG DO BEGIN
+        PDMProgressG.Start( C_Progress, RecordCountG[9] );
+        IF FINDSET THEN
+          REPEAT
+            PDMProgressG.Increment( 1 );
+            ProcessRecord;
+          UNTIL NEXT = 0;
+        PDMProgressG.Stop;
+      END;
+    END;
+
+    PROCEDURE ProcessRecord@1101103005();
+    BEGIN
+      WITH QHistoryHeaderG DO BEGIN
+        COMMIT;
+        CLEARLASTERROR;
+        CASE TRUE OF
+          "Q Status" = "Q Status"::Ignore:
+            ;
+          CODEUNIT.RUN( CODEUNIT::"BNH History Header Update", QHistoryHeaderG ):
+            SetStatus( "Q Status"::OK, '' )
+          ELSE
+            SetStatus( "Q Status"::Error, GETLASTERRORTEXT );
+        END;
+        RecordCountG[ "Q Status" ] +=1;
+      END;
+    END;
+
+    PROCEDURE SetStatus@1101103000(StatusP@1101103000 : Option;MessageP@1101103001 : Text);
+    BEGIN
+      WITH QHistoryHeaderG DO BEGIN
+        GET( "Q Primary Key" );
+        "Q Status" := StatusP;
+        "Q Datetime" := CURRENTDATETIME;
+        "Q Update message" := COPYSTR( MessageP, 1, MAXSTRLEN( "Q Update message" ));
+        MODIFY;
+      END;
+    END;
+
+    PROCEDURE ShowResults@1101103003();
+    BEGIN
+      IF GUIALLOWED THEN
+        WITH QHistoryHeaderG DO
+          MESSAGE( C_Results, RecordCountG[ "Q Status"::OK ], RecordCountG[ "Q Status"::Ignore ], RecordCountG[ "Q Status"::Error ] );
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

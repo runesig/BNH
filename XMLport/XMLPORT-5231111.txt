@@ -1,0 +1,94 @@
+OBJECT XMLport 5231111 BnH Customer tillegg1
+{
+  OBJECT-PROPERTIES
+  {
+    Date=05.11.17;
+    Time=14:11:08;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    Direction=Import;
+    TextEncoding=WINDOWS;
+    OnPreXMLport=BEGIN
+                   IF GUIALLOWED THEN
+                     DialogG.OPEN( C_INC_Progress );
+
+                   WITH "BnH Customer tillegg1" DO
+                     IF FINDLAST THEN
+                       RecordNoG := "BnH Customer tillegg1".COUNT;
+                 END;
+
+    OnPostXMLport=BEGIN
+                    IF GUIALLOWED THEN
+                      DialogG.CLOSE;
+                  END;
+
+    Format=Variable Text;
+    FieldSeparator=[;];
+  }
+  ELEMENTS
+  {
+    { [{B789ED0C-E180-4A5B-82CC-3F30928F2F81}];  ;XML                 ;Element ;Text     }
+
+    { [{8E1ACA55-AD7B-4249-8730-69E50D275F7D}];1 ;Table               ;Element ;Table   ;
+                                                  SourceTable=Table5231111;
+                                                  Import::OnBeforeInsertRecord=BEGIN
+                                                                                 RecordNoG += 1;
+                                                                                 "BnH Customer tillegg1"."Primary Key" := RecordNoG;
+
+                                                                                 IF RecordNoG MOD 100 = 0 THEN
+                                                                                   DialogG.UPDATE( 1, RecordNoG );
+                                                                               END;
+                                                                                }
+
+    { [{5CF28B3F-F6AF-4232-881E-DEB231461CDD}];2 ;Kundenr             ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Customer tillegg1::Kundenr;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{68C76F38-58BA-41BB-9958-112EA2236BE9}];2 ;Fornavn             ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Customer tillegg1::Fornavn;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{C981B7C1-536B-493D-AF54-A53C338087F7}];2 ;Etternavn           ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Customer tillegg1::Etternavn;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{A4CAFD00-9843-4BB5-83CA-69F396334893}];2 ;Kredittgrense       ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Customer tillegg1::Kredittgrense;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+  }
+  EVENTS
+  {
+  }
+  REQUESTPAGE
+  {
+    PROPERTIES
+    {
+    }
+    CONTROLS
+    {
+    }
+  }
+  CODE
+  {
+    VAR
+      C_INC_Progress@1101103000 : TextConst 'ENU=Import in progress...\ \Record No. #1#####;NOR=Import kj›rer...\ \Post nummer #1#####';
+      DialogG@1101103001 : Dialog;
+      RecordNoG@1101103002 : Integer;
+
+    BEGIN
+    END.
+  }
+}
+

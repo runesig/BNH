@@ -1,0 +1,123 @@
+OBJECT Codeunit 5231078 Department Item ExPo
+{
+  OBJECT-PROPERTIES
+  {
+    Date=30.01.18;
+    Time=10:33:10;
+    Modified=Yes;
+    Version List=BNH;
+  }
+  PROPERTIES
+  {
+    TableNo=5207300;
+    OnRun=VAR
+            ServiceLineL@1101261798 : Record 5025625;
+            SalesLineL@1101103000 : Record 37;
+            DummyTextL@1101261800 : Text[50];
+          BEGIN
+            EPSetupG := Rec;
+
+            CASE EPSetupG."Object ID" OF
+              5025625:
+              BEGIN
+                EPUnitG.GetParamsShort(FirstRecRefG,SecondRecRefG,EPParamG,DummyTextL);
+                CASE EPSetupG.Trigger OF
+                  EPSetupG.Trigger::OnValidate: BEGIN
+                    CASE EPSetupG.Type OF
+                      EPSetupG.Type::Post: BEGIN
+                        FirstRecRefG.SETTABLE(ServiceLineL);
+                        SetDepartmentService(ServiceLineL);
+                        FirstRecRefG.GETTABLE(ServiceLineL);
+                      END;
+                    END;
+                  END;
+                END;
+              EPUnitG.SetParamsShort(FirstRecRefG,SecondRecRefG,EPParamG,DummyTextL);
+              END;
+              37:
+              BEGIN
+                EPUnitG.GetParamsShort(FirstRecRefG,SecondRecRefG,EPParamG,DummyTextL);
+                CASE EPSetupG.Trigger OF
+                  EPSetupG.Trigger::OnValidate: BEGIN
+                    CASE EPSetupG.Type OF
+                      EPSetupG.Type::Post: BEGIN
+                        FirstRecRefG.SETTABLE(SalesLineL);
+                        SetDepartmentPart(SalesLineL);
+                        FirstRecRefG.GETTABLE(SalesLineL);
+                      END;
+                    END;
+                  END;
+                END;
+              EPUnitG.SetParamsShort(FirstRecRefG,SecondRecRefG,EPParamG,DummyTextL);
+              END;
+            END;
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      UserSetupG@1109400002 : Record 91;
+      EPSetupG@1101165285 : Record 5207300;
+      EPParamG@1101165289 : Record 5207301;
+      EPUnitG@1101165288 : Codeunit 5207300;
+      VehicleAreaManagementG@1101103002 : Codeunit 5231170;
+      FirstRecRefG@1101165287 : RecordRef;
+      SecondRecRefG@1101165286 : RecordRef;
+      C_INC001@1101103001 : TextConst 'ENU=Quote No. is not set! Check missing "Inside1" or "Inside2" for the Exit Point setup.';
+      C_INC002@1101103003 : TextConst 'ENU=Copy serial number is not allowed.';
+      C_INC003@1101103004 : TextConst 'ENU=No vehicle is configured for this document.';
+      C_INC004@1101103005 : TextConst 'ENU=Another Sales Order already exists for this reference number.';
+      DimMgt@1101103000 : Codeunit 408;
+
+    PROCEDURE SetDepartmentService@1101103000(VAR ServiceLineP@1101103003 : Record 5025625);
+    VAR
+      VehicleSetupExtL@1101103001 : Record 1058075;
+      VehicleL@1101103000 : Record 5025400;
+      OldVATPostingGroupL@1101103002 : Code[10];
+      C_INC001L@1101103004 : TextConst 'ENU=Ensure that you have added correct setup in table: Vehicle Setup Ext.';
+      ItemL@1101103005 : Record 27;
+    BEGIN
+      IF (ServiceLineP."No." = '') OR (ServiceLineP.Type <> ServiceLineP.Type::Item) THEN
+        EXIT;
+        IF (ItemL.GET(ServiceLineP."No.")) AND (ItemL."Global Dimension 1 Code" <> '') THEN
+          BEGIN
+          ServiceLineP."Department Code" := ItemL."Global Dimension 1 Code";
+
+          END;
+    END;
+
+    PROCEDURE SetDepartmentPart@1101103001(VAR SalesLineP@1101103003 : Record 37);
+    VAR
+      VehicleSetupExtL@1101103001 : Record 1058075;
+      VehicleL@1101103000 : Record 5025400;
+      OldVATPostingGroupL@1101103002 : Code[10];
+      C_INC001L@1101103004 : TextConst 'ENU=Ensure that you have added correct setup in table: Vehicle Setup Ext.';
+      ItemL@1101103005 : Record 27;
+    BEGIN
+      IF (SalesLineP."No." = '') OR (SalesLineP.Type <> SalesLineP.Type::Item) THEN
+        EXIT;
+        IF (ItemL.GET(SalesLineP."No.")) AND (ItemL."Global Dimension 1 Code" <> '') THEN
+          BEGIN
+          SalesLineP."Shortcut Dimension 1 Code" := ItemL."Global Dimension 1 Code";
+          DimMgt.ValidateShortcutDimValues(1, SalesLineP."Shortcut Dimension 1 Code", SalesLineP."Dimension Set ID");
+          DimMgt.ValidateShortcutDimValues(2, SalesLineP."Shortcut Dimension 2 Code", SalesLineP."Dimension Set ID");
+          END;
+    END;
+
+    BEGIN
+    {
+      ---------------------------------------------+
+      | Copyright ¸ 2016 SI-DATA SID                 |
+      +----------------------------------------------+
+      | MYENGINE@INCADEA                             |
+      +----------------------------------------------+
+      No.  Version  Date      ID  Remark
+      ------------------------------------------------
+
+      SID.01  23.08.2016  Had to modify the code to include if get, otherwise the system crash is the VehicleSetupExt does not contain a record
+    }
+    END.
+  }
+}
+

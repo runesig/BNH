@@ -1,0 +1,508 @@
+OBJECT XMLport 5231115 BNH Vehicle
+{
+  OBJECT-PROPERTIES
+  {
+    Date=06.11.17;
+    Time=20:13:38;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    Direction=Import;
+    TextEncoding=WINDOWS;
+    OnPreXMLport=BEGIN
+                   IF GUIALLOWED THEN
+                     DialogG.OPEN( C_INC_Progress );
+
+                   WITH "BNH Vehicle" DO
+                     IF FINDLAST THEN
+                       RecordNoG := "Q Primary Key";
+                 END;
+
+    OnPostXMLport=BEGIN
+                    IF GUIALLOWED THEN
+                      DialogG.CLOSE;
+                  END;
+
+    Format=Variable Text;
+    FieldDelimiter=|;
+  }
+  ELEMENTS
+  {
+    { [{A6E70CCD-F263-4B66-A4C5-7873FC3BC7B7}];  ;XML                 ;Element ;Text     }
+
+    { [{FFB128B6-D63D-45C3-AA57-85BAB6EA6F96}];1 ;Table               ;Element ;Table   ;
+                                                  SourceTable=Table5231115;
+                                                  Import::OnBeforeInsertRecord=BEGIN
+                                                                                 RecordNoG += 1;
+                                                                                 "BNH Vehicle"."Q Primary Key" := RecordNoG;
+
+                                                                                 IF RecordNoG MOD 100 = 0 THEN
+                                                                                   DialogG.UPDATE( 1, RecordNoG );
+                                                                               END;
+                                                                                }
+
+    { [{5198465D-3C5D-4A74-8091-D39F6EBDDD1E}];2 ;KEY                 ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::KEY;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{079B0544-9CCB-44BD-85F4-BBAA15C62341}];2 ;STATE-CODE          ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::STATE-CODE;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{B1EE4B90-4FFF-404A-8E65-8366FF4DBC59}];2 ;TRANSACT-DATE       ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::TRANSACT-DATE;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{70080DB8-1C09-417D-A9AA-41FF39BE270D}];2 ;HANDLER             ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::HANDLER;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{D984A671-A104-47D1-B49E-1026B54D3559}];2 ;DEBIT-CUSTOMER      ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::DEBIT-CUSTOMER;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{370B24FF-E68F-4E18-9BFF-0AA5703A8451}];2 ;REGISTER-NUMBER     ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::REGISTER-NUMBER;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{673C9ED5-F7A2-46F4-A313-36369BC0D283}];2 ;CAR-GROUP           ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::CAR-GROUP;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{9A1689E4-9711-42FC-8204-BC92E9F2C10B}];2 ;STATUS              ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::STATUS;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{42B47BFB-2BAE-4AEC-AA03-EAC16F1B41CC}];2 ;CHASSIS-NUMBER      ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::CHASSIS-NUMBER;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{39FDF3A2-4418-4FD7-BFD6-9F6A2683DD28}];2 ;USER-CODE           ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::USER-CODE;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{EF9E534E-DA7D-4484-AAB2-5095F1FE2DF0}];2 ;OWNER-CODE          ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::OWNER-CODE;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{D2B5F295-0D4B-49F3-BB26-17589325CF1E}];2 ;UNIT-ACCOUNTING     ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::UNIT-ACCOUNTING;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{24E4E2F5-576E-4981-8949-04A691192510}];2 ;CONTACT-PERSON      ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::CONTACT-PERSON;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{AECD79E2-EA32-418A-97DA-BD42382B1C16}];2 ;FIRST-REG-DATE      ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::FIRST-REG-DATE;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{3979ED7F-7FE1-4D23-8E65-2E9D9531789D}];2 ;LATEST-REG-DATE     ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::LATEST-REG-DATE;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{616AE154-6208-4412-9EB9-C126FB4D1B93}];2 ;FIRST-OCCURRENCE-DAT;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::FIRST-OCCURRENCE-DAT;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{FA5AA7B3-04C2-4963-8AEF-EF410AE87D5D}];2 ;EXPECTED-ARIVAL-DATE;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::EXPECTED-ARIVAL-DATE;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{9FFCFFF4-E783-4170-9C4E-8237AF476972}];2 ;ARIVAL-DATE         ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::ARIVAL-DATE;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{6CC18DC1-0B63-4A27-85BF-BB96B7957884}];2 ;LAST-OWNER-CHANGE   ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::LAST-OWNER-CHANGE;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{2963B391-E8C7-4AC0-8A2F-0D606ADC1152}];2 ;SALESMAN-BUY        ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::SALESMAN-BUY;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{E58A87C5-FB0A-4DCE-903E-66DDF6AF48D7}];2 ;SALESMAN-SALE       ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::SALESMAN-SALE;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{BFCA1366-E4CB-4636-BFAA-DB87DB48A3A4}];2 ;RESERVATION-DATE    ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::RESERVATION-DATE;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{D95FB230-139F-4952-B6AF-49B5B49AD5AE}];2 ;RESERVATION         ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::RESERVATION;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{C4D9F623-26F2-461B-B46F-1AF9610CEEB2}];2 ;MODEL-TEXT          ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::MODEL-TEXT;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{02F2870B-82A8-4271-B87E-5757EC8E0DEE}];2 ;ORIG-MODEL-CODE1    ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::ORIG-MODEL-CODE1;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{A1FE1C35-5C91-43DE-A17D-CE79A6E8B9F3}];2 ;ORIG-MODEL-CODE2    ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::ORIG-MODEL-CODE2;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{DBAABDCF-16FA-4FC0-8C01-D1B21D989367}];2 ;COLOUR              ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::COLOUR;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{C66EB354-21C3-405F-9A9B-DF44CF71BB88}];2 ;MODEL-CODE          ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::MODEL-CODE;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{70AB9B61-141E-4439-868B-B171DA1C548F}];2 ;CLASSIFICATION      ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::CLASSIFICATION;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{82154F5F-E363-4936-B285-AAF52A1C006E}];2 ;MOTOR-NUMBER        ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::MOTOR-NUMBER;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{CCE5FD17-013E-4FBE-A15E-51050D9ED9F2}];2 ;KEY-CODE            ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::KEY-CODE;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{3B0113BA-FE0A-4ECA-AE3F-0893EFE319B1}];2 ;YEAR-MODEL          ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::YEAR-MODEL;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{BC9F5233-F9E3-44FC-B846-2521249AC8F3}];2 ;CYLINDER-VOLUME     ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::CYLINDER-VOLUME;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{BA80AB9A-CE64-493F-89D2-A8F31B1775A6}];2 ;SEATS               ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::SEATS;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{FF860DC8-4A6E-468B-9C35-E227BF995738}];2 ;DECLARATION-DATE    ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::DECLARATION-DATE;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{C0E95B0B-DB6E-4129-AAFD-A17CA2E5BA85}];2 ;DECLARATION-PLACE   ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::DECLARATION-PLACE;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{0C3FAF1D-62DA-4CD0-B08A-B89531EAD01B}];2 ;DECLARATION-NUMBER  ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::DECLARATION-NUMBER;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{1C33E360-DD48-4E23-9F2C-6950913246E9}];2 ;ARRIVAL-SHIP        ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::ARRIVAL-SHIP;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{4A04A8F5-CE95-4D5E-880F-4C2CFE2F6F64}];2 ;ARRIVAL-NUMBER      ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::ARRIVAL-NUMBER;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{5AD4E380-C933-46BB-98E4-9F33E8E78280}];2 ;BIL-OF-LANDING      ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::BIL-OF-LANDING;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{2E44F320-6ACB-4506-B8E7-B99A3262114F}];2 ;SCRUTINEERING-DATE  ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::SCRUTINEERING-DATE;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{386435A1-E60A-4184-970B-609A60AD8520}];2 ;EQUIPMENT-1         ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::EQUIPMENT-1;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{6D334E11-F101-49E7-8335-5B56F1487785}];2 ;EQUIPMENT-2         ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::EQUIPMENT-2;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{A6D228EE-E70F-4AED-AD0E-7BB5B37EBDF5}];2 ;EQUIPMENT-3         ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::EQUIPMENT-3;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{03CD2DA1-1E69-421A-8EE9-5C45BF4DA1AD}];2 ;EQUIPMENT-4         ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::EQUIPMENT-4;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{AF6D307B-8BE7-4562-B77F-93E8B080D4D1}];2 ;INSURANCE           ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::INSURANCE;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{B670B571-F39B-4182-9F7C-247273A32034}];2 ;MILEAGE             ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::MILEAGE;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{180AAF39-676D-487B-B59A-66FCD58FCB28}];2 ;MISC-1              ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::MISC-1;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{2EE855A6-2003-4D68-B94C-420A60FE0345}];2 ;MISC-2              ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::MISC-2;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{401E2E3B-7AF3-44AE-8A76-1965C98A1074}];2 ;MISC-3              ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::MISC-3;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{F839ADAF-B203-4356-82B4-E8DB2EE1F31B}];2 ;MISC-4              ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::MISC-4;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{E9432C2C-A502-4DF3-B0E8-7F9C2D1CB90A}];2 ;MISC-5              ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::MISC-5;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{D6404E52-2FF8-4C2C-B790-31D13A679674}];2 ;MISC-6              ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::MISC-6;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{CD4ECFB2-056C-4B50-90D7-29886CCE9A3A}];2 ;MISC-7              ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::MISC-7;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{D3B80AA6-091A-402D-9D89-36AB639CA0CE}];2 ;MISC-8              ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::MISC-8;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{35B34F81-0417-4F94-BCD3-570BCD2624C8}];2 ;MISC-9              ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::MISC-9;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{607C34DA-BB40-40C2-B5E4-6DA72E978EF7}];2 ;MISC-10             ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::MISC-10;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{8A98D459-6F94-4E03-AA27-19537D75A2DD}];2 ;LAST-INVOICE-DTE    ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::LAST-INVOICE-DTE;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{65D2BF04-F7AA-4608-9D5C-D50C70F91E9E}];2 ;CONTACT-DATE        ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::CONTACT-DATE;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{5295F164-B00B-44EA-ACAB-7A3E922558CE}];2 ;MAIL-CODE-1         ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::MAIL-CODE-1;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{52D237DA-727F-4721-B4B2-223EF994F353}];2 ;MAIL-CODE-2         ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::MAIL-CODE-2;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{879FE80A-B817-4009-8536-8E327BB2CC00}];2 ;MAIL-CODE-3         ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::MAIL-CODE-3;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{5C47D3EB-C97C-49B4-9048-DBCA8C8618E6}];2 ;MAIL-CODE-4         ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::MAIL-CODE-4;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{5960DF43-1967-48FC-9815-0714EBE45D84}];2 ;MAIL-CODE-5         ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::MAIL-CODE-5;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{7ACE1FDE-682B-4268-B706-0294A94F9B25}];2 ;MAIL-CODE-6         ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::MAIL-CODE-6;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{0AB0E7DA-EDC2-40F7-B6DB-C76557B19629}];2 ;MAIL-CODE-7         ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::MAIL-CODE-7;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{C9BA351F-F21B-4A73-8FB2-3F2EE5A71404}];2 ;MAIL-CODE-8         ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::MAIL-CODE-8;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{B84076DB-6844-4392-8D57-F2491D4FF4B4}];2 ;MAIL-CODE-9         ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::MAIL-CODE-9;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{5BBE46F1-D630-42D8-B734-F6C85C47DC56}];2 ;SALE-THIS-YR        ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::SALE-THIS-YR;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{7D9B144E-A20B-4B82-903B-FFE0FD058FFE}];2 ;SALE-LAST-YR        ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::SALE-LAST-YR;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{15B4B0CD-87B2-4CAF-91DE-4926DE10E3B3}];2 ;SALE-LAST-YR-1      ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::SALE-LAST-YR-1;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{BECF4DA8-DF85-4996-A002-FDA0F7FA8A25}];2 ;DELETE-PROPOSAL     ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::DELETE-PROPOSAL;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{574852BC-5C2A-46A3-A27A-375670DD6EC7}];2 ;LEASING             ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Vehicle::LEASING;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+  }
+  EVENTS
+  {
+  }
+  REQUESTPAGE
+  {
+    PROPERTIES
+    {
+    }
+    CONTROLS
+    {
+    }
+  }
+  CODE
+  {
+    VAR
+      C_INC_Progress@1101103000 : TextConst 'ENU=Import in progress...\ \Record No. #1#####;NOR=Import kj›rer...\ \Post nummer #1#####';
+      DialogG@1101103001 : Dialog;
+      RecordNoG@1101103002 : Integer;
+
+    BEGIN
+    END.
+  }
+}
+

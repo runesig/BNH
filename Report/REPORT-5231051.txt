@@ -1,0 +1,169 @@
+OBJECT Report 5231051 Bokfûr Rammeordre
+{
+  OBJECT-PROPERTIES
+  {
+    Date=18.04.18;
+    Time=15:29:31;
+    Modified=Yes;
+    Version List=BlanketOrderBNH;
+  }
+  PROPERTIES
+  {
+    ProcessingOnly=Yes;
+  }
+  DATASET
+  {
+    { 1101103000;;DataItem;                  ;
+               DataItemTable=Table36;
+               DataItemTableView=SORTING(Document Type,No.)
+                                 WHERE(Document Type=CONST(Order),
+                                       Boolean 2=CONST(Yes));
+               OnPreDataItem=BEGIN
+
+                               IF ReplacePostingDate AND (PostingDateReq = 0D) THEN
+                                 ERROR('Please enter the posting date.');
+                               //TAB 01. begin
+                               IF ReplaceDocumentDate AND (Documentdatereq = 0D) THEN
+                                 ERROR('Please enter the Document date.');
+                               //TAB 01. end
+                               CounterTotal := COUNT;
+                               Window.OPEN('Posting orders  #1########## @2@@@@@@@@@@@@@');
+                             END;
+
+               OnAfterGetRecord=BEGIN
+
+                                  IF CalcInvDisc THEN
+                                    CalculateInvoiceDiscount;
+
+                                  Counter := Counter + 1;
+                                  Window.UPDATE(1,"No.");
+                                  Window.UPDATE(2,ROUND(Counter / CounterTotal * 10000,1));
+                                  "Sales Header".Ship := ShipReq;
+                                  "Sales Header".Invoice := InvReq;
+                                  CLEAR(SalesPost);
+                                  //SalesPost.SetPostingDate(ReplacePostingDate,ReplaceDocumentDate,PostingDateReq);
+                                  IF ReplacePostingDate THEN BEGIN
+                                    "Sales Header".VALIDATE("Posting Date",PostingDateReq);
+                                    //TAB 01. begin
+                                    //"Sales Header".VALIDATE("Document Date",PostingDateReq);
+                                    //TAB 01. end
+                                      "Sales Header".MODIFY;
+                                    COMMIT;
+                                  END;
+                                  //TAB 01. begin
+                                  IF ReplaceDocumentDate THEN BEGIN
+                                    "Sales Header".VALIDATE("Document Date",Documentdatereq);
+                                    "Sales Header".MODIFY;
+                                    COMMIT;
+                                  END;
+                                  //TAB 01. end
+
+                                  SalesPostPrint.SetWithoutDialog(TRUE);
+                                  IF SalesPostPrint.RUN("Sales Header") THEN BEGIN
+                                    CounterOK := CounterOK + 1;
+                                    IF MARKEDONLY THEN
+                                      MARK(FALSE);
+                                  END;
+                                END;
+
+               OnPostDataItem=BEGIN
+
+                                Window.CLOSE;
+                                MESSAGE('%1 orders out of a total of %2 have now been posted.',CounterOK,CounterTotal);
+                              END;
+                               }
+
+  }
+  REQUESTPAGE
+  {
+    PROPERTIES
+    {
+      OnOpenPage=BEGIN
+
+                   SalesSetup.GET;
+                   CalcInvDisc := SalesSetup."Calc. Inv. Discount";
+                   ShipReq := TRUE;
+                   InvReq := TRUE;
+                   ReplacePostingDate := TRUE;
+                   ReplaceDocumentDate := TRUE;
+                   PostingDateReq := TODAY;
+                   Documentdatereq := TODAY;
+                 END;
+
+    }
+    CONTROLS
+    {
+      { 1101103000;;Container;
+                  ContainerType=ContentArea }
+
+      { 1101103001;1;Field  ;
+                  Name=Levere;
+                  CaptionML=NOR=<Lever>;
+                  SourceExpr=ShipReq }
+
+      { 1101103002;1;Field  ;
+                  Name=Faktura;
+                  CaptionML=NOR=<Fakturer>;
+                  SourceExpr=InvReq }
+
+      { 1101103003;1;Field  ;
+                  Name=Bokf›ringsdato;
+                  SourceExpr=PostingDateReq }
+
+      { 1101103004;1;Field  ;
+                  Name=Bilagsdato;
+                  SourceExpr=Documentdatereq }
+
+      { 1101103005;1;Field  ;
+                  Name=Erstatt bokf›ringsdato;
+                  SourceExpr=ReplacePostingDate }
+
+      { 1101103006;1;Field  ;
+                  Name=Erstatt bilagsdato;
+                  SourceExpr=ReplaceDocumentDate }
+
+    }
+  }
+  LABELS
+  {
+  }
+  CODE
+  {
+    VAR
+      SalesLine@1101103015 : Record 37;
+      SalesSetup@1101103014 : Record 311;
+      SalesCalcDisc@1101103013 : Codeunit 60;
+      SalesPost@1101103012 : Codeunit 80;
+      SalesPostPrint@1101103011 : Codeunit 82;
+      Window@1101103010 : Dialog;
+      ShipReq@1101103009 : Boolean;
+      InvReq@1101103008 : Boolean;
+      PostingDateReq@1101103007 : Date;
+      CounterTotal@1101103006 : Integer;
+      Counter@1101103005 : Integer;
+      CounterOK@1101103004 : Integer;
+      ReplacePostingDate@1101103003 : Boolean;
+      ReplaceDocumentDate@1101103002 : Boolean;
+      CalcInvDisc@1101103001 : Boolean;
+      Documentdatereq@1101103000 : Date;
+
+    PROCEDURE CalculateInvoiceDiscount@1();
+    BEGIN
+      SalesLine.RESET;
+      SalesLine.SETRANGE("Document Type","Sales Header"."Document Type");
+      SalesLine.SETRANGE("Document No.","Sales Header"."No.");
+      IF SalesLine.FIND('-') THEN
+        IF SalesCalcDisc.RUN(SalesLine) THEN BEGIN
+          "Sales Header".GET("Sales Header"."Document Type","Sales Header"."No.");
+          COMMIT;
+        END;
+    END;
+
+    BEGIN
+    END.
+  }
+  RDLDATA
+  {
+  }
+}
+

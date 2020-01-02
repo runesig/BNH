@@ -1,0 +1,311 @@
+OBJECT Page 50007 Pre Calculation
+{
+  OBJECT-PROPERTIES
+  {
+    Date=15.01.18;
+    Time=10:26:58;
+    Modified=Yes;
+    Version List=BNH;
+  }
+  PROPERTIES
+  {
+    Editable=No;
+    CaptionML=[ENU=Pre Calculation;
+               NOR=Forkalkulasjon];
+    SourceTable=Table36;
+    SourceTableView=SORTING(Document Type,No.)
+                    WHERE(Order Type=CONST(Vehicle Sales & Purchases));
+    PageType=Card;
+    OnInit=BEGIN
+             DataExchangeUnitG.SpecialFunctionsParam(SpecialFunctionsAssignmentsG,RecRefG,TypeG::GetParam);
+             RecRefG.SETTABLE(SalesHeaderG);
+
+             COPYFILTERS(SalesHeaderG);
+
+             //CreateFilter(SalesHeaderG."Document Type", SalesHeaderG."No.");
+           END;
+
+    OnAfterGetRecord=BEGIN
+                       Calc();
+                     END;
+
+    ActionList=ACTIONS
+    {
+      { 1101103021;  ;ActionContainer;
+                      ActionContainerType=NewDocumentItems }
+      { 1101103020;1 ;ActionGroup }
+      { 1101103019;2 ;Action    ;
+                      Name=Calculation Report;
+                      CaptionML=[ENU=Print;
+                                 NOR=Skriv ut];
+                      Promoted=Yes;
+                      PromotedIsBig=Yes;
+                      Image=Print;
+                      PromotedCategory=Report;
+                      OnAction=BEGIN
+                                 REPORT.RUN(REPORT::"Calculation Report", TRUE, FALSE, Rec);
+                               END;
+                                }
+    }
+  }
+  CONTROLS
+  {
+    { 1101103000;0;Container;
+                ContainerType=ContentArea }
+
+    { 1101103001;1;Group  ;
+                Name=General;
+                Editable=false;
+                GroupType=Group }
+
+    { 1101103002;2;Field  ;
+                SourceExpr="Document Type" }
+
+    { 1101103003;2;Field  ;
+                SourceExpr="No." }
+
+    { 1101103004;2;Field  ;
+                SourceExpr="Bill-to Customer No." }
+
+    { 1101103005;2;Field  ;
+                SourceExpr="Sell-to Customer Name" }
+
+    { 1101103007;1;Group  ;
+                Name=Pre Calculation;
+                CaptionML=[ENU=Pre Calculation;
+                           NOR=Forkalkulasjon];
+                GroupType=Group }
+
+    { 1101103008;2;Field  ;
+                Name=Vehilce;
+                CaptionML=[ENU=Vehicle;
+                           NOR=Kj›ret›y];
+                SourceExpr=VehicleG }
+
+    { 1101103009;2;Field  ;
+                Name=Own Option;
+                CaptionML=[ENU=Own Option;
+                           NOR=Egenmontert utstyr];
+                SourceExpr=OwnOptionG }
+
+    { 1101103010;2;Field  ;
+                Name=Excpence Customer;
+                CaptionML=[ENU=Excpence Customer;
+                           NOR=Omkonstinger kunde];
+                SourceExpr=ExpenceCustomerG }
+
+    { 1101103011;2;Field  ;
+                Name=Incentive;
+                CaptionML=[ENU=Incentive;
+                           NOR=Bonus];
+                SourceExpr=IncentiveG;
+                StyleExpr=TRUE }
+
+    { 1101103014;2;Field  ;
+                Name=Cost Own Option;
+                CaptionML=[ENU=Cost Own Option;
+                           NOR=Kost egenmontert utstyr];
+                SourceExpr=CostOwnOptionG }
+
+    { 1101103012;2;Field  ;
+                Name=Cost Vehicle;
+                CaptionML=[ENU=Cost Vehicle;
+                           NOR=Kost kj›ret›y];
+                SourceExpr=CostVehicleG }
+
+    { 1101103015;2;Field  ;
+                Name=PDI;
+                CaptionML=[ENU=PDI;
+                           NOR=PDI];
+                SourceExpr=PDIG }
+
+    { 1101103018;2;Field  ;
+                Name=Total Discount;
+                CaptionML=[ENU=Total Discount;
+                           NOR=Total rabatt];
+                SourceExpr=TotalDiscountG;
+                Style=Strong;
+                StyleExpr=TRUE }
+
+    { 1101103016;2;Field  ;
+                Name=TotalProfit;
+                CaptionML=[ENU=Total Profit;
+                           NOR=Total fortjeneste];
+                SourceExpr=TotalProfitG;
+                Importance=Promoted;
+                Style=Strong;
+                StyleExpr=TRUE }
+
+    { 1101103017;2;Field  ;
+                Name=TotalProfitPercent;
+                CaptionML=[ENU=Total Profit %;
+                           NOR=Total fortjeneste %];
+                SourceExpr=TotalProfitPercentG;
+                Importance=Promoted;
+                Style=Strong;
+                StyleExpr=TRUE }
+
+    { 1101103006;1;Part   ;
+                Name=Salesline;
+                CaptionML=[ENU=Sales Line;
+                           NOR=Salgslinjer];
+                SubPageLink=Document Type=FIELD(Document Type),
+                            Document No.=FIELD(No.);
+                PagePartID=Page50009;
+                PartType=Page }
+
+    { 1101103013;1;Part   ;
+                Name=Sales Incentive;
+                CaptionML=[ENU=Sales Incentive;
+                           NOR=Bonus];
+                SubPageLink=Document Type=FIELD(Document Type),
+                            Document No.=FIELD(No.),
+                            Post=CONST(Yes);
+                PagePartID=Page50008;
+                PartType=Page }
+
+  }
+  CODE
+  {
+    VAR
+      DataExchangeUnitG@1101103011 : Codeunit 5028965;
+      SpecialFunctionsAssignmentsG@1101103010 : Record 5206812;
+      RecRefG@1101103012 : RecordRef;
+      PreCalcVehicleSaleG@1101103015 : Codeunit 50004;
+      TypeG@1101103013 : 'InitParam,GetParam';
+      SalesHeaderG@1101103014 : Record 36;
+      VehicleG@1101103000 : Decimal;
+      OwnOptionG@1101103001 : Decimal;
+      ExpenceCustomerG@1101103002 : Decimal;
+      IncentiveG@1101103003 : Decimal;
+      CostVehicleG@1101103004 : Decimal;
+      CostOwnOptionG@1101103005 : Decimal;
+      PDIG@1101103006 : Decimal;
+      TotalDiscountG@1101103016 : Decimal;
+      TotalProfitG@1101103007 : Decimal;
+      TotalProfitPercentG@1101103008 : Decimal;
+      dummy@1101103009 : Integer;
+
+    PROCEDURE Calc@1101103000();
+    VAR
+      SalesLineL@1101103000 : Record 37;
+      CQSSetupL@1101103001 : Record 1057631;
+    BEGIN
+      CQSSetupL.GET;
+
+      VehicleG          := 0;
+      OwnOptionG        := 0;
+      ExpenceCustomerG  := 0;
+      IncentiveG        := 0;
+      CostVehicleG      := 0;
+      TotalDiscountG    := 0;
+      //SalesLineL.SETRANGE("Document Type", "Document Type");
+      //SalesLineL.SETRANGE("Document No.", "No.");
+      //IF SalesLineL.FINDFIRST THEN
+      //  REPEAT
+       // IF SalesLineL."Item Type" = SalesLineL."Item Type"::Vehicle THEN
+       //   BEGIN
+      //    VehicleG += SalesLineL.Amount;
+      //    CostVehicleG += VehicleCost(SalesLineL."No.");
+      //    PDIG := PDICost(SalesLineL."Shortcut Dimension 2 Code");
+         // END;
+       // IF SalesLineL."Item Type" = SalesLineL."Item Type"::"G/L Account" THEN
+       //   IF (SalesLineL."No." = CQSSetupL."Vehicle tax/surcharge 1") OR (SalesLineL."No." = CQSSetupL."Vehicle tax/surcharge 6") THEN
+       //     ExpenceCustomerG += SalesLineL.Amount;
+
+      //  UNTIL SalesLineL.NEXT = 0;
+
+      VehicleG          := PreCalcVehicleSaleG.VehiclePrice(Rec);
+      CostVehicleG      := PreCalcVehicleSaleG.VehicleCost(Rec);
+      PDIG              := PreCalcVehicleSaleG.PDICost(Rec);
+      ExpenceCustomerG  := PreCalcVehicleSaleG.ExpenceCustomer(Rec);
+      IncentiveG        := PreCalcVehicleSaleG.SalesIncentive("Document Type", "No.");
+      TotalDiscountG    := PreCalcVehicleSaleG.TotalDiscount(Rec);
+      CostOwnOptionG    := PreCalcVehicleSaleG.OwnOptionCost(Rec);
+      OwnOptionG        := PreCalcVehicleSaleG.OwnOptionSalesPrice(Rec);
+
+      TotalProfitG := (VehicleG + OwnOptionG + ExpenceCustomerG) - (- IncentiveG + CostVehicleG + CostOwnOptionG + PDIG);
+      IF (VehicleG + OwnOptionG + ExpenceCustomerG) <> 0 THEN
+        TotalProfitPercentG := (TotalProfitG / (VehicleG + OwnOptionG + ExpenceCustomerG)) * 100;
+    END;
+
+    PROCEDURE VehicleCost@1101103001(ModelcodeP@1101103000 : Code[20]) UnitCostR : Decimal;
+    VAR
+      ModelL@1101103001 : Record 27;
+    BEGIN
+      IF ModelL.GET(ModelcodeP) THEN
+        BEGIN
+        UnitCostR += ModelL."Unit Cost";
+        END;
+
+      EXIT(UnitCostR);
+    END;
+
+    PROCEDURE SalesIncentive@1101103002(DocTypeP@1101103001 : 'Quote,Order,Invoice,Credit Memo,Blanket Order,Return Order';DocNoP@1101103002 : Code[10]) IncentivR : Decimal;
+    VAR
+      SalesIncentiveLineL@1101103000 : Record 5025486;
+    BEGIN
+      SalesIncentiveLineL.SETRANGE("Document Type", DocTypeP);
+      SalesIncentiveLineL.SETRANGE("Document No.", DocNoP);
+      SalesIncentiveLineL.SETRANGE(Post, TRUE);
+      IF SalesIncentiveLineL.FINDFIRST THEN
+        REPEAT
+        IncentivR += SalesIncentiveLineL.Amount;
+        UNTIL SalesIncentiveLineL.NEXT = 0;
+      EXIT(IncentivR);
+    END;
+
+    PROCEDURE OwnOptionCost@1101103003() OwnOptCostR : Decimal;
+    VAR
+      SalesLineL@1101103000 : Record 37;
+      OptionSetupL@1101103001 : Record 5025472;
+    BEGIN
+      OptionSetupL.GET;
+      SalesLineL.SETRANGE("Document Type", "Document Type");
+      SalesLineL.SETRANGE("Document No.", "No.");
+      SalesLineL.SETRANGE(Type, SalesLineL.Type::Item);
+      SalesLineL.SETRANGE("Item Type", SalesLineL."Item Type"::"Own Option");
+      SalesLineL.SETFILTER("Gen. Prod. Posting Group", '%1', OptionSetupL."Prod. Posting Group Default" + '*');
+      //SalesLineL.SETRANGE("Gen. Prod. Posting Group", OptionSetupL."Prod. Posting Group Default");
+      IF SalesLineL.FINDFIRST THEN
+        REPEAT
+        OwnOptCostR += SalesLineL."Unit Cost (LCY)";
+        UNTIL SalesLineL.NEXT = 0;
+      EXIT(OwnOptCostR);
+    END;
+
+    PROCEDURE OwnOptionSalesPrice@1101103004() OwnOptCostR : Decimal;
+    VAR
+      SalesLineL@1101103000 : Record 37;
+      OptionSetupL@1101103001 : Record 5025472;
+    BEGIN
+      OptionSetupL.GET;
+      SalesLineL.SETRANGE("Document Type", "Document Type");
+      SalesLineL.SETRANGE("Document No.", "No.");
+      SalesLineL.SETRANGE(Type, SalesLineL.Type::Item);
+      SalesLineL.SETRANGE("Item Type", SalesLineL."Item Type"::"Own Option");
+      SalesLineL.SETFILTER("Gen. Prod. Posting Group", '%1', OptionSetupL."Prod. Posting Group Default" + '*');
+      IF SalesLineL.FINDFIRST THEN
+        REPEAT
+        OwnOptCostR += SalesLineL.Amount;
+        UNTIL SalesLineL.NEXT = 0;
+      EXIT(OwnOptCostR);
+    END;
+
+    PROCEDURE PDICost@1101103005(MakeP@1101103001 : Code[10]) : Decimal;
+    VAR
+      CQSModelMasterSetupL@1101103000 : Record 1057640;
+    BEGIN
+      CQSModelMasterSetupL.SETRANGE("Company Name", COMPANYNAME);
+      CQSModelMasterSetupL.SETRANGE("Make Code", MakeP);
+      IF CQSModelMasterSetupL.FINDFIRST THEN
+        EXIT(CQSModelMasterSetupL.PDI)
+        ELSE
+        EXIT(0);
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

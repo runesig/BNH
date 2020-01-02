@@ -1,0 +1,200 @@
+OBJECT Codeunit 5231123 BNH Regnskapsposter Upd. 2016
+{
+  OBJECT-PROPERTIES
+  {
+    Date=18.11.17;
+    Time=14:53:43;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    TableNo=5231122;
+    OnRun=BEGIN
+            BNHRegnskapsposter2016G.COPY( Rec );
+
+            CASE TRUE OF
+              BNHRegnskapsposter2016G.Status = Status::Ignore:
+                EXIT;
+              ELSE
+                InsertRecord();
+            END;
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      BNHRegnskapsposter2016G@1101103000 : Record 5231122;
+
+    PROCEDURE InsertRecord@1101103040();
+    VAR
+      GenJournalLineL@1101103001 : Record 81;
+      GenJournalLine2L@1101103002 : Record 81;
+      VendorL@1101103000 : Record 23;
+      tmpDecL@1101103003 : Decimal;
+      intDato@1101103005 : Integer;
+      txtDato@1101103006 : Text;
+    BEGIN
+
+      GenJournalLine2L.SETRANGE("Journal Template Name", 'GENERELT');
+      GenJournalLine2L.SETRANGE("Journal Batch Name", 'XHB16_J/F');
+
+      GenJournalLineL.INIT;
+      GenJournalLineL.VALIDATE("Journal Template Name", 'GENERELT');
+      GenJournalLineL.VALIDATE("Journal Batch Name", 'XHB16_J/F');
+      IF GenJournalLine2L.FINDLAST THEN
+        GenJournalLineL."Line No." := GenJournalLine2L."Line No." + 10
+        ELSE
+        GenJournalLineL."Line No." := 10;
+
+       intDato := 1002016 + BNHRegnskapsposter2016G.Periode * 10000;
+       txtDato := FORMAT(intDato);
+      GenJournalLineL.VALIDATE("Posting Date", Str2Date(txtDato,0));
+
+      GenJournalLineL.VALIDATE("Document No.", 'Poster ' + COPYSTR(txtDato,2,2) +' 2016');
+      GenJournalLineL.VALIDATE("External Document No.", 'Poster 2016');
+      BNHRegnskapsposter2016G.CALCFIELDS("Incadea konto","Incadea merke", "Bel›p");
+
+      IF BNHRegnskapsposter2016G."Incadea konto" = '' THEN
+        BNHRegnskapsposter2016G."Incadea konto" := '9998';
+      GenJournalLineL.VALIDATE("Account Type", GenJournalLineL."Account Type"::"G/L Account");
+      GenJournalLineL.VALIDATE("Account No.", BNHRegnskapsposter2016G."Incadea konto");
+      IF BNHRegnskapsposter2016G."Incadea merke" <> '' THEN
+        GenJournalLineL.VALIDATE("Shortcut Dimension 2 Code", BNHRegnskapsposter2016G."Incadea merke");
+      //EVALUATE(tmpDecL, BNHRegnskapsposter2016G.Bel›p);
+      GenJournalLineL.VALIDATE(Amount, BNHRegnskapsposter2016G."Bel›p");
+      IF BNHRegnskapsposter2016G.Filial = '' THEN
+        GenJournalLineL.VALIDATE("Location Code", '09')
+      ELSE
+        GenJournalLineL.VALIDATE("Location Code", '0'+ BNHRegnskapsposter2016G.Filial);
+      GenJournalLineL.Description := 'Overf›rt fra gammelt system';
+
+      {
+      IF STRLEN(BNHRegnskapsposter2016G.Avdeling) = 1 THEN
+         BNHRegnskapsposter2016G.Avdeling := '0'+ BNHRegnskapsposter2016G.Avdeling;
+      IF (BNHRegnskapsposter2016G.Avdeling = '08') OR (BNHRegnskapsposter2016G.Avdeling = '15') THEN
+        BNHRegnskapsposter2016G.Avdeling := '';
+      IF BNHRegnskapsposter2016G.Avdeling = '00' THEN
+        BNHRegnskapsposter2016G.Avdeling := '90';
+      IF BNHRegnskapsposter2016G.Avdeling = '01' THEN
+        BNHRegnskapsposter2016G.Avdeling := '91';
+      IF (BNHRegnskapsposter2016G.Avdeling = '11') OR (BNHRegnskapsposter2016G.Avdeling = '13') THEN
+        BNHRegnskapsposter2016G.Avdeling := '10';
+      }
+      CASE BNHRegnskapsposter2016G.Avdeling OF
+        '0'   :
+          BNHRegnskapsposter2016G.Avdeling := '00';
+        '1'   :
+          BNHRegnskapsposter2016G.Avdeling := '01';
+        '10'  :
+          BEGIN
+          BNHRegnskapsposter2016G.Avdeling := '10';
+          GenJournalLineL.VALIDATE("Shortcut Dimension 2 Code", 'NISSAN');
+          END;
+        '11'  :
+          BEGIN
+          BNHRegnskapsposter2016G.Avdeling := '10';
+          GenJournalLineL.VALIDATE("Shortcut Dimension 2 Code", 'SUBARU');
+          END;
+        '12'  :
+          BNHRegnskapsposter2016G.Avdeling := '12';
+        '13'  :
+          BEGIN
+          BNHRegnskapsposter2016G.Avdeling := '10';
+          GenJournalLineL.VALIDATE("Shortcut Dimension 2 Code", 'HYUNDAI');
+          END;
+        '15'  :
+          BNHRegnskapsposter2016G.Avdeling := '';
+        '20'  :
+          BNHRegnskapsposter2016G.Avdeling := '20';
+        '24'  :
+          BNHRegnskapsposter2016G.Avdeling := '24';
+        '25'  :
+          BNHRegnskapsposter2016G.Avdeling := '25';
+        '26'  :
+          BNHRegnskapsposter2016G.Avdeling := '26';
+        '30'  :
+          BNHRegnskapsposter2016G.Avdeling := '30';
+        '40'  :
+          BNHRegnskapsposter2016G.Avdeling := '40';
+        '50'  :
+          BNHRegnskapsposter2016G.Avdeling := '50';
+        '6'   :
+          BNHRegnskapsposter2016G.Avdeling := '06';
+        '7'   :
+          BNHRegnskapsposter2016G.Avdeling := '07';
+        '8'   :
+          BNHRegnskapsposter2016G.Avdeling := '';
+        '9'   :
+          BNHRegnskapsposter2016G.Avdeling := '';
+        ''    :
+          BNHRegnskapsposter2016G.Avdeling := '';
+
+      END;
+
+
+      GenJournalLineL.VALIDATE("Shortcut Dimension 1 Code", BNHRegnskapsposter2016G.Avdeling);
+
+      GenJournalLineL."Gen. Prod. Posting Group" := '';
+      GenJournalLineL."VAT Prod. Posting Group" := '';
+      GenJournalLineL."Mva. kode" := '';
+      GenJournalLineL."VAT Amount" := 0;
+      GenJournalLineL."VAT Amount (LCY)" := 0;
+      GenJournalLineL."VAT %" := 0;
+      GenJournalLineL."VAT Base Amount (LCY)" := 0;
+      GenJournalLineL."Motkonto mva. kode" := '';
+      GenJournalLineL."Bal. VAT Amount" := 0;
+      GenJournalLineL."VAT Base Amount" := GenJournalLineL.Amount;
+      GenJournalLineL."Bal. VAT Base Amount" := 0;
+      GenJournalLineL."Bal. Account Type" := 0;
+      //---
+
+      GenJournalLineL.INSERT(TRUE);
+    END;
+
+    PROCEDURE Str2Date@1117700019(InnDato@1117700000 : Text[30];InnFormat@1117700001 : Integer) UtDato : Date;
+    VAR
+      Dag@1117700002 : Integer;
+      Mnd@1117700003 : Integer;
+      Aar@1117700004 : Integer;
+    BEGIN
+      IF InnDato = '' THEN EXIT(0D);
+
+      CASE InnFormat OF
+        0: // DD-MM-YYYY
+          BEGIN
+            EVALUATE(Dag, COPYSTR(InnDato,1,1));
+            EVALUATE(Mnd, COPYSTR(InnDato,2,2));
+            EVALUATE(Aar, COPYSTR(InnDato,4,4));
+            UtDato := DMY2DATE(Dag, Mnd, Aar);
+          END;
+        1: // MM-DD-YYYY
+          BEGIN
+            EVALUATE(Dag, COPYSTR(InnDato,4,2));
+            EVALUATE(Mnd, COPYSTR(InnDato,1,2));
+            EVALUATE(Aar, COPYSTR(InnDato,7,4));
+            UtDato := DMY2DATE(Dag, Mnd, Aar);
+          END;
+        2: // DDMMYY
+          BEGIN
+            EVALUATE(Dag, COPYSTR(InnDato,1,2));
+            EVALUATE(Mnd, COPYSTR(InnDato,3,2));
+            EVALUATE(Aar, COPYSTR(InnDato,5,2));
+            UtDato := DMY2DATE(Dag, Mnd, Aar+2000);
+          END;
+        3: // YYYYMMDD
+          BEGIN
+            EVALUATE(Dag, COPYSTR(InnDato,7,2));
+            EVALUATE(Mnd, COPYSTR(InnDato,5,2));
+            EVALUATE(Aar, COPYSTR(InnDato,1,4));
+            UtDato := DMY2DATE(Dag, Mnd, Aar);
+          END;
+      END;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

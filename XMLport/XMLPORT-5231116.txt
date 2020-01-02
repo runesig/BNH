@@ -1,0 +1,461 @@
+OBJECT XMLport 5231116 BnH Vehicle_m520 Uttrekk
+{
+  OBJECT-PROPERTIES
+  {
+    Date=06.11.17;
+    Time=20:16:55;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    Direction=Import;
+    TextEncoding=WINDOWS;
+    OnPreXMLport=BEGIN
+                   IF GUIALLOWED THEN
+                     DialogG.OPEN( C_INC_Progress );
+
+                   WITH "BnH Vehicle_m520 Uttrekk" DO
+                     IF FINDLAST THEN
+                       RecordNoG := "Primary Key";
+                 END;
+
+    OnPostXMLport=BEGIN
+                    IF GUIALLOWED THEN
+                      DialogG.CLOSE;
+                  END;
+
+    Format=Variable Text;
+    FieldDelimiter=<">;
+    FieldSeparator=[;];
+  }
+  ELEMENTS
+  {
+    { [{1CDB1B1B-9A8F-4144-B0E0-EE68C18144C6}];  ;XML                 ;Element ;Text     }
+
+    { [{5B03713E-2114-410E-9862-41577291BD7E}];1 ;Table               ;Element ;Table   ;
+                                                  SourceTable=Table5231116;
+                                                  Import::OnBeforeInsertRecord=BEGIN
+                                                                                 RecordNoG += 1;
+                                                                                 "BnH Vehicle_m520 Uttrekk"."Primary Key" := RecordNoG;
+
+                                                                                 IF RecordNoG MOD 100 = 0 THEN
+                                                                                   DialogG.UPDATE( 1, RecordNoG );
+                                                                               END;
+                                                                                }
+
+    { [{16A6B406-0F72-4D11-85C3-8C5A4B941092}];2 ;Basisnr             ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::Basisnr;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{ACA023EA-E8EB-42E4-9A54-5E28D3A243E9}];2 ;Reg.nr              ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::Reg.nr;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{82D26B60-CB6E-471D-A468-C2224DB80466}];2 ;Betalernr           ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::Betalernr;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{E1B10B64-A055-44AF-9FFD-588651977105}];2 ;Chassisnummer       ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::Chassisnummer;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{B438FB95-DD31-41CC-86F4-0F174C02CF7E}];2 ;Navn                ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::Navn;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{3F0A88B6-E9CC-45CB-B65C-4E5A09A29341}];2 ;EnhGrp              ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::EnhGrp;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{9EE96A9F-D33F-482E-9C8D-8014005ED770}];2 ;Merke               ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::Merke;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{76070307-AAC5-4854-BC4C-12D0F54DCC75}];2 ;Mod.ln              ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::Mod.ln;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{4EC16ACA-E5AE-4FF2-A89F-2AF2B71CE452}];2 ;Mod.Ür              ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::Mod.Ür;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{FBB396A9-61FA-4AF4-B15D-B0589FD5FF5E}];2 ;Dekk_lokasjon       ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::Dekk lokasjon;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{5E4842CC-C535-4AAA-8B37-77E6AA6F40AE}];2 ;Fabrikkmodell       ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::Fabrikkmodell;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{C5F13A19-22A2-4FB7-8742-054C6D574918}];2 ;Vk.mod.kd           ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::Vk.mod.kd;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{7E06A27C-43F2-4DEF-B18D-498180EBE7CB}];2 ;AktKm               ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::AktKm;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{3520B55A-D538-4159-A9D0-291133FF8890}];2 ;F._reg              ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::1. reg;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{B7713622-784A-4602-8F2A-FE03D9A82EB9}];2 ;S._reg              ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::S. reg;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{0E0C3A97-3606-436B-982C-F1E24E87C48B}];2 ;Eiersk              ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::Eiersk;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{95389316-1E5B-45F9-86AA-64CCF9C072E3}];2 ;S.enhet             ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::S.enhet;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{891C7BA6-CBC0-49AA-A550-A5E4D07F03A4}];2 ;Enh                 ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::Enh;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{1DEB42A3-8B0B-45BA-AD93-52C6CA12ED8E}];2 ;CO_ut               ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::CO2 ut;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{F7ABD428-DC3C-4062-853F-A2B4A564A459}];2 ;Fabrik.fargekode    ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::Fabrik.fargekode;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{B34E47F0-5E4E-46E9-81AF-21268FFEA4B2}];2 ;Fabrikantens_fargena;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::Fabrikantens fargena;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{ACEF0E85-47C0-44D1-974E-2E68A794FD10}];2 ;Interiõrkode        ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::Interiõrkode;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{DF29DA1C-5532-423C-BE19-6EB9546D462C}];2 ;F._ank              ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::F. ank;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{CD189362-4D39-4F9C-A967-A043F8F4E08E}];2 ;A.sete              ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::A.sete;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{4E65FCB5-48BA-4FCD-8E67-3B82E314AD96}];2 ;LF_utlõp            ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::LF utlõp;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{69521AE6-281C-4F09-8C3A-8794F5BC0DCF}];2 ;Motorkode           ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::Motorkode;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{80B7E41E-C9A1-47FD-8975-4570EDE82852}];2 ;Girkassenummer      ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::Girkassenummer;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{05632B07-F28D-4D39-83B4-B6E3A5BF632E}];2 ;Utstyr_I            ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::Utstyr 1;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{5DE3F922-9772-4FF0-A3FA-EAA2F2473BAB}];2 ;Utstyr_II           ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::Utstyr 2;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{685280EF-02EF-478C-A88E-037C23F9B418}];2 ;Sy.vol              ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::Sy.vol;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{C15B59BA-B92F-4D4C-AD9D-A74D58C8F50A}];2 ;Motornummer         ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::Motornummer;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{38BE2AB3-4B64-4E83-B984-872FC23932D1}];2 ;Nõkkelnummer        ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::Nõkkelnummer;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{C44663EC-4163-4972-B2B5-26444F1BF330}];2 ;Radio               ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::Radio;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{612434FC-4B82-44EA-8EA0-599E081A8F52}];2 ;Hestekr             ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::Hestekr;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{F54F38CF-92AE-478E-ADCA-85F410EC0DE5}];2 ;Drivst              ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::Drivst;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{CCE89AC9-68B4-4B18-843E-C3EE77E1609F}];2 ;Mobiltelefon_I      ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::Mobiltelefon 1;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{E5C27CA2-35FA-414D-97AE-55C51D567DE3}];2 ;Mobiltelefon_II     ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::Mobiltelefon 2;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{D1BE3E4D-9FAC-4562-AA99-8269D8D9DF0F}];2 ;Kontaktperson       ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::Kontaktperson;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{8FA2D036-60B4-4FDD-9513-2E5DD59D29CB}];2 ;Kontr               ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::Kontr?;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{957CC2F2-92E5-4215-9A33-DFF9A6910ABB}];2 ;Kontak              ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::Kontak;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{56829E31-64D1-4584-8D66-C474BCDCC9A5}];2 ;Oppf                ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::Oppf;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{AC4A593C-45C3-4D97-BF88-1092BCC3C74B}];2 ;E-mail_adresse      ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::E-mail adresse;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{C9292F4A-5D18-4AB9-A845-AE5547219EE4}];2 ;Brukernr            ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::Brukernr;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{7E2D1F93-AF47-490A-A1D6-902B9C921F8E}];2 ;Owner_No            ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::Owner No;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{51F45F01-24A9-46BB-8214-43897E476C13}];2 ;BrKd                ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::BrKd;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{7F13828B-BE45-4B4A-BC98-6AF6915D46A8}];2 ;E-mail_adresse_I    ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::E-mail adresse 2;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{4C2D56C0-C386-44C1-B371-BFEFF2C49448}];2 ;Eier_II_nu          ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::Eier 2 nu;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{6499EBB6-3EB1-408F-818C-313B8D59757E}];2 ;SjÜfõrnr.           ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::SjÜfõrnr.;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{7B7DAA98-AD1E-4FF5-B1AC-D131AB1FA866}];2 ;BrKdI               ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::BrKd2;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{2AF9623B-3698-4B87-BACD-47E15B861754}];2 ;Diverse_IV          ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::Diverse 4;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{DA830CCF-062E-4781-9DC4-E928DC09346B}];2 ;SiInsp              ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::SiInsp;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{6F953C58-6821-4A25-8CF9-B8146E33D230}];2 ;S_fakt              ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::S fakt;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{ED5C9305-8E78-4C44-97A7-35AFC1DAF50E}];2 ;NServI              ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::NServ1;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{5182D237-7024-4D13-96F0-AFDFFE5518B0}];2 ;S._ser              ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::S. ser;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{BF544892-74B2-424B-A925-00B7E01CECB1}];2 ;Forsikringsselskap  ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::Forsikringsselskap;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{828183AA-DB57-41D0-9030-45617A746F5B}];2 ;Verk.loka           ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::Verk.loka;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{F898697F-E391-4558-9625-458AAE9FAFFD}];2 ;FoKmèr              ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::FoKmèr;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{8CA3842B-751B-4277-9583-B63959DB6B4E}];2 ;Salg_dette_Ür       ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::Salg dette Ür;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{0F65B6A9-4C71-4E01-AFBA-1E795291CAF6}];2 ;Salg_siste_Ür       ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::Salg siste Ür;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{A1BA5261-8826-4FF6-BBEF-DF3F753BA38F}];2 ;Salg_f.Ü            ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::Salg f.Ü;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{F1E3717B-05AE-4B70-9DC6-6AD13E917B36}];2 ;S._av               ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::S. av;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{3D600D3E-6914-4F8F-A7D7-B82D09CB414D}];2 ;Oppr                ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::Oppr;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{ED618211-2F46-4BDA-BD72-D7FDEA8342B8}];2 ;LeFiKo              ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::LeFiKo;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{94FDAC57-4910-44C3-A867-B43BD2766987}];2 ;LeFiNa              ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::LeFiNa;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{30FB8F8A-628B-4067-A3F9-7DC172460B54}];2 ;LF_sta              ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BnH Vehicle_m520 Uttrekk::LF sta;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+  }
+  EVENTS
+  {
+  }
+  REQUESTPAGE
+  {
+    PROPERTIES
+    {
+    }
+    CONTROLS
+    {
+    }
+  }
+  CODE
+  {
+    VAR
+      C_INC_Progress@1101103000 : TextConst 'ENU=Import in progress...\ \Record No. #1#####;NOR=Import kjõrer...\ \Post nummer #1#####';
+      DialogG@1101103001 : Dialog;
+      RecordNoG@1101103002 : Integer;
+
+    BEGIN
+    END.
+  }
+}
+

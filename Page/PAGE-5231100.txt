@@ -1,0 +1,50 @@
+OBJECT Page 5231100 BB Konvertering kontonr.
+{
+  OBJECT-PROPERTIES
+  {
+    Date=22.10.17;
+    Time=08:40:25;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    SourceTable=Table5231100;
+    PageType=List;
+  }
+  CONTROLS
+  {
+    { 1101103000;0;Container;
+                ContainerType=ContentArea }
+
+    { 1101103001;1;Group  ;
+                Name=Group;
+                GroupType=Repeater }
+
+    { 1101103002;2;Field  ;
+                SourceExpr="BB kontonr." }
+
+    { 1101103003;2;Field  ;
+                SourceExpr="BB kontobeskrivelse" }
+
+    { 1101103004;2;Field  ;
+                SourceExpr="Incadea kontonr." }
+
+    { 1101103005;2;Field  ;
+                SourceExpr="Incade kontobeskrivelse" }
+
+    { 1101103008;2;Field  ;
+                SourceExpr="Totalbel›p" }
+
+    { 1101103009;2;Field  ;
+                SourceExpr="Antall poster" }
+
+  }
+  CODE
+  {
+
+    BEGIN
+    END.
+  }
+}
+

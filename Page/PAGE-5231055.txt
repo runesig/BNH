@@ -1,0 +1,47 @@
+OBJECT Page 5231055 Gjentakelsesgruppe oversikt
+{
+  OBJECT-PROPERTIES
+  {
+    Date=03.10.17;
+    Time=12:28:33;
+    Modified=Yes;
+    Version List=BlanketOrderBNH;
+  }
+  PROPERTIES
+  {
+    SourceTable=Table5231050;
+    PageType=List;
+  }
+  CONTROLS
+  {
+    { 1101103000;0;Container;
+                ContainerType=ContentArea }
+
+    { 1101103001;1;Group  ;
+                Name=Group;
+                GroupType=Repeater }
+
+    { 1101103002;2;Field  ;
+                SourceExpr=Code }
+
+    { 1101103003;2;Field  ;
+                SourceExpr=Description }
+
+    { 1101103004;2;Field  ;
+                SourceExpr="Date Formula" }
+
+    { 1101103005;2;Field  ;
+                SourceExpr="Start Date" }
+
+    { 1101103006;2;Field  ;
+                SourceExpr="End Date" }
+
+  }
+  CODE
+  {
+
+    BEGIN
+    END.
+  }
+}
+

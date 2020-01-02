@@ -1,0 +1,43 @@
+OBJECT Table 5231120 Chassis og modellkoder
+{
+  OBJECT-PROPERTIES
+  {
+    Date=06.11.17;
+    Time=12:35:39;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+  }
+  FIELDS
+  {
+    { 1   ;   ;Primary Key         ;Integer        }
+    { 2   ;   ;Status              ;Option        ;OptionCaptionML=[ENU=" ,Ignore,OK,Error";
+                                                                    NOR=" ,Ignorer,OK,Feil"];
+                                                   OptionString=[ ,Ignore,OK,Error] }
+    { 3   ;   ;Datetime            ;DateTime      ;CaptionML=[ENU=Time;
+                                                              NOR=Tidspunkt] }
+    { 4   ;   ;Update message      ;Text250       ;CaptionML=[ENU=Message;
+                                                              NOR=Melding] }
+    { 5   ;   ;No.                 ;Code20        ;CaptionML=[ENU=Item No.;
+                                                              NOR=Varenr.] }
+    { 10  ;   ;Chassis_vin         ;Text50         }
+    { 20  ;   ;Modellkode          ;Text50         }
+  }
+  KEYS
+  {
+    {    ;Primary Key                             ;Clustered=Yes }
+    {    ;Chassis_vin                              }
+  }
+  FIELDGROUPS
+  {
+  }
+  CODE
+  {
+
+    BEGIN
+    END.
+  }
+}
+

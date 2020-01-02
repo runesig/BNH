@@ -1,0 +1,42 @@
+OBJECT Table 5231123 BNH Konvertering kontonr.
+{
+  OBJECT-PROPERTIES
+  {
+    Date=23.11.17;
+    Time=08:56:43;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+  }
+  FIELDS
+  {
+    { 1   ;   ;Dracar kontonr.     ;Code20         }
+    { 10  ;   ;Dracar kontobeskrivelse;Text50      }
+    { 20  ;   ;Incadea kontonr.    ;Code20        ;TableRelation="G/L Account".No. WHERE (Account Type=FILTER(Posting)) }
+    { 30  ;   ;Incade kontobeskrivelse;Text50     ;FieldClass=FlowField;
+                                                   CalcFormula=Lookup("G/L Account".Name WHERE (No.=FIELD(Incadea kontonr.)));
+                                                   Editable=No }
+    { 40  ;   ;Incadea merkekode   ;Code10        ;TableRelation=Make.Code }
+    { 50  ;   ;Lokasjon            ;Code10        ;TableRelation=Location.Code }
+    { 500 ;   ;Totalbel›p          ;Decimal       ;FieldClass=FlowField;
+                                                   CalcFormula=Sum("BNH Regnskapsposter"."Dec Bel›p" WHERE (Kontonr=FIELD(Dracar kontonr.))) }
+    { 510 ;   ;Antall poster       ;Integer       ;FieldClass=FlowField;
+                                                   CalcFormula=Count("BNH Regnskapsposter" WHERE (Kontonr=FIELD(Dracar kontonr.))) }
+  }
+  KEYS
+  {
+    {    ;Dracar kontonr.                         ;Clustered=Yes }
+  }
+  FIELDGROUPS
+  {
+  }
+  CODE
+  {
+
+    BEGIN
+    END.
+  }
+}
+

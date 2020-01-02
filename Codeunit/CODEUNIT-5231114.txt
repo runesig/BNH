@@ -1,0 +1,88 @@
+OBJECT Codeunit 5231114 BNH Vehicle
+{
+  OBJECT-PROPERTIES
+  {
+    Date=23.11.17;
+    Time=21:02:24;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    TableNo=5231115;
+    OnRun=BEGIN
+            BnHVehicleG.COPY( Rec );
+            ProcessRecords;
+            ShowResults;
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      C_ConfirmProcess@1101103000 : TextConst 'ENU=Process %1 records?;NOR=Prosesser %1 poster?';
+      BnHVehicleG@1101103001 : Record 5231115;
+      C_Results@1101103003 : TextConst 'ENU=Results:\ \%1 OK\ \%2 Ignored\ \%3 Failed;NOR=Resultater:\ \%1 OK\ \%2 ignorert\ \%3 feil';
+      RecordCountG@1101103004 : ARRAY [9] OF Integer;
+      PDMProgressG@1101103002 : Codeunit 50009;
+      C_Progress@1101103005 : TextConst 'ENU=Processing...;NOR=Prosesserer...';
+
+    PROCEDURE ProcessRecords@1101103001();
+    BEGIN
+      WITH BnHVehicleG DO BEGIN
+        RecordCountG[9] := COUNT;
+        IF GUIALLOWED THEN
+          IF NOT CONFIRM( C_ConfirmProcess, TRUE, RecordCountG[9] ) THEN
+            EXIT;
+        PDMProgressG.Start( C_Progress, RecordCountG[9] );
+        IF FINDSET THEN
+          REPEAT
+            PDMProgressG.Increment( 1 );
+            COMMIT;
+            CLEARLASTERROR;
+            CASE TRUE OF
+              "Q Status" = "Q Status"::Ignore:
+                ;
+              CODEUNIT.RUN( CODEUNIT::"BnH Vehicle Update", BnHVehicleG ):
+                SetStatus( "Q Status"::OK, '' )
+              ELSE
+                SetStatus( "Q Status"::Error, GETLASTERRORTEXT );
+            END;
+            RecordCountG[ "Q Status" ] +=1;
+          UNTIL NEXT = 0;
+        PDMProgressG.Stop;
+      END;
+      COMMIT;
+    END;
+
+    PROCEDURE SetStatus@1101103000(StatusP@1101103000 : Option;MessageP@1101103001 : Text);
+    BEGIN
+      WITH BnHVehicleG DO BEGIN
+        GET( "Q Primary Key" );
+        CASE TRUE OF
+          "Q Status" = "Q Status"::Ignore:
+            ;
+          StatusP = "Q Status"::OK:
+            "Q Status" := StatusP;
+          ELSE BEGIN
+            "Q Status" := StatusP;
+            "Q Datetime" := CURRENTDATETIME;
+            "Q Update message" := COPYSTR( MessageP, 1, MAXSTRLEN( "Q Update message" ));
+            MODIFY;
+          END;
+        END;
+      END;
+    END;
+
+    PROCEDURE ShowResults@1101103003();
+    BEGIN
+      WITH BnHVehicleG DO
+        IF GUIALLOWED THEN
+          MESSAGE( C_Results, RecordCountG[ "Q Status"::OK ], RecordCountG[ "Q Status"::Ignore ], RecordCountG[ "Q Status"::Error ] );
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

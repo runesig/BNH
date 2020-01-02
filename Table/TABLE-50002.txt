@@ -1,0 +1,36 @@
+OBJECT Table 50002 SynkarionOrders
+{
+  OBJECT-PROPERTIES
+  {
+    Date=02.06.17;
+    Time=12:34:56;
+    Modified=Yes;
+    Version List=BNH - Synkarion;
+  }
+  PROPERTIES
+  {
+  }
+  FIELDS
+  {
+    { 1   ;   ;OrderNo             ;Code20         }
+    { 10  ;   ;SynkarionId         ;Integer        }
+    { 900 ;   ;CreatedDT           ;DateTime       }
+    { 910 ;   ;CreatedBy           ;Code20         }
+    { 920 ;   ;ModifiedDT          ;DateTime       }
+    { 930 ;   ;ModifiedBy          ;Code20         }
+  }
+  KEYS
+  {
+    {    ;OrderNo                                 ;Clustered=Yes }
+  }
+  FIELDGROUPS
+  {
+  }
+  CODE
+  {
+
+    BEGIN
+    END.
+  }
+}
+

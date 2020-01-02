@@ -1,0 +1,53 @@
+OBJECT Page 50019 BNH CSI Used Car Setup
+{
+  OBJECT-PROPERTIES
+  {
+    Date=10.10.18;
+    Time=09:35:21;
+    Modified=Yes;
+    Version List=BNH.01;
+  }
+  PROPERTIES
+  {
+    CaptionML=[ENU=BNH CSI Used Car Setup;
+               NOR=BNH CSI Oppsett bruktbilsalg];
+    SourceTable=Table50017;
+    PageType=List;
+  }
+  CONTROLS
+  {
+    { 1101103000;0;Container;
+                ContainerType=ContentArea }
+
+    { 1101103001;1;Group  ;
+                Name=Group;
+                GroupType=Repeater }
+
+    { 1101103002;2;Field  ;
+                SourceExpr="Location Code" }
+
+    { 1101103003;2;Field  ;
+                SourceExpr="Dealer No." }
+
+    { 1101103004;2;Field  ;
+                SourceExpr="Carsales Posting Group" }
+
+  }
+  CODE
+  {
+
+    BEGIN
+    {
+      +----------------------------------------------+
+      | 2009 SI-DATA A/S (SID)                       |
+      +----------------------------------------------+
+      | INCADEA ENGINE                               |
+      +----------------------------------------------+
+      No.  Version  Date      ID      Remark
+      ------------------------------------------------
+      01.  7.1.5    07.06.18  JRO     Initiale version
+    }
+    END.
+  }
+}
+

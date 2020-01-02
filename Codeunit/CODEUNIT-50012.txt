@@ -1,0 +1,375 @@
+OBJECT Codeunit 50012 Import Nokian Dekk
+{
+  OBJECT-PROPERTIES
+  {
+    Date=30.08.17;
+    Time=21:59:18;
+    Modified=Yes;
+    Version List=BNH;
+  }
+  PROPERTIES
+  {
+    TableNo=5025702;
+    OnRun=VAR
+            ImpExpProcessDirectoryL@1101103004 : Record 5025704;
+            ImpExpProcessFilenameL@1101103003 : Record 5025705;
+            MakeL@1101103002 : Record 12;
+            recFileL@1101103001 : Record 2000000022;
+            FileNameL@1101103000 : Text[250];
+            FileL@1101103006 : Text[250];
+            BackupFileL@1101103005 : Text[250];
+          BEGIN
+            ImpExpProcessDirectoryL.SETRANGE("Process No.", "Process ID");
+            IF ImpExpProcessDirectoryL.FINDFIRST THEN;
+            ImpExpProcessFilenameL.SETRANGE("Process No.", "Process ID");
+            IF ImpExpProcessFilenameL.FINDFIRST THEN;
+
+
+            recFileL.SETRANGE(Path, ImpExpProcessDirectoryL.Directory);
+            recFileL.SETRANGE("Is a file", TRUE);
+            recFileL.SETFILTER(Name, ImpExpProcessFilenameL.Filename);
+            IF recFileL.FINDFIRST THEN
+              IF recFileL.COUNT = 1 THEN
+                FileNameL := recFileL.Name
+                ELSE
+                IF recFileL.COUNT > 1 THEN
+                  ERROR(IncNo003, ImpExpProcessFilenameL.Filename, ImpExpProcessDirectoryL.Directory);
+            IF NOT recFileL.FINDFIRST THEN
+              ERROR(IncNo002, ImpExpProcessFilenameL.Filename, ImpExpProcessDirectoryL.Directory);
+
+            MakeG := "Make Code";
+            IF NOT MakeL.GET(MakeG) THEN
+              ERROR(IncNo004,MakeG);
+
+            FileL := ImpExpProcessDirectoryL.Directory + FileNameL;
+            IF ImpExpProcessDirectoryL."Backup Directory" <> '' THEN
+              BackupFileL := ImpExpProcessDirectoryL."Backup Directory" + FORMAT(WORKDATE) + FORMAT(TIME) + FileNameL;
+            BackupFileL := DELCHR(BackupFileL, '=', ':');
+
+            ProcessFile(FileL, '', BackupFileL);
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      diaG@1101103029 : Dialog;
+      QtyReadG@1101103030 : Integer;
+      UserSessiong@1101103028 : Record 5028686;
+      BNHMakeSetupG@1101103011 : Record 50010;
+      SupplierArticleID@1101103000 : Code[20];
+      ShortDescription@1101103001 : Text[100];
+      Listepris@1101103002 : Code[10];
+      Bredde@1101103012 : Text;
+      Profil@1101103013 : Text;
+      Radial@1101103014 : Text;
+      "H›yde"@1101103015 : Text;
+      Loadindex@1101103016 : Text;
+      Hastighet@1101103017 : Text;
+      Merke@1101103018 : Text;
+      "M›nster"@1101103019 : Text;
+      FuelEff@1101103003 : Code[10];
+      WetGrip@1101103004 : Code[10];
+      NoiseValue@1101103005 : Text;
+      NoiseGrade@1101103006 : Code[10];
+      MakeG@1101103024 : Code[20];
+      NewG@1101103026 : Integer;
+      UpdateG@1101103027 : Integer;
+      IncNo001@1101103032 : TextConst 'ENU=Created %1 new Item\Updated %2 Item;NOR="Opprettet %1 varenummer\Oppdatert %2 varenummer "';
+      IncNo002@1101103009 : TextConst 'ENU=No file %1 is found in %2;NOR=Ingen fil  %1 ble funnet i %2';
+      IncNo003@1101103008 : TextConst 'ENU=More than one file %1 is found in %2;NOR=Mer enn en fil %1 ble funnet i %2';
+      IncNo004@1101103007 : TextConst 'ENU=Make %1 is not valid;NOR=Merkekode %1 er ikke gyldig';
+      DiscountCode@1101103010 : TextConst 'ENU=55;NOR=55';
+
+    PROCEDURE ProcessFile@1101103001(FilenameP@1101103000 : Text;ArkP@1101103003 : Text;BackupfileP@1101103004 : Text) : Text;
+    VAR
+      ExcelBufferL@1101103010 : TEMPORARY Record 370;
+      NoL@1101103001 : Integer;
+      FieldNoL@1101103006 : Text;
+      FieldNameL@1101103005 : Text;
+      RowL@1101103002 : Integer;
+    BEGIN
+      WITH ExcelBufferL DO BEGIN
+        ArkP := ExcelBufferL.SelectSheetsName(FilenameP);
+        OpenBook( FilenameP, ArkP );
+        ReadSheet;
+      END;
+      OpenDialog();
+      WITH ExcelBufferL DO BEGIN
+        FINDSET;
+        REPEAT
+        IF ExcelBufferL."Row No." > 1 THEN
+          BEGIN
+          IF (RowL <> 0) AND (RowL <> ExcelBufferL."Row No.") THEN
+            ItemMaster();
+          RowL := ExcelBufferL."Row No.";
+          CASE ExcelBufferL.xlColID OF
+            'A' :
+              BEGIN
+              ClearValue();
+              SupplierArticleID       := ExcelBufferL."Cell Value as Text";
+              QtyReadG += 1;
+              END;
+            'B' :
+              Listepris                 := ExcelBufferL."Cell Value as Text";
+            'D' :
+              Merke                     := ExcelBufferL."Cell Value as Text";
+            'F' :
+              "M›nster"                   := ExcelBufferL."Cell Value as Text";
+            'G' :
+              Loadindex                 := ExcelBufferL."Cell Value as Text";
+            'H' :
+              Hastighet                 := ExcelBufferL."Cell Value as Text";
+            'I' :
+              "H›yde"                     := ExcelBufferL."Cell Value as Text";
+            'J' :
+              Bredde                    := ExcelBufferL."Cell Value as Text";
+            'K' :
+              Profil                    := ExcelBufferL."Cell Value as Text";
+            'AD' :
+              Radial                    := ExcelBufferL."Cell Value as Text";
+            'AH' :
+              FuelEff                   := ExcelBufferL."Cell Value as Text";
+            'AJ' :
+              WetGrip                   := COPYSTR(ExcelBufferL."Cell Value as Text", 1, 50);
+            'AI' :
+              NoiseValue                := ExcelBufferL."Cell Value as Text";
+          END;
+        END;
+        IF Radial = '1' THEN
+          Radial := 'R'
+          ELSE
+          Radial := '';
+
+        ShortDescription := Bredde +
+                             '/' +
+                              Profil +
+                               '-' +
+                                Radial +
+                                 ' ' +
+                                  "H›yde" +
+                                  ' ' +
+                                  Loadindex +
+                                   Hastighet +
+                                    ' ' +
+                                     Merke +
+                                      "M›nster";
+        UpdateDialog(SupplierArticleID);
+
+        UNTIL NEXT = 0;
+        ItemMaster();
+      END;
+      MESSAGE(IncNo001, NewG, UpdateG);
+      IF BackupfileP <> '' THEN
+        RENAME(FilenameP, BackupfileP);
+      CloseDialog();
+    END;
+
+    PROCEDURE ItemMaster@1101103000();
+    VAR
+      ItemMasterL@1101103000 : Record 5029101;
+      ItemMaster2L@1101103002 : Record 5029101;
+      MakeSetupL@1101103003 : Record 5028656;
+    BEGIN
+      ItemMasterL.INIT;
+      ItemMasterL."No." := SupplierArticleID;
+      ItemMasterL."Make Code" := MakeG;
+      ItemMasterL."Search Description" := COPYSTR(ShortDescription, 1, 50);
+      ItemMasterL.Description := COPYSTR(ShortDescription, 1, 50);
+      ItemMasterL."Item Group" := DiscountCode;
+      ItemMasterL."Base Unit of Measure" := 'STK';
+      ItemMasterL."Purch. Unit of Measure Code" := 'STK';
+      IF EVALUATE(ItemMasterL.Price, Listepris) THEN;
+      IF (WetGrip <> '') AND (NoiseValue <> '') AND (FuelEff <> '') THEN
+        ItemMasterL."EU Tire Data Code" := TireData();
+      IF NOT ItemMaster2L.GET(SupplierArticleID, MakeG) THEN
+        BEGIN
+        ItemMasterL.INSERT(TRUE);
+        NewG += 1;
+        END ELSE BEGIN
+        ItemMasterL.MODIFY(TRUE);
+        UpdateG += 1;
+        END;
+
+      IF MakeSetupL.GET(ItemMasterL."Make Code") THEN
+        IF MakeSetupL."Item Price Category Master" <> '' THEN
+          ItemPriceMaster(ItemMasterL."No.", ItemMasterL."Make Code", MakeSetupL."Item Price Category Master", ItemMasterL.Price)
+          ELSE
+          ERROR('Merkeoppsett er ikke korrekt');
+
+      IF BNHMakeSetupG.GET(MakeG) THEN
+        IF BNHMakeSetupG."Item No. Additional Item" <> '' THEN
+          AdditionalItem();
+    END;
+
+    PROCEDURE ItemPriceMaster@1101103002(ItemNoP@1101103001 : Code[20];MakeP@1101103002 : Code[10];PriceCategoryP@1101103004 : Code[10];PriceP@1101103003 : Decimal);
+    VAR
+      ItemMasterPriceL@1101103000 : Record 5029102;
+    BEGIN
+      IF NOT ItemMasterPriceL.GET(ItemNoP, MakeP, PriceCategoryP, WORKDATE) THEN
+        BEGIN
+        ItemMasterPriceL."Item No." := ItemNoP;
+        ItemMasterPriceL.VALIDATE("Make Code", MakeP);
+        ItemMasterPriceL.VALIDATE("Item Price Category", 'LP');
+        ItemMasterPriceL.VALIDATE("Valid-From Date", WORKDATE);
+        ItemMasterPriceL.VALIDATE(Price, PriceP);
+        ItemMasterPriceL.INSERT(TRUE);
+        END ELSE BEGIN
+        ItemMasterPriceL.VALIDATE(Price, PriceP);
+        ItemMasterPriceL.MODIFY(TRUE);
+        END;
+    END;
+
+    PROCEDURE TireData@1101103003() EUTireDataCodeR : Code[10];
+    VAR
+      EUTireSetupL@1101103000 : Record 5205340;
+      EUTireDataL@1101103001 : Record 5205341;
+    BEGIN
+      EUTireDataCodeR := FuelEff + WetGrip + NoiseValue + NoiseGrade;
+      IF (EUTireDataCodeR <> '') AND (NOT EUTireDataL.GET(EUTireDataCodeR)) THEN
+        BEGIN
+        IF NOT EUTireSetupL.GET(EUTireSetupL.Type::"Fuel Efficiency Class", FuelEff) THEN
+          BEGIN
+          EUTireSetupL.INIT;
+          EUTireSetupL.Type := EUTireSetupL.Type::"Fuel Efficiency Class";
+          EUTireSetupL.Code := FuelEff;
+          EUTireSetupL.INSERT(TRUE);
+          END;
+        IF NOT EUTireSetupL.GET(EUTireSetupL.Type::"Wet Grip Class", WetGrip) THEN
+          BEGIN
+          EUTireSetupL.INIT;
+          EUTireSetupL.Type := EUTireSetupL.Type::"Wet Grip Class";
+          EUTireSetupL.Code := WetGrip;
+          EUTireSetupL.INSERT(TRUE);
+          END;
+        EUTireDataL.INIT;
+        EUTireDataL.Code := EUTireDataCodeR;
+        EUTireDataL.VALIDATE("Tire Class", 'C1');
+        EUTireDataL.VALIDATE("Fuel Efficiency Class", FuelEff);
+        EUTireDataL.VALIDATE("Wet Grip Class", WetGrip);
+        EUTireDataL.VALIDATE("External Rolling Noise (dB)", NoiseValue);
+        EUTireDataL.VALIDATE("Rolling Noise Class", NoiseGrade);
+        EUTireDataL.INSERT(TRUE);
+        END;
+    END;
+
+    PROCEDURE AdditionalItem@1101103005();
+    VAR
+      ItemMasterAdditionalItemL@1101103000 : Record 5029096;
+      ItemMasterL@1101103001 : Record 5029101;
+    BEGIN
+      IF NOT ItemMasterL.GET(BNHMakeSetupG."Item No. Additional Item", BNHMakeSetupG."Make Code") THEN
+        BEGIN
+        ItemMasterL.INIT;
+        ItemMasterL."No." := BNHMakeSetupG."Item No. Additional Item";
+        ItemMasterL."Make Code" := BNHMakeSetupG."Make Code";
+        ItemMasterL.Description := BNHMakeSetupG.Description;
+        ItemMasterL.INSERT(TRUE);
+        END;
+
+      IF NOT ItemMasterAdditionalItemL.GET(MakeG, SupplierArticleID, 0, BNHMakeSetupG."Make Code") THEN
+        BEGIN
+        ItemMasterAdditionalItemL.INIT;
+        ItemMasterAdditionalItemL.VALIDATE("Make Code", MakeG);
+        ItemMasterAdditionalItemL.VALIDATE("Item No.", SupplierArticleID);
+        ItemMasterAdditionalItemL.VALIDATE("Entry No.", 0);
+        ItemMasterAdditionalItemL.VALIDATE("Additional Item Make Code", BNHMakeSetupG."Make Code");
+        ItemMasterAdditionalItemL.VALIDATE("Additional Item No.", BNHMakeSetupG."Item No. Additional Item");
+        ItemMasterAdditionalItemL.VALIDATE(Quantity, 1);
+        ItemMasterAdditionalItemL.VALIDATE("Deposit Item", FALSE);
+        ItemMasterAdditionalItemL.INSERT(TRUE);
+        END;
+    END;
+
+    PROCEDURE ___@1101103013();
+    BEGIN
+    END;
+
+    PROCEDURE ClearValue@1101103004();
+    BEGIN
+
+      CLEAR(SupplierArticleID);
+      CLEAR(ShortDescription);
+      CLEAR(Listepris);
+      CLEAR(FuelEff);
+      CLEAR(WetGrip);
+      CLEAR(NoiseValue);
+      CLEAR(NoiseGrade);
+    END;
+
+    PROCEDURE Str2Date@1117700019(InnDato@1117700000 : Text[30];InnFormat@1117700001 : Integer) UtDato : Date;
+    VAR
+      Dag@1117700002 : Integer;
+      Mnd@1117700003 : Integer;
+      Aar@1117700004 : Integer;
+    BEGIN
+      IF (InnDato = '') OR (InnDato = '00000000') THEN EXIT(0D);
+      CASE InnFormat OF
+        0: // DD-MM-YYYY
+          BEGIN
+            EVALUATE(Dag, COPYSTR(InnDato,1,2));
+            EVALUATE(Mnd, COPYSTR(InnDato,4,2));
+            EVALUATE(Aar, COPYSTR(InnDato,7,4));
+            UtDato := DMY2DATE(Dag, Mnd, Aar);
+          END;
+        1: // MM-DD-YYYY
+          BEGIN
+            EVALUATE(Dag, COPYSTR(InnDato,4,2));
+            EVALUATE(Mnd, COPYSTR(InnDato,1,2));
+            EVALUATE(Aar, COPYSTR(InnDato,7,4));
+            UtDato := DMY2DATE(Dag, Mnd, Aar);
+          END;
+        2: // DDMMYY
+          BEGIN
+            EVALUATE(Dag, COPYSTR(InnDato,1,2));
+            EVALUATE(Mnd, COPYSTR(InnDato,3,2));
+            EVALUATE(Aar, COPYSTR(InnDato,5,2));
+            UtDato := DMY2DATE(Dag, Mnd, Aar+2000);
+          END;
+        3: // YYYYMMDD
+          BEGIN
+            EVALUATE(Dag, COPYSTR(InnDato,7,2));
+            EVALUATE(Mnd, COPYSTR(InnDato,5,2));
+            EVALUATE(Aar, COPYSTR(InnDato,1,4));
+            UtDato := DMY2DATE(Dag, Mnd, Aar);
+          END;
+        4: // DD-MM-YY
+          BEGIN
+            EVALUATE(Dag, COPYSTR(InnDato,1,2));
+            EVALUATE(Mnd, COPYSTR(InnDato,4,2));
+            EVALUATE(Aar, COPYSTR(InnDato,7,2));
+            UtDato := DMY2DATE(Dag, Mnd, Aar+2000);
+          END;
+
+      END;
+    END;
+
+    PROCEDURE OpenDialog@1101103036();
+    BEGIN
+
+
+      diaG.OPEN('Prosess:   ' + '##1#############################################' + '\' +
+                'Rad    :   ' + '##2################' + '\');
+    END;
+
+    PROCEDURE UpdateDialog@1101103026(txtStatus@1101103000 : Text[100]);
+    BEGIN
+
+      diaG.UPDATE(1, txtStatus);
+      diaG.UPDATE(2, QtyReadG);
+    END;
+
+    PROCEDURE CloseDialog@1101103037();
+    BEGIN
+
+      diaG.CLOSE();
+    END;
+
+    BEGIN
+    {
+      Import prismaster for Conti dekk
+    }
+    END.
+  }
+}
+

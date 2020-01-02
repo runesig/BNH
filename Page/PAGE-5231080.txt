@@ -1,0 +1,42 @@
+OBJECT Page 5231080 Portrait Order Setup
+{
+  OBJECT-PROPERTIES
+  {
+    Date=31.10.17;
+    Time=09:05:24;
+    Modified=Yes;
+    Version List=BNH Portrait;
+  }
+  PROPERTIES
+  {
+    SourceTable=Table5231080;
+    PageType=List;
+  }
+  CONTROLS
+  {
+    { 1101103000;0;Container;
+                ContainerType=ContentArea }
+
+    { 1101103001;1;Group  ;
+                Name=Group;
+                GroupType=Repeater }
+
+    { 1101103002;2;Field  ;
+                SourceExpr="Item No.";
+                TableRelation=Item.No. }
+
+    { 1101103003;2;Field  ;
+                SourceExpr="Service Agreement" }
+
+    { 1101103004;2;Field  ;
+                SourceExpr="Tire Hotel" }
+
+  }
+  CODE
+  {
+
+    BEGIN
+    END.
+  }
+}
+

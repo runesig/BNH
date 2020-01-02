@@ -1,0 +1,180 @@
+OBJECT Codeunit 5231135 BNH History Header Update
+{
+  OBJECT-PROPERTIES
+  {
+    Date=22.11.17;
+    Time=20:12:29;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    TableNo=5231131;
+    OnRun=BEGIN
+            QHistoryHeaderG.COPY( Rec );
+            RecordRefG.OPEN( DATABASE::"DataMig Legacy Document Header");
+            CASE TRUE OF
+              QHistoryHeaderG."Q Status" = "Q Status"::Ignore:
+                EXIT;
+              RecordRefG.GET( QHistoryHeaderG."Q Record ID" ):
+                ModifyRecord;
+              ELSE
+                InsertRecord;
+            END;
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      C_ConfirmProcess@1101103000 : TextConst 'ENU=Process %1 records?;NOR=Prosesser %1 poster?';
+      QHistoryHeaderG@1101103003 : Record 5231131;
+      CustVehHistHdrLegacyDMSG@1101103001 : Record 5210222;
+      RecordRefG@1101103002 : RecordRef;
+
+    PROCEDURE InsertRecord@1101103000();
+    BEGIN
+      CLEAR( CustVehHistHdrLegacyDMSG );
+      WITH CustVehHistHdrLegacyDMSG DO BEGIN
+        INIT;
+        INSERT( TRUE );
+        SetFields();
+        MODIFY(TRUE);
+        END;
+
+
+      WITH QHistoryHeaderG DO BEGIN
+        GET( "Q Primary Key" );
+        RecordRefG.GETTABLE( CustVehHistHdrLegacyDMSG );
+        "Q Record ID" := RecordRefG.RECORDID;
+        VIN := GetVIN2;
+        MODIFY( TRUE );
+      END;
+    END;
+
+    PROCEDURE ModifyRecord@1101103001();
+    BEGIN
+      WITH CustVehHistHdrLegacyDMSG DO BEGIN
+        CustVehHistHdrLegacyDMSG.GET(QHistoryHeaderG."Q Record ID");
+        SetFields;
+        MODIFY( TRUE );
+      END;
+    END;
+
+    PROCEDURE SetFields@1101103003();
+    VAR
+      ValueL@1101103001 : Text;
+      LastSpacePosL@1101103000 : Integer;
+    BEGIN
+      WITH CustVehHistHdrLegacyDMSG DO BEGIN
+
+      //  "Entry No." := FindLastRec + 1;
+        "Main Area" := CustVehHistHdrLegacyDMSG."Main Area"::"Service Sales";
+        "Document Type" := CustVehHistHdrLegacyDMSG."Document Type"::Order;
+        "Sell-to/Buy-from No." := GetCustomer(0);
+        "Sell-to/Buy-from Name" := GetCustomer(1);
+        VALIDATE(VIN , GetVIN2);
+        VIN := GetVIN2;
+        "Order No." := QHistoryHeaderG."ORDER-NR";
+        "Order Date" := EvalDate( QHistoryHeaderG."ORDER-DATE" );
+        "Document No." := QHistoryHeaderG."INVOICE-NUMBER";
+        "Posting Date" := EvalDate( QHistoryHeaderG."INVOICE-DATE" );
+        "License No." := QHistoryHeaderG."REGISTER-NUMBER";
+        IF EVALUATE( Mileage, DELCHR( QHistoryHeaderG.MILEAGE, '=', DELCHR( QHistoryHeaderG.MILEAGE, '=', '0123456789' ))) THEN ;
+        "Branch Code" := COPYSTR(QHistoryHeaderG.DEPARTMENT, 1, 2);
+        "Location Code" := COPYSTR(QHistoryHeaderG.DEPARTMENT, 1, 2);
+        EVALUATE( Amount, CONVERTSTR( QHistoryHeaderG."ORDERS-GROSSVALUE", '.', ',' ));
+        "Text 1" := COPYSTR( QHistoryHeaderG.REF, 1, MAXSTRLEN( "Text 1" ));;
+        "Text 2" := COPYSTR( QHistoryHeaderG.NOTE, 1, MAXSTRLEN( "Text 2" ));
+        CustVehHistHdrLegacyDMSG."Legacy Customer/Vendor No." := QHistoryHeaderG."DEBIT-CUSTOMER";
+        //"Text 3" :=
+        //"Text 4" :=
+        //"Text 5" :=
+        //"Text 6" :=
+        //"Extra Code 1" :=
+        //"Extra Code 2" :=
+        //"Extra Code 3" :=
+        //"Boolean 1" :=
+        //"Boolean 2" :=
+        //"Date 1" :=
+        //"Date 2" :=
+        //"Decimal 1" :=
+        //"Decimal 2" :=
+        //"Integer 1" :=
+        //"Integer 2" :=
+        //"Integer 3" :=
+        //"Integer 4" :=
+
+      END;
+    END;
+
+    PROCEDURE GetVIN@1101103002() : Code[20];
+    VAR
+      VehicleL@1101103000 : Record 5025400;
+    BEGIN
+      WITH VehicleL DO BEGIN
+        RESET;
+        SETCURRENTKEY( "License No." );
+        SETRANGE( "License No.", QHistoryHeaderG."REGISTER-NUMBER" );
+        FINDFIRST;
+        EXIT( VIN )
+      END;
+
+      //Gj›r findfirst betinget ovenfor og s›k i BNH kj›ret›yfil her:
+    END;
+
+    PROCEDURE GetVIN2@1101103005() : Code[20];
+    VAR
+      BNHVehicleL@1101103000 : Record 5231115;
+    BEGIN
+      WITH BNHVehicleL DO BEGIN
+        RESET;
+
+        SETCURRENTKEY("REGISTER-NUMBER");
+        SETRANGE( "REGISTER-NUMBER", QHistoryHeaderG."REGISTER-NUMBER" );
+        IF FINDFIRST THEN
+          IF STRLEN(BNHVehicleL."CHASSIS-NUMBER") = 17 THEN
+          EXIT("CHASSIS-NUMBER") ELSE
+          ERROR('Chassisnr for %1 er ikke 17 tegn', QHistoryHeaderG."REGISTER-NUMBER");
+      END;
+
+      //Gj›r findfirst betinget ovenfor og s›k i BNH kj›ret›yfil her:
+    END;
+
+    PROCEDURE EvalDate@1101103004(TextP@1101103003 : Text) : Date;
+    VAR
+      DateL@1101103000 : Date;
+    BEGIN
+      IF EVALUATE( DateL, STRSUBSTNO( '%1.%2.%3', COPYSTR( TextP, 7, 2 ), COPYSTR( TextP, 5, 2 ), COPYSTR( TextP, 1, 4 ))) THEN
+        EXIT( DateL )
+      ELSE
+        EXIT( 0D );
+    END;
+
+    PROCEDURE FindLastRec@1101103006() : Integer;
+    VAR
+      DataMigLegacyDocumentHeaderL@1101103000 : Record 5210222;
+    BEGIN
+      IF DataMigLegacyDocumentHeaderL.FINDLAST THEN
+       EXIT(DataMigLegacyDocumentHeaderL."Entry No.")
+       ELSE
+       EXIT;
+    END;
+
+    PROCEDURE GetCustomer@1101103007(TypeP@1101103001 : 'No,Name') : Text[50];
+    VAR
+      CustomerL@1101103000 : Record 18;
+    BEGIN
+      CustomerL.SETRANGE("Text 1", QHistoryHeaderG."DEBIT-CUSTOMER");
+      IF CustomerL.FINDFIRST THEN
+        IF TypeP = TypeP::No THEN
+        EXIT(CustomerL."No.")
+        ELSE
+        EXIT(CustomerL.Name);
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

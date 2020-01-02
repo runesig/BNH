@@ -1,0 +1,40 @@
+OBJECT Table 5231125 BNH Make
+{
+  OBJECT-PROPERTIES
+  {
+    Date=22.11.17;
+    Time=12:32:32;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+  }
+  FIELDS
+  {
+    { 10  ;   ;PROD-GRP            ;Text50         }
+    { 20  ;   ;Make Code           ;Code10        ;TableRelation=Make;
+                                                   CaptionML=[ENU=Make Code;
+                                                              NOR=Merkekode] }
+    { 30  ;   ;Antall              ;Integer       ;FieldClass=FlowField;
+                                                   CalcFormula=Count("BNH Item" WHERE (PROD-GRP=FIELD(PROD-GRP))) }
+    { 40  ;   ;Med beholdning      ;Integer       ;FieldClass=FlowField;
+                                                   CalcFormula=Count("BNH Item" WHERE (PROD-GRP=FIELD(PROD-GRP),
+                                                                                       Inventory=FILTER(<>0))) }
+  }
+  KEYS
+  {
+    {    ;PROD-GRP                                ;Clustered=Yes }
+    {    ;Make Code                                }
+  }
+  FIELDGROUPS
+  {
+  }
+  CODE
+  {
+
+    BEGIN
+    END.
+  }
+}
+

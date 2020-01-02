@@ -1,0 +1,175 @@
+OBJECT XMLport 5231120 BNH Regnskapsposter
+{
+  OBJECT-PROPERTIES
+  {
+    Date=24.11.17;
+    Time=21:52:38;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    Direction=Import;
+    TextEncoding=WINDOWS;
+    OnPreXMLport=BEGIN
+                   IF GUIALLOWED THEN
+                     DialogG.OPEN( C_INC_Progress );
+
+                   WITH "BNH Regnskapsposter" DO
+                     IF FINDLAST THEN
+                       RecordNoG := "BNH Regnskapsposter"."Primary Key";
+                 END;
+
+    OnPostXMLport=BEGIN
+                    IF GUIALLOWED THEN
+                      DialogG.CLOSE;
+                  END;
+
+    Format=Variable Text;
+    FieldSeparator=[;];
+  }
+  ELEMENTS
+  {
+    { [{732F2C2D-9D00-46B0-8216-EB2855782AA8}];  ;XML                 ;Element ;Text     }
+
+    { [{3F55CF77-F6CB-4013-8447-9E768E1B0B8D}];1 ;Table               ;Element ;Table   ;
+                                                  SourceTable=Table5231121;
+                                                  Import::OnBeforeInsertRecord=BEGIN
+                                                                                 RecordNoG += 1;
+                                                                                 "BNH Regnskapsposter"."Primary Key" := RecordNoG;
+
+                                                                                 IF RecordNoG MOD 100 = 0 THEN
+                                                                                   DialogG.UPDATE( 1, RecordNoG );
+                                                                               END;
+                                                                                }
+
+    { [{A9DE18EB-BF27-477E-A9F2-87F7A3A1A974}];2 ;Kontonr             ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Regnskapsposter::Kontonr;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{31789452-A4F9-4D1D-9FD3-87B4DEA6EE75}];2 ;Filial              ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Regnskapsposter::Filial;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{2971D8E9-1F1A-45D2-A094-D30292820C9F}];2 ;Avd                 ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Regnskapsposter::Avd;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{377533CD-CE6E-4F4D-80CE-BBCBC2AF6F8C}];2 ;K                   ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Regnskapsposter::K;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{A63044E7-7406-472B-B45B-B6922190BA2F}];2 ;Resk_ref            ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Regnskapsposter::Resk/ref;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{72B3FE05-75A7-4404-8671-BD2E0BC64C31}];2 ;Buntnr              ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Regnskapsposter::Buntnr;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{90D12293-5904-4434-98E4-A174F5803A91}];2 ;BilaNr              ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Regnskapsposter::BilaNr;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{0E74B3E7-461A-4376-BC13-6AA46D8DD029}];2 ;BilDat              ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Regnskapsposter::BilDat;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{B04C01C4-25B0-47C1-A28F-B3428782B9BC}];2 ;Jour                ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Regnskapsposter::Jour;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{46CF418E-35EE-4428-B84B-7ADD453AB042}];2 ;M1                  ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Regnskapsposter::M1;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{0531158A-35DD-43A2-88C4-6804337D703A}];2 ;BA                  ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Regnskapsposter::BA;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{3D815164-4690-42EC-8019-B5257A8F7AB5}];2 ;Bel›p               ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Regnskapsposter::Bel›p;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{5724407F-CAA7-4DD2-8395-A277898B99F9}];2 ;Motkonto            ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Regnskapsposter::Motkonto;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{60239369-E1E8-4B27-8408-9002FF48B4E1}];2 ;M2                  ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Regnskapsposter::M2;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+    { [{A7A9DC8F-598C-447C-835B-A52461CEA1D3}];2 ;Tekst               ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Regnskapsposter::Tekst;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded;
+                                                  Import::OnAfterAssignField=BEGIN
+                                                                               Erstatt.ErstattChr("BNH Regnskapsposter".Tekst);
+                                                                             END;
+
+                                                  Export::OnBeforePassField=BEGIN
+                                                                              Erstatt.ErstattChr("BNH Regnskapsposter".Tekst);
+                                                                            END;
+                                                                             }
+
+    { [{FC361CD2-0624-40B6-9943-CCBD35CF0893}];2 ;M†ned               ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=BNH Regnskapsposter::M†ned;
+                                                  MinOccurs=Zero;
+                                                  MaxOccurs=Unbounded }
+
+  }
+  EVENTS
+  {
+  }
+  REQUESTPAGE
+  {
+    PROPERTIES
+    {
+    }
+    CONTROLS
+    {
+    }
+  }
+  CODE
+  {
+    VAR
+      C_INC_Progress@1101103000 : TextConst 'ENU=Import in progress...\ \Record No. #1#####;NOR=Import kj›rer...\ \Post nummer #1#####';
+      DialogG@1101103001 : Dialog;
+      RecordNoG@1101103002 : Integer;
+      Erstatt@1101103003 : Codeunit 5231127;
+
+    BEGIN
+    END.
+  }
+}
+

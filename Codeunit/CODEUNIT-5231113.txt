@@ -1,0 +1,119 @@
+OBJECT Codeunit 5231113 BNH Open Balance Cust Update
+{
+  OBJECT-PROPERTIES
+  {
+    Date=25.11.17;
+    Time=10:21:44;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    TableNo=5231113;
+    OnRun=BEGIN
+            BNHCustomerOpenBalanceG.COPY( Rec );
+
+            CASE TRUE OF
+              BNHCustomerOpenBalanceG.Status = Status::Ignore:
+                EXIT;
+              ELSE
+                InsertRecord();
+            END;
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      BNHCustomerOpenBalanceG@1101103000 : Record 5231113;
+
+    PROCEDURE InsertRecord@1101103022();
+    VAR
+      GenJournalLineL@1101103001 : Record 81;
+      GenJournalLine2L@1101103002 : Record 81;
+      CustomerL@1101103000 : Record 18;
+      tmpDecL@1101103003 : Decimal;
+    BEGIN
+      BNHCustomerOpenBalanceG.CALCFIELDS("Customer No.");
+      IF NOT CustomerL.GET(BNHCustomerOpenBalanceG."Customer No.") THEN
+        ERROR('Customer %1 not available', BNHCustomerOpenBalanceG.kundenr);
+      GenJournalLine2L.SETRANGE("Journal Template Name", 'GENERELT');
+      GenJournalLine2L.SETRANGE("Journal Batch Name", 'XKONVKUNDE');
+
+      GenJournalLineL.INIT;
+      GenJournalLineL.VALIDATE("Journal Template Name", 'GENERELT');
+      GenJournalLineL.VALIDATE("Journal Batch Name", 'XKONVKUNDE');
+      IF GenJournalLine2L.FINDLAST THEN
+        GenJournalLineL."Line No." := GenJournalLine2L."Line No." + 10000
+        ELSE
+        GenJournalLineL."Line No." := 10000;
+      GenJournalLineL.VALIDATE("Posting Date", 251117D);
+      IF STRLEN(BNHCustomerOpenBalanceG."faktura dato") = 5 THEN
+        GenJournalLineL.VALIDATE("Document Date", Str2Date('0' + BNHCustomerOpenBalanceG."faktura dato", 2))
+        ELSE
+        GenJournalLineL.VALIDATE("Document Date", Str2Date(BNHCustomerOpenBalanceG."faktura dato", 2));
+      GenJournalLineL.VALIDATE("Document No.", ('XKONV' + FORMAT(BNHCustomerOpenBalanceG."Primary Key")  + '_' + BNHCustomerOpenBalanceG.fakturanr));
+      GenJournalLineL.VALIDATE("Account Type", GenJournalLineL."Account Type"::Customer);
+      GenJournalLineL.VALIDATE("Account No.", BNHCustomerOpenBalanceG."Customer No.");
+      GenJournalLineL.VALIDATE(Description, BNHCustomerOpenBalanceG.tekst);
+      IF EVALUATE(tmpDecL, BNHCustomerOpenBalanceG."rest bel›p") THEN
+        EVALUATE(tmpDecL, BNHCustomerOpenBalanceG."rest bel›p")
+        ELSE
+        tmpDecL := 0;
+      GenJournalLineL.VALIDATE(Amount, tmpDecL);
+      IF GenJournalLineL.Amount > 0 THEN GenJournalLineL."Document Type" := 2 ELSE
+         GenJournalLineL."Document Type" := 3;
+      IF STRLEN(BNHCustomerOpenBalanceG."forf.dato") = 5 THEN
+        GenJournalLineL.VALIDATE("Due Date", Str2Date('0' + BNHCustomerOpenBalanceG."forf.dato", 2))
+        ELSE
+        GenJournalLineL.VALIDATE("Due Date", Str2Date(BNHCustomerOpenBalanceG."forf.dato", 2));
+      GenJournalLineL.VALIDATE("Location Code", '09');
+      GenJournalLineL.VALIDATE("Bal. Account No.", '9920');
+      GenJournalLineL.INSERT(TRUE);
+    END;
+
+    PROCEDURE Str2Date@1117700019(InnDato@1117700000 : Text[30];InnFormat@1117700001 : Integer) UtDato : Date;
+    VAR
+      Dag@1117700002 : Integer;
+      Mnd@1117700003 : Integer;
+      Aar@1117700004 : Integer;
+    BEGIN
+      IF InnDato = '' THEN EXIT(0D);
+
+      CASE InnFormat OF
+        0: // DD-MM-YYYY
+          BEGIN
+            EVALUATE(Dag, COPYSTR(InnDato,1,2));
+            EVALUATE(Mnd, COPYSTR(InnDato,4,2));
+            EVALUATE(Aar, COPYSTR(InnDato,7,4));
+            UtDato := DMY2DATE(Dag, Mnd, Aar);
+          END;
+        1: // MM-DD-YYYY
+          BEGIN
+            EVALUATE(Dag, COPYSTR(InnDato,4,2));
+            EVALUATE(Mnd, COPYSTR(InnDato,1,2));
+            EVALUATE(Aar, COPYSTR(InnDato,7,4));
+            UtDato := DMY2DATE(Dag, Mnd, Aar);
+          END;
+        2: // DDMMYY
+          BEGIN
+            EVALUATE(Dag, COPYSTR(InnDato,1,2));
+            EVALUATE(Mnd, COPYSTR(InnDato,3,2));
+            EVALUATE(Aar, COPYSTR(InnDato,5,2));
+            UtDato := DMY2DATE(Dag, Mnd, Aar+2000);
+          END;
+        3: // YYYYMMDD
+          BEGIN
+            EVALUATE(Dag, COPYSTR(InnDato,7,2));
+            EVALUATE(Mnd, COPYSTR(InnDato,5,2));
+            EVALUATE(Aar, COPYSTR(InnDato,1,4));
+            UtDato := DMY2DATE(Dag, Mnd, Aar);
+          END;
+      END;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

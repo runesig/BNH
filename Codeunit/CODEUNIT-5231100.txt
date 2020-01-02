@@ -1,0 +1,86 @@
+OBJECT Codeunit 5231100 BB Kunder
+{
+  OBJECT-PROPERTIES
+  {
+    Date=18.10.17;
+    Time=19:30:49;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+
+    PROCEDURE FindCustomer@1101103001();
+    VAR
+      BBKundeL@1101103001 : Record 5231104;
+      CustomerL@1101103000 : Record 18;
+      NoneDigitsL@1101103002 : Text;
+    BEGIN
+      IF BBKundeL.FINDFIRST THEN
+        REPEAT
+            NoneDigitsL := '';
+            IF BBKundeL."E-Mail" <> '' THEN
+              BEGIN
+              CustomerL.SETRANGE("E-Mail", BBKundeL."E-Mail");
+              IF CustomerL.FINDFIRST THEN
+                IF CustomerL.COUNT = 1 THEN
+                  BBKundeL."BNH Kundenr." := CustomerL."No."
+                  ELSE
+                  BBKundeL."Antall i BNH" := CustomerL.COUNT;
+              END;
+
+            IF BBKundeL."BNH Kundenr." = '' THEN
+              BEGIN
+                CustomerL.RESET;
+                IF BBKundeL."Mobile Phone No." <> '' THEN
+                  NoneDigitsL := DELCHR(BBKundeL."Mobile Phone No.",'=','+0123456789');
+                IF (BBKundeL."Mobile Phone No." <> '') AND (NoneDigitsL = '') THEN
+                  BEGIN
+                  CustomerL.SETRANGE("Mobile Phone No.", BBKundeL."Mobile Phone No.");
+                  IF CustomerL.FINDFIRST THEN
+                    IF CustomerL.COUNT = 1 THEN
+                      BBKundeL."BNH Kundenr." := CustomerL."No."
+                      ELSE
+                      BBKundeL."Antall i BNH" := CustomerL.COUNT;
+
+                    IF BBKundeL."BNH Kundenr." = '' THEN
+                    BEGIN
+                    CustomerL.RESET;
+                    CustomerL.SETRANGE("Mobile Phone No.", '+47' + BBKundeL."Mobile Phone No.");
+                    IF CustomerL.FINDFIRST THEN
+                      IF CustomerL.COUNT = 1 THEN
+                        BBKundeL."BNH Kundenr." := CustomerL."No."
+                        ELSE
+                        BBKundeL."Antall i BNH" := CustomerL.COUNT;
+                    END;
+                  END;
+
+              BBKundeL.MODIFY;
+            END;
+            UNTIL BBKundeL.NEXT =  0;
+    END;
+
+    PROCEDURE Nullstill@1101103000();
+    VAR
+      BBKundeL@1101103000 : Record 5231104;
+    BEGIN
+      IF BBKundeL.FINDFIRST THEN
+        REPEAT
+        BBKundeL."BNH Kundenr." := '';
+        BBKundeL."Antall i BNH" := 0;
+        BBKundeL.MODIFY;
+
+        UNTIL BBKundeL.NEXT = 0;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

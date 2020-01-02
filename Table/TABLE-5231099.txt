@@ -1,0 +1,35 @@
+OBJECT Table 5231099 BNH User code
+{
+  OBJECT-PROPERTIES
+  {
+    Date=11.04.18;
+    Time=15:21:17;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+  }
+  FIELDS
+  {
+    { 1   ;   ;BNH User            ;Code10         }
+    { 10  ;   ;Navn                ;Text50         }
+    { 20  ;   ;Fornavn             ;Text50         }
+    { 30  ;   ;Etternavn           ;Text50         }
+    { 40  ;   ;EMSelger kode       ;Code10         }
+  }
+  KEYS
+  {
+    {    ;BNH User                                ;Clustered=Yes }
+  }
+  FIELDGROUPS
+  {
+  }
+  CODE
+  {
+
+    BEGIN
+    END.
+  }
+}
+

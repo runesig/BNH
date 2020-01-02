@@ -1,0 +1,139 @@
+OBJECT Codeunit 5231183 Financing Qt. to Order Exit P2
+{
+  OBJECT-PROPERTIES
+  {
+    Date=23.04.18;
+    Time=12:08:38;
+    Modified=Yes;
+    Version List=BNH;
+  }
+  PROPERTIES
+  {
+    TableNo=5207300;
+    OnRun=VAR
+            SalesHeaderL@1101261798 : Record 36;
+            DummyTextL@1101261800 : Text[50];
+          BEGIN
+            // Exit Point for 'Sales-Quote to Order (Yes/No)'
+            // IMPORTATNT: Both Inside1 and Inside2 MUST be set for this to work
+
+
+            EPSetupG := Rec;
+            EPUnitG.GetParamsShort(FirstRecRefG,SecondRecRefG,EPParamG,DummyTextL);
+
+            FirstRecRefG.SETTABLE(SalesHeaderL);
+
+              CASE EPSetupG.Type OF
+                EPSetupG.Type::"Inside 1":
+                  SetSalesQuoteInside1(SalesHeaderL);
+                EPSetupG.Type::Post:
+                  BEGIN
+                    UpdateSalesHeaderToOrg(SalesHeaderL);
+                  END;
+                ELSE
+                  EXIT;
+              END;
+
+              EPUnitG.SetParamsShort(FirstRecRefG,SecondRecRefG,EPParamG,DummyTextL);
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      UserSetupG@1109400002 : Record 91;
+      EPSetupG@1101165285 : Record 5207300;
+      EPParamG@1101165289 : Record 5207301;
+      EPUnitG@1101165288 : Codeunit 5207300;
+      FirstRecRefG@1101165287 : RecordRef;
+      SecondRecRefG@1101165286 : RecordRef;
+      Quote2OrderSC@1101103000 : Codeunit 5231184;
+      C_INC001@1101103001 : TextConst 'ENU=Another Sales Order already exists for this reference number.';
+
+    PROCEDURE SetSalesQuoteInside1@1101103000(SalesHeaderP@1101103000 : Record 36);
+    VAR
+      SalesLineL@1101103001 : Record 37;
+    BEGIN
+      // @ Inside 1
+      // Check Conditions First
+      IF SalesHeaderP."Order Type" <> SalesHeaderP."Order Type"::"Vehicle Sales & Purchases" THEN
+        EXIT;
+      IF SalesHeaderP."Document Type" = SalesHeaderP."Document Type"::Invoice THEN
+        EXIT;
+
+      SalesLineL.RESET;
+      SalesLineL.SETRANGE("Document Type", SalesHeaderP."Document Type");
+      SalesLineL.SETRANGE("Document No.", SalesHeaderP."No.");
+      SalesLineL.SETRANGE(Type, SalesLineL.Type::Item);
+      SalesLineL.SETRANGE("Item Type", SalesLineL."Item Type"::Vehicle);
+      IF NOT SalesLineL.FINDFIRST THEN
+        EXIT; // No vehicle is present so skip it
+
+
+      //heu test
+      Quote2OrderSC.SetOrgQuoteRec(SalesHeaderP); // Reset QuoteNo
+    END;
+
+    PROCEDURE UpdateSalesHeaderToOrg@1101103002(VAR SalesHeaderP@1101103000 : Record 36);
+    VAR
+      SalesHeaderL@1101103001 : Record 36;
+      SalesLineL@1101103008 : Record 37;
+      SalesQuoteL@1101103003 : Record 36;
+      SalesQuoteLineL@1101103005 : Record 37;
+      SalesQuoteNoL@1101103002 : Code[20];
+      SalesPersonCodeL@1101103004 : Code[20];
+      SLDescriptionL@1101103006 : Text[100];
+      SLDescription2L@1101103007 : Text[100];
+      SalesLineTypeL@1101103014 : Option;
+      SalesLineOrgDokNoL@1101103013 : Code[20];
+    BEGIN
+      //Pricegroup and salesman from quote
+      IF SalesHeaderP."Order Type" <> SalesHeaderP."Order Type"::"Vehicle Sales & Purchases" THEN
+        EXIT;
+      IF SalesHeaderP."Document Type" = SalesHeaderP."Document Type"::Invoice THEN
+        EXIT;
+
+      IF ((SalesHeaderP."Salesperson Code" <> Quote2OrderSC.GetOrgQuoteSalesMan()) OR (SalesHeaderP."Vehicle Sales Price Group" <> Quote2OrderSC.GetOrgQuoteSalesPriceGroup())) THEN
+        BEGIN
+          COMMIT;
+          SalesQuoteNoL := Quote2OrderSC.GetOrgQuoteSalesPriceGroup();
+          SalesPersonCodeL := Quote2OrderSC.GetOrgQuoteSalesMan();
+          SalesHeaderP."Vehicle Sales Price Group" := SalesQuoteNoL;
+          SalesHeaderP."Salesperson Code" := SalesPersonCodeL;
+          FirstRecRefG.GETTABLE(SalesHeaderP);
+          FirstRecRefG.MODIFY;
+        END;
+
+      SalesLineTypeL := SalesHeaderP."Document Type"; //SalesLineL."Document Type"::Order; //Quote;
+      SalesLineOrgDokNoL := Quote2OrderSC.GetOrgQuoteNo;
+
+      SalesLineL.RESET;
+      SalesLineL.SETRANGE("Document Type", SalesLineTypeL);
+      SalesLineL.SETRANGE("Document No.", SalesHeaderP."No.");
+      IF SalesLineL.FINDSET(TRUE) THEN
+        REPEAT
+           IF Quote2OrderSC.OrgSLExist(SalesLineTypeL, SalesLineOrgDokNoL, SalesLineL."Line No.") THEN
+             BEGIN
+               SLDescriptionL := Quote2OrderSC.GetOrgQuoteSLDescription(SalesLineTypeL, SalesLineOrgDokNoL, SalesLineL."Line No.");
+               SLDescription2L := Quote2OrderSC.GetOrgQuoteSLDescription2(SalesLineTypeL, SalesLineOrgDokNoL, SalesLineL."Line No.");
+               SalesLineL.Description := SLDescriptionL;
+               SalesLineL."Description 2" := SLDescription2L;
+               SalesLineL.MODIFY;
+             END;
+        UNTIL SalesLineL.NEXT = 0;
+    END;
+
+    BEGIN
+    {
+      +----------------------------------------------+
+      | Copyright ¸ 2017 Incadea                     |
+      +----------------------------------------------+
+      | MYENGINE@INCADEA                             |
+      +----------------------------------------------+
+      No.  Version  Date      ID  Remark
+      ------------------------------------------------
+    }
+    END.
+  }
+}
+

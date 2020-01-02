@@ -1,0 +1,217 @@
+OBJECT Codeunit 5231181 Financing Qt. to Order Exit Po
+{
+  OBJECT-PROPERTIES
+  {
+    Date=22.01.18;
+    Time=15:29:57;
+    Modified=Yes;
+    Version List=BNH;
+  }
+  PROPERTIES
+  {
+    TableNo=5207300;
+    OnRun=VAR
+            SalesHeaderL@1101261798 : Record 36;
+            DummyTextL@1101261800 : Text[50];
+          BEGIN
+            // Exit Point for 'Sales-Quote to Order (Yes/No)'
+            // IMPORTATNT: Both Inside1 and Inside2 MUST be set for this to work
+
+            EPSetupG := Rec;
+            EPUnitG.GetParamsShort(FirstRecRefG,SecondRecRefG,EPParamG,DummyTextL);
+
+            FirstRecRefG.SETTABLE(SalesHeaderL);
+
+            CASE EPSetupG.Type OF
+              EPSetupG.Type::Pre:
+                ChecksPre(SalesHeaderL);
+              EPSetupG.Type::"Inside 1":
+                SetSalesQuoteInside1(SalesHeaderL);
+              EPSetupG.Type::"Inside 2":
+                BEGIN
+                  UpdateSalesHeaderToOrg(SalesHeaderL);
+                  CreateQuoteToOrderConfigHistoryInside2(SalesHeaderL);
+                END;
+              ELSE
+                EXIT;
+            END;
+
+            EPUnitG.SetParamsShort(FirstRecRefG,SecondRecRefG,EPParamG,DummyTextL);
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      UserSetupG@1109400002 : Record 91;
+      EPSetupG@1101165285 : Record 5207300;
+      EPParamG@1101165289 : Record 5207301;
+      EPUnitG@1101165288 : Codeunit 5207300;
+      FirstRecRefG@1101165287 : RecordRef;
+      SecondRecRefG@1101165286 : RecordRef;
+      Quote2OrderSC@1101103000 : Codeunit 5231182;
+      C_INC001@1101103001 : TextConst 'ENU=Another Sales Order already exists for this reference number.';
+
+    PROCEDURE ChecksPre@1101103001(SalesHeaderP@1101103000 : Record 36);
+    VAR
+      SalesLineL@1101103001 : Record 37;
+    BEGIN
+      IF SalesHeaderP."Order Type" <> SalesHeaderP."Order Type"::"Vehicle Sales & Purchases" THEN
+        EXIT;
+
+      Quote2OrderSC.SetQuoteNo(''); // Reset QuoteNo
+
+      SalesLineL.RESET;
+      SalesLineL.SETRANGE("Document Type", SalesHeaderP."Document Type");
+      SalesLineL.SETRANGE("Document No.", SalesHeaderP."No.");
+      SalesLineL.SETRANGE(Type, SalesLineL.Type::Item);
+      SalesLineL.SETRANGE("Item Type", SalesLineL."Item Type"::Vehicle);
+      IF NOT SalesLineL.FINDFIRST THEN
+        EXIT; // No vehicle is present so skip it
+
+      //heu test
+      Quote2OrderSC.SetOrgQuoteRec(SalesHeaderP);
+    END;
+
+    PROCEDURE SetSalesQuoteInside1@1101103000(SalesHeaderP@1101103000 : Record 36);
+    VAR
+      SalesLineL@1101103001 : Record 37;
+    BEGIN
+      // @ Inside 1
+      // Check Conditions First
+      IF SalesHeaderP."Order Type" <> SalesHeaderP."Order Type"::"Vehicle Sales & Purchases" THEN
+        EXIT;
+
+      SalesLineL.RESET;
+      SalesLineL.SETRANGE("Document Type", SalesHeaderP."Document Type");
+      SalesLineL.SETRANGE("Document No.", SalesHeaderP."No.");
+      SalesLineL.SETRANGE(Type, SalesLineL.Type::Item);
+      SalesLineL.SETRANGE("Item Type", SalesLineL."Item Type"::Vehicle);
+      IF NOT SalesLineL.FINDFIRST THEN
+        EXIT; // No vehicle is present so skip it
+
+      Quote2OrderSC.SetQuoteNo(SalesHeaderP."No.");
+    END;
+
+    PROCEDURE UpdateSalesHeaderToOrg@1101103002(VAR SalesHeaderP@1101103000 : Record 36);
+    VAR
+      SalesHeaderL@1101103001 : Record 36;
+      SalesLineL@1101103008 : Record 37;
+      SalesLineTypeL@1101103009 : Option;
+      SalesLineOrgDokNoL@1101103010 : Code[20];
+      SalesQuoteL@1101103003 : Record 36;
+      SalesQuoteLineL@1101103005 : Record 37;
+      SLDescriptionL@1101103006 : Text[100];
+      SLDescription2L@1101103007 : Text[100];
+    BEGIN
+      SalesLineTypeL := SalesLineL."Document Type"::Quote;
+      SalesLineOrgDokNoL := Quote2OrderSC.GetOrgQuoteNo;
+
+      SalesLineL.RESET;
+      SalesLineL.SETRANGE("Document Type", SalesLineL."Document Type"::Order);
+      SalesLineL.SETRANGE("Document No.", SalesHeaderP."No.");
+      IF SalesLineL.FINDSET(TRUE) THEN
+        REPEAT
+           IF Quote2OrderSC.OrgSLExist(SalesLineTypeL, SalesLineOrgDokNoL, SalesLineL."Line No.") THEN
+             BEGIN
+               SLDescriptionL := Quote2OrderSC.GetOrgQuoteSLDescription(SalesLineTypeL, SalesLineOrgDokNoL, SalesLineL."Line No.");
+               SLDescription2L := Quote2OrderSC.GetOrgQuoteSLDescription2(SalesLineTypeL, SalesLineOrgDokNoL, SalesLineL."Line No.");
+               SalesLineL.Description := SLDescriptionL;
+               SalesLineL."Description 2" := SLDescription2L;
+               SalesLineL.MODIFY;
+             END;
+        UNTIL SalesLineL.NEXT = 0;
+    END;
+
+    PROCEDURE CreateQuoteToOrderConfigHistoryInside2@1101286982(VAR SalesHeaderP@1101103000 : Record 36);
+    VAR
+      SalesLineL@1101103001 : Record 37;
+      FinancingCalculatorEntryQuoteL@1101103002 : Record 5231176;
+      FinancingCalculatorEntryOrderL@1101103003 : Record 5231176;
+      SalesQuoteNoL@1101103004 : Code[20];
+      VehicleContractQuoteL@1101103005 : Record 5231084;
+      VehicleContractOrderL@1101103007 : Record 5231084;
+      VehicleContractOptionQuoteL@1101103006 : Record 5231085;
+      VehicleContractOptionOrderL@1101103008 : Record 5231085;
+    BEGIN
+      // @ Inside 2
+      IF SalesHeaderP."Order Type" <> SalesHeaderP."Order Type"::"Vehicle Sales & Purchases" THEN
+        EXIT;
+
+      SalesQuoteNoL := Quote2OrderSC.GetQuoteNo();
+      IF SalesQuoteNoL = '' THEN // Not a quote that should be processed
+        EXIT;
+
+      FinancingCalculatorEntryQuoteL.RESET;
+      FinancingCalculatorEntryQuoteL.SETRANGE("Document Type", FinancingCalculatorEntryQuoteL."Document Type"::Quote);
+      FinancingCalculatorEntryQuoteL.SETRANGE("Document No.", SalesQuoteNoL);
+      IF FinancingCalculatorEntryQuoteL.FINDSET THEN REPEAT
+
+         FinancingCalculatorEntryOrderL.INIT;
+         FinancingCalculatorEntryOrderL.COPY(FinancingCalculatorEntryQuoteL);
+         FinancingCalculatorEntryOrderL."Document Type" := SalesHeaderP."Document Type";
+         FinancingCalculatorEntryOrderL."Document No." := SalesHeaderP."No.";
+         FinancingCalculatorEntryOrderL.INSERT;
+
+      UNTIL FinancingCalculatorEntryQuoteL.NEXT = 0;
+
+      FinancingCalculatorEntryQuoteL.RESET;
+      FinancingCalculatorEntryQuoteL.SETRANGE("Document Type", FinancingCalculatorEntryQuoteL."Document Type"::Quote);
+      FinancingCalculatorEntryQuoteL.SETRANGE("Document No.", SalesQuoteNoL);
+      FinancingCalculatorEntryQuoteL.DELETEALL;
+
+
+      // Vehicle Contract
+      VehicleContractQuoteL.RESET;
+      VehicleContractQuoteL.SETRANGE("Document Type", VehicleContractQuoteL."Document Type"::Quote);
+      VehicleContractQuoteL.SETRANGE("No.", SalesQuoteNoL);
+      IF VehicleContractQuoteL.FINDSET THEN REPEAT
+
+        VehicleContractOrderL.INIT;
+        VehicleContractOrderL.COPY(VehicleContractQuoteL);
+        VehicleContractOrderL."Document Type" := SalesHeaderP."Document Type";
+        VehicleContractOrderL."No." := SalesHeaderP."No.";
+        VehicleContractOrderL.INSERT;
+
+      UNTIL VehicleContractQuoteL.NEXT = 0;
+
+      VehicleContractQuoteL.RESET;
+      VehicleContractQuoteL.SETRANGE("Document Type", VehicleContractQuoteL."Document Type"::Quote);
+      VehicleContractQuoteL.SETRANGE("No.", SalesQuoteNoL);
+      VehicleContractQuoteL.DELETEALL;
+
+
+      //Vehicle Contract Option
+      VehicleContractOptionQuoteL.RESET;
+      VehicleContractOptionQuoteL.SETRANGE("Document Type", VehicleContractOptionQuoteL."Document Type"::Quote);
+      VehicleContractOptionQuoteL.SETRANGE("Kontraktnr.", SalesQuoteNoL);
+      IF VehicleContractOptionQuoteL.FINDSET THEN REPEAT
+
+        VehicleContractOptionOrderL.INIT;
+        VehicleContractOptionOrderL.COPY(VehicleContractOptionQuoteL);
+        VehicleContractOptionOrderL."Document Type" := SalesHeaderP."Document Type";
+        VehicleContractOptionOrderL."Kontraktnr." := SalesHeaderP."No.";
+        VehicleContractOptionOrderL.INSERT;
+
+      UNTIL VehicleContractOptionQuoteL.NEXT = 0;
+
+      VehicleContractOptionQuoteL.RESET;
+      VehicleContractOptionQuoteL.SETRANGE("Document Type", VehicleContractOptionQuoteL."Document Type"::Quote);
+      VehicleContractOptionQuoteL.SETRANGE("Kontraktnr.", SalesQuoteNoL);
+      VehicleContractOptionQuoteL.DELETEALL;
+    END;
+
+    BEGIN
+    {
+      +----------------------------------------------+
+      | Copyright ¸ 2017 Incadea                     |
+      +----------------------------------------------+
+      | MYENGINE@INCADEA                             |
+      +----------------------------------------------+
+      No.  Version  Date      ID  Remark
+      ------------------------------------------------
+    }
+    END.
+  }
+}
+

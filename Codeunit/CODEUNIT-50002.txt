@@ -1,0 +1,288 @@
+OBJECT Codeunit 50002 SynkarionIn
+{
+  OBJECT-PROPERTIES
+  {
+    Date=10.04.18;
+    Time=07:42:58;
+    Modified=Yes;
+    Version List=BNH - Synkarion;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+
+    PROCEDURE GetSystemVersion@1101103000() version : Text[250];
+    VAR
+      synkarion@1101103000 : DotNet "'NavSynkarionDLL, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bc52fb4d226f0168'.SynkarionDLL.Synkarion";
+      cEngineVersionL@1101103001 : Codeunit 5025849;
+    BEGIN
+
+      EXIT('Incadea.dms ' + cEngineVersionL.EngineVersion);
+    END;
+
+    PROCEDURE CreateUpdateOrder@1101103001(json@1101103001 : BigText;VAR jsonResponse@1101103006 : BigText);
+    VAR
+      JsonConvert@1101103002 : DotNet "'Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed'.Newtonsoft.Json.JsonConvert";
+      apiOrder@1101103003 : DotNet "'NavSynkarionDLL, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bc52fb4d226f0168'.SynkarionDLL.Order";
+      cSynkarionFunctionsL@1101103000 : Codeunit 50003;
+      orderNo@1101103004 : Code[20];
+      update@1101103005 : Boolean;
+    BEGIN
+
+      apiOrder := apiOrder.Order();
+      apiOrder := JsonConvert.DeserializeObject(json, GETDOTNETTYPE(apiOrder));
+
+      update := FALSE;
+
+      //Service header
+      orderNo := cSynkarionFunctionsL.CreateUpdateServiceHeader(apiOrder, update);
+
+      //Service Jobs
+      IF update THEN
+        cSynkarionFunctionsL.UpdateServiceJobLines(orderNo, apiOrder)
+      ELSE
+        cSynkarionFunctionsL.CreateServiceJobLines(orderNo, apiOrder);
+
+      jsonResponse.ADDTEXT('OrderNo=' + orderNo + ''', ');
+
+      //Service lines
+      IF update THEN
+        cSynkarionFunctionsL.UpdateServiceLines(orderNo, apiOrder, jsonResponse)
+      ELSE
+        cSynkarionFunctionsL.CreateServiceLines(orderNo, apiOrder, jsonResponse);
+
+      //jsonResponse.ADDTEXT('}');
+
+      //EXIT('OrderNo=' + orderNo);
+    END;
+
+    PROCEDURE CreateUpdateCustomer@1101103002(json@1101103001 : BigText) : Text[250];
+    VAR
+      JsonConvert@1101103002 : DotNet "'Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed'.Newtonsoft.Json.JsonConvert";
+      apiCustomer@1101103005 : DotNet "'NavSynkarionDLL, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bc52fb4d226f0168'.SynkarionDLL.Customer";
+      cSynkarionFunctionsL@1101103000 : Codeunit 50003;
+      customerNo@1101103004 : Code[20];
+    BEGIN
+
+      apiCustomer := apiCustomer.Customer();
+      apiCustomer := JsonConvert.DeserializeObject(json, GETDOTNETTYPE(apiCustomer));
+
+      //Create or Update Customer
+      customerNo := cSynkarionFunctionsL.CreateUpdateCustomer(apiCustomer);
+
+      EXIT('CustomerNo=' + customerNo);
+    END;
+
+    PROCEDURE PostClocking@1101103004(json@1101103001 : BigText) : Text[250];
+    VAR
+      JsonConvert@1101103002 : DotNet "'Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed'.Newtonsoft.Json.JsonConvert";
+      JsonSettings@1101103006 : DotNet "'Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed'.Newtonsoft.Json.JsonSerializerSettings";
+      apiClocking@1101103005 : DotNet "'NavSynkarionDLL, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bc52fb4d226f0168'.SynkarionDLL.Clocking";
+      cSynkarionFunctionsL@1101103000 : Codeunit 50003;
+      clockingTypeL@1101103003 : 'Started,Ended';
+      entryNoL@1101103004 : Integer;
+    BEGIN
+
+      EXIT('ClockingId=0');  // PostClocking disabled. HAN 10.04.2018
+
+      JsonSettings := JsonSettings.JsonSerializerSettings;
+      JsonSettings.DateTimeZoneHandling := 1;
+
+      apiClocking := apiClocking.Clocking();
+      apiClocking := JsonConvert.DeserializeObject(json, GETDOTNETTYPE(apiClocking), JsonSettings);
+
+      //Create Clocking
+      entryNoL := cSynkarionFunctionsL.CreateClocking(apiClocking, clockingTypeL::Started, 0);
+      cSynkarionFunctionsL.CreateClocking(apiClocking, clockingTypeL::Ended, entryNoL);
+
+      cSynkarionFunctionsL.ClockingRelatedInfo(apiClocking);
+
+      EXIT('ClockingId=' + FORMAT(entryNoL));
+    END;
+
+    PROCEDURE UpdateOrderStatus@1101103003(json@1101103001 : BigText) : Text[250];
+    VAR
+      JsonConvert@1101103002 : DotNet "'Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed'.Newtonsoft.Json.JsonConvert";
+      apiOrderStatus@1101103005 : DotNet "'NavSynkarionDLL, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bc52fb4d226f0168'.SynkarionDLL.OrderStatus";
+      cSynkarionFunctionsL@1101103000 : Codeunit 50003;
+      clockingTypeL@1101103003 : 'Started,Ended';
+      status@1101103004 : Text[250];
+    BEGIN
+
+      apiOrderStatus := apiOrderStatus.OrderStatus();
+      apiOrderStatus := JsonConvert.DeserializeObject(json, GETDOTNETTYPE(apiOrderStatus));
+
+      status := cSynkarionFunctionsL.UpdateOrderStatus(apiOrderStatus);
+
+      EXIT(status);
+    END;
+
+    PROCEDURE GetVehicle@1101103006(vinOrLicenseNoP@1101103000 : Text[50]) json : Text[1024];
+    VAR
+      JsonConvert@1101103003 : DotNet "'Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed'.Newtonsoft.Json.JsonConvert";
+      apiVehicle@1101103002 : DotNet "'NavSynkarionDLL, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bc52fb4d226f0168'.SynkarionDLL.Vehicle";
+      cSynkarionFunctionsL@1101103001 : Codeunit 50003;
+      rVehicleL@1101103004 : Record 5025400;
+      vehicleFoundL@1101103005 : Boolean;
+    BEGIN
+
+      vehicleFoundL := FALSE;
+      json := '';
+
+      CASE STRLEN(vinOrLicenseNoP) OF
+
+        17:
+          BEGIN
+            IF rVehicleL.GET(vinOrLicenseNoP) THEN
+              vehicleFoundL := TRUE;
+          END;
+        7:
+          BEGIN
+            rVehicleL.RESET;
+            rVehicleL.SETRANGE("License No.", vinOrLicenseNoP);
+            IF rVehicleL.FINDFIRST THEN
+              vehicleFoundL := TRUE;
+          END;
+
+      END;
+
+      IF vehicleFoundL THEN
+      BEGIN
+        apiVehicle := apiVehicle.Vehicle();
+        apiVehicle.chassisNumber      := rVehicleL.VIN;
+        apiVehicle.createdDate        := CREATEDATETIME(rVehicleL."Creation Date", 0T);
+        apiVehicle.firstRegDate       := CREATEDATETIME(rVehicleL."Initial Registration", 0T);
+        apiVehicle.keyNumber          := rVehicleL."Key No.";
+        apiVehicle.milleage           := rVehicleL.Mileage;
+        apiVehicle.model              := rVehicleL.Model;
+        apiVehicle.modelYear          := rVehicleL."Model Year";
+        apiVehicle.paintColor         := rVehicleL."Color Description";
+        apiVehicle.producer           := rVehicleL."Make Code";
+        apiVehicle.registrationNumber := rVehicleL."License No.";
+        apiVehicle.updatedDate        := CREATEDATETIME(rVehicleL."Last Date Modified", 0T);
+
+        json := JsonConvert.SerializeObject(apiVehicle);
+
+      END;
+
+      EXIT(json);
+    END;
+
+    PROCEDURE CreateVehicle@1101103007(json@1101103000 : BigText) : Text[250];
+    VAR
+      JsonConvert@1101103005 : DotNet "'Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed'.Newtonsoft.Json.JsonConvert";
+      apiVehicle@1101103004 : DotNet "'NavSynkarionDLL, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bc52fb4d226f0168'.SynkarionDLL.Vehicle";
+      cSynkarionFunctionsL@1101103003 : Codeunit 50003;
+    BEGIN
+
+      apiVehicle := apiVehicle.Vehicle();
+      apiVehicle := JsonConvert.DeserializeObject(json, GETDOTNETTYPE(apiVehicle));
+
+      EXIT(cSynkarionFunctionsL.CreateVehicle(apiVehicle));
+    END;
+
+    PROCEDURE GetArticle@1101103009(searchTextP@1101103000 : Text[50];VAR jsonP@1101103008 : BigText);
+    VAR
+      JsonConvert@1101103003 : DotNet "'Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed'.Newtonsoft.Json.JsonConvert";
+      apiArticle@1101103002 : DotNet "'NavSynkarionDLL, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bc52fb4d226f0168'.SynkarionDLL.Article";
+      apiArticles@1101103006 : DotNet "'NavSynkarionDLL, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bc52fb4d226f0168'.SynkarionDLL.Articles";
+      cSynkarionFunctionsL@1101103001 : Codeunit 50003;
+      rItemL@1101103004 : Record 27;
+      rLaborL@1101103007 : Record 5025601;
+      teller@1101103009 : Integer;
+    BEGIN
+
+      //articleFoundL := FALSE;
+      //jsonP := '';
+
+      teller := 0;
+
+      apiArticles := apiArticles.Articles();
+
+      rItemL.RESET;
+      rItemL.SETFILTER(Description, '@*' + searchTextP + '*');
+      IF rItemL.FIND('-') THEN
+      REPEAT
+        teller += 1;
+
+        apiArticle := apiArticle.Article();
+        apiArticle.articleNo    := rItemL."No.";
+        apiArticle.itemType     := 'Item';
+        apiArticle.description  := rItemL."Description 2";
+        apiArticle.name         := rItemL.Description;
+        apiArticle.createdDate  := CURRENTDATETIME;
+        apiArticle.currency     := 'NOK';
+        apiArticle.disabled     := FALSE;
+        apiArticle.price        := rItemL."Unit Price";
+        apiArticle.unit         := 'STK';
+        apiArticle.updatedDate  := CREATEDATETIME(rItemL."Last Date Modified", rItemL."Last Time Modified");
+        apiArticle.vatPercentage := 25;
+
+        apiArticles.AddArticle(apiArticle);
+
+        CLEAR(apiArticle);
+
+      UNTIL rItemL.NEXT = 0;
+
+      rLaborL.RESET;
+      rLaborL.SETFILTER(Description, '@*' + searchTextP + '*');
+      IF rLaborL.FIND('-') THEN
+      REPEAT
+        teller += 1;
+
+        apiArticle := apiArticle.Article();
+
+        apiArticle.articleNo    := rLaborL."No.";
+        apiArticle.itemType     := 'Labor';
+        apiArticle.description  := rLaborL."Description 2";
+        apiArticle.name         := rLaborL.Description;
+        apiArticle.createdDate  := CURRENTDATETIME;
+        apiArticle.currency     := 'NOK';
+        apiArticle.disabled     := FALSE;
+        apiArticle.price        := 0;
+        apiArticle.unit         := 'STK';
+        apiArticle.updatedDate  := CREATEDATETIME(rLaborL."Last Date Modified", 0T);
+        apiArticle.vatPercentage := 25;
+
+        apiArticles.AddArticle(apiArticle);
+
+        CLEAR(apiArticle);
+
+      UNTIL rLaborL.NEXT = 0;
+
+
+      //jsonP.ADDTEXT('Antall=' + FORMAT(teller) + ' S›keord: ' + searchTextP);
+
+      jsonP.ADDTEXT(JsonConvert.SerializeObject(apiArticles));
+
+
+      //EXIT(json);
+    END;
+
+    PROCEDURE PostLog@1101103005(json@1101103001 : BigText) : Text[250];
+    VAR
+      JsonConvert@1101103002 : DotNet "'Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed'.Newtonsoft.Json.JsonConvert";
+      apiLog@1101103005 : DotNet "'NavSynkarionDLL, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bc52fb4d226f0168'.SynkarionDLL.Log";
+      cSynkarionFunctionsL@1101103000 : Codeunit 50003;
+      clockingTypeL@1101103003 : 'Started,Ended';
+      status@1101103004 : Text[250];
+    BEGIN
+
+      apiLog := apiLog.Log();
+      apiLog := JsonConvert.DeserializeObject(json, GETDOTNETTYPE(apiLog));
+
+      cSynkarionFunctionsL.InsertLog(apiLog);
+
+      EXIT('');
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

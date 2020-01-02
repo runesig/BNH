@@ -1,0 +1,87 @@
+OBJECT Page 50002 SynkarionArticle
+{
+  OBJECT-PROPERTIES
+  {
+    Date=14.09.17;
+    Time=13:17:21;
+    Modified=Yes;
+    Version List=BNH - Synkarion;
+  }
+  PROPERTIES
+  {
+    SourceTable=Table27;
+    PageType=List;
+    OnAfterGetRecord=BEGIN
+
+                       currency := 'NOK';
+                       vatPercentage := 25;
+
+                       articleNo := "No.";
+                     END;
+
+  }
+  CONTROLS
+  {
+    { 1101103000;0;Container;
+                ContainerType=ContentArea }
+
+    { 1101103001;1;Group  ;
+                Name=Group;
+                GroupType=Repeater }
+
+    { 1101103002;2;Field  ;
+                SourceExpr="No." }
+
+    { 1101103012;2;Field  ;
+                Name=articleNo;
+                SourceExpr=articleNo }
+
+    { 1101103003;2;Field  ;
+                Name=name;
+                SourceExpr=Description }
+
+    { 1101103004;2;Field  ;
+                Name=description;
+                SourceExpr="Description 2" }
+
+    { 1101103005;2;Field  ;
+                Name=price;
+                SourceExpr="Unit Price" }
+
+    { 1101103010;2;Field  ;
+                Name=currency;
+                SourceExpr=currency }
+
+    { 1101103006;2;Field  ;
+                Name=unit;
+                SourceExpr="Base Unit of Measure" }
+
+    { 1101103011;2;Field  ;
+                Name=vatPercentage;
+                SourceExpr=vatPercentage }
+
+    { 1101103007;2;Field  ;
+                Name=disabled;
+                SourceExpr=Blocked }
+
+    { 1101103008;2;Field  ;
+                Name=createdDate;
+                SourceExpr="Creation Date" }
+
+    { 1101103009;2;Field  ;
+                Name=updatedDate;
+                SourceExpr="Last Date Modified" }
+
+  }
+  CODE
+  {
+    VAR
+      currency@1101103000 : Text[30];
+      vatPercentage@1101103001 : Decimal;
+      articleNo@1101103002 : Text;
+
+    BEGIN
+    END.
+  }
+}
+

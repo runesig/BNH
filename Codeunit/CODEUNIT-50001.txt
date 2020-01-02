@@ -1,0 +1,744 @@
+OBJECT Codeunit 50001 SynkarionOut
+{
+  OBJECT-PROPERTIES
+  {
+    Date=19.06.18;
+    Time=08:45:57;
+    Modified=Yes;
+    Version List=BNH - Synkarion;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+
+            //SetOrderStatus('VO001905');
+            //EXIT;
+
+            //UpdateArticleList('VO000868');
+            //UpdateServiceJobList();
+            //EXIT;
+
+            //SetOrderStatus('VO000471');
+
+            HandleSpecialFunction;
+            //UpdateServiceJobTypeList();
+
+            //1. Articles
+            //UpdateArticleList('VO000648');
+
+            //2. Customer
+            //PostCustomer('CU31789');
+
+            //3. Service job list
+            //UpdateServiceJobList();
+
+            //4. Order
+            //PostOrder('VO000966');
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      StatusG@1101103000 : 'OK,ERROR';
+
+    PROCEDURE HandleSpecialFunction@1101103004();
+    VAR
+      SpecialFunctionsAssignmentsL@1101103004 : Record 5206812;
+      CurrentRecRefL@1101103003 : RecordRef;
+      TypeL@1101103002 : 'InitParam,GetParam';
+      DataExchangeUnitL@1101103001 : Codeunit 5028965;
+      oSSMActionL@1101103000 : 'Login,Send VIN,Get Data';
+      rServiceHeaderL@1101103005 : Record 5025624;
+    BEGIN
+      CLEAR(DataExchangeUnitL);
+      DataExchangeUnitL.SpecialFunctionsParam(SpecialFunctionsAssignmentsL, CurrentRecRefL, TypeL::GetParam);
+
+      CASE SpecialFunctionsAssignmentsL."Action Type" OF
+        SpecialFunctionsAssignmentsL."Action Type"::Launch :
+          BEGIN
+            CASE CurrentRecRefL.NUMBER OF
+              DATABASE::"Service Header" :
+                BEGIN
+                  CurrentRecRefL.SETTABLE(rServiceHeaderL);
+                  CASE SpecialFunctionsAssignmentsL.Parameter OF
+                    'PostOrder':
+                      BEGIN
+                        UpdateArticleList(rServiceHeaderL."No.");
+                        //PostCustomer(rServiceHeaderL."Sell-to Customer No.");
+                        PostAllOrderCustomers(rServiceHeaderL."No.");
+                        //UpdateServiceJobList(rServiceHeaderL."No.");
+                        PostOrder(rServiceHeaderL."No.");
+                      END;
+                    'CloseOrder':
+                      BEGIN
+                        SetOrderStatus(rServiceHeaderL."No.");
+                      END;
+                  END;
+                END;
+            END;
+          END;
+      END;
+    END;
+
+    PROCEDURE PostAllOrderCustomers@1101103000(orderNoP@1101103000 : Code[20]);
+    VAR
+      rServiceHeaderL@1101103005 : Record 5025624;
+      rServiceLineL@1101103004 : Record 5025625;
+      rServiceJobLineL@1101103003 : Record 5025627;
+      rCustomerTempL@1101103001 : TEMPORARY Record 18;
+    BEGIN
+
+
+      IF rServiceHeaderL.GET(rServiceHeaderL."Document Type"::Order, orderNoP) THEN
+      BEGIN
+
+        PostCustomer(rServiceHeaderL."Sell-to Customer No.");
+
+        rCustomerTempL.INIT;
+        rCustomerTempL."No." := rServiceHeaderL."Sell-to Customer No.";
+        rCustomerTempL.INSERT;
+
+        rServiceJobLineL.RESET;
+        rServiceJobLineL.SETRANGE(rServiceJobLineL."Document Type", rServiceJobLineL."Document Type"::Order);
+        rServiceJobLineL.SETRANGE(rServiceJobLineL."Document No." , orderNoP);
+        IF rServiceJobLineL.FINDSET THEN
+        REPEAT
+
+          IF NOT rCustomerTempL.GET(rServiceJobLineL."Bill-to Customer No.") THEN
+          BEGIN
+
+            PostCustomer(rServiceJobLineL."Bill-to Customer No.");
+
+            rCustomerTempL.INIT;
+            rCustomerTempL."No." := rServiceJobLineL."Bill-to Customer No.";
+            rCustomerTempL.INSERT;
+          END;
+
+
+        UNTIL rServiceJobLineL.NEXT = 0;
+
+      END;
+    END;
+
+    PROCEDURE PostCustomer@1101103001(customerNoP@1101103004 : Code[20]);
+    VAR
+      rSynkarionSetupL@1101103005 : Record 50001;
+      synkarion@1101103000 : DotNet "'NavSynkarionDLL, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bc52fb4d226f0168'.SynkarionDLL.Synkarion" RUNONCLIENT;
+      apiCustomer@1101103001 : DotNet "'NavSynkarionDLL, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bc52fb4d226f0168'.SynkarionDLL.Customer" RUNONCLIENT;
+      rCustomerL@1101103002 : Record 18;
+      response@1101103003 : Text[1024];
+      JsonConvert@1101103006 : DotNet "'Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed'.Newtonsoft.Json.JsonConvert" RUNONCLIENT;
+      JsonSetting@1101103007 : DotNet "'Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed'.Newtonsoft.Json.JsonSerializerSettings" RUNONCLIENT;
+      jsonRequestL@1101103008 : BigText;
+    BEGIN
+
+      rSynkarionSetupL.GET;
+      rSynkarionSetupL.TESTFIELD(EndpointURL);
+      rSynkarionSetupL.TESTFIELD(AuthToken);
+
+      IF rCustomerL.GET(customerNoP) THEN
+      BEGIN
+
+        apiCustomer := apiCustomer.Customer();
+
+        apiCustomer.countryCode       := rCustomerL."Country/Region Code";
+        apiCustomer.createdDate       := CREATEDATETIME(rCustomerL."Creation Date", 0T);
+        apiCustomer.email             := rCustomerL."E-Mail";
+        apiCustomer.firstName         := rCustomerL."First Name";
+        apiCustomer.incadeaCustomerNo := rCustomerL."No.";
+        apiCustomer.lastName          := rCustomerL."Last Name";
+        apiCustomer.mobilePhone       := rCustomerL."Mobile Phone No.";
+        apiCustomer.postalCode        := rCustomerL."Post Code";
+        apiCustomer.postalPlace       := rCustomerL.City;
+        apiCustomer.street            := rCustomerL.Address;
+        //apiCustomer.synkarionId       := '';
+        apiCustomer.updatedDate       := CREATEDATETIME(rCustomerL."Last Date Modified", 0T);
+
+        synkarion := synkarion.Synkarion;
+
+        synkarion.authToken   := rSynkarionSetupL.AuthToken;
+        synkarion.endPointUrl := rSynkarionSetupL.EndpointURL + 'PostCustomer';
+
+        response := synkarion.PostCustomer(apiCustomer);
+
+        jsonRequestL.ADDTEXT(JsonConvert.SerializeObject(apiCustomer));
+        InsertLog('PostCustomer', jsonRequestL, StatusG::OK, response);
+
+        //MESSAGE(response);
+
+      END
+      ELSE
+        ERROR('Fant ikke kunde!');
+    END;
+
+    PROCEDURE UpdateServiceJobTypeList@1101103002();
+    VAR
+      rSynkarionSetupL@1101103006 : Record 50001;
+      synkarion@1101103003 : DotNet "'NavSynkarionDLL, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bc52fb4d226f0168'.SynkarionDLL.Synkarion" RUNONCLIENT;
+      apiServiceJobType@1101103004 : DotNet "'NavSynkarionDLL, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bc52fb4d226f0168'.SynkarionDLL.ServiceJobType" RUNONCLIENT;
+      apiServiceJobTypeList@1101103002 : DotNet "'NavSynkarionDLL, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bc52fb4d226f0168'.SynkarionDLL.ServiceJobTypeList" RUNONCLIENT;
+      rServiceJobLineL@1101103001 : Record 5025627;
+      rInstructionL@1101103008 : Record 5025609;
+      jsonRequestL@1101103010 : BigText;
+      response@1101103000 : Text[1024];
+      JsonConvert@1101103007 : DotNet "'Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed'.Newtonsoft.Json.JsonConvert" RUNONCLIENT;
+      JsonSetting@1101103005 : DotNet "'Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed'.Newtonsoft.Json.JsonSerializerSettings" RUNONCLIENT;
+      fil@1101103009 : File;
+    BEGIN
+
+      rSynkarionSetupL.GET;
+      rSynkarionSetupL.TESTFIELD(EndpointURL);
+      rSynkarionSetupL.TESTFIELD(AuthToken);
+
+      apiServiceJobTypeList := apiServiceJobTypeList.ServiceJobTypeList();
+
+      //rServiceJobLineL.RESET;
+      //rServiceJobLineL.SETRANGE(rServiceJobLineL."Document Type", rServiceJobLineL."Document Type"::Order);
+      //rServiceJobLineL.SETRANGE(rServiceJobLineL."Document No." , orderNoP);
+      //IF rServiceJobLineL.FINDSET(FALSE) THEN
+
+      rInstructionL.RESET;
+      //rInstructionL.SETRANGE(rInstructionL."Make Code", 'FELLES');
+      IF rInstructionL.FIND('-') THEN
+      REPEAT
+
+        apiServiceJobType := apiServiceJobType.ServiceJobType();
+
+        //apiServiceJob.incadeaId           := rInstructionL."No.";
+        apiServiceJobType.jobTypeId       := rInstructionL."No.";
+        apiServiceJobType.makeCode        := rInstructionL."Make Code";
+        //apiServiceJob.lineNo            :=
+        apiServiceJobType.name            := rInstructionL.Description;
+        //apiServiceJob.incadeaCustomerNo :=
+        apiServiceJobType.updatedDate       := CURRENTDATETIME;
+        apiServiceJobType.createdDate       := CURRENTDATETIME;
+
+        apiServiceJobTypeList.AddServiceJobType(apiServiceJobType);
+
+        CLEAR(apiServiceJobType);
+
+      UNTIL rInstructionL.NEXT = 0;
+
+      synkarion := synkarion.Synkarion();
+
+      synkarion.authToken   := rSynkarionSetupL.AuthToken;
+      synkarion.endPointUrl := rSynkarionSetupL.EndpointURL + 'UpdateServiceJobTypeList';
+
+
+      IF fil.CREATE('c:\temp\apiServiceJobTypeList.json') THEN
+      BEGIN
+        fil.WRITE(JsonConvert.SerializeObject(apiServiceJobTypeList.serviceJobTypes));
+        //fil.WRITE(JsonConvert.SerializeObject(apiServiceJobList));
+        fil.CLOSE;
+      END;
+
+      response := synkarion.PostServiceJobTypeList(apiServiceJobTypeList.serviceJobTypes);
+
+      jsonRequestL.ADDTEXT(JsonConvert.SerializeObject(apiServiceJobTypeList.serviceJobTypes));
+      InsertLog('UpdateServiceJobTypeList', jsonRequestL, StatusG::OK, response);
+
+      MESSAGE(response);
+    END;
+
+    PROCEDURE UpdateArticleList@1101103011(OrderNoP@1101103000 : Code[20]);
+    VAR
+      rSynkarionSetupL@1101103007 : Record 50001;
+      synkarion@1101103005 : DotNet "'NavSynkarionDLL, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bc52fb4d226f0168'.SynkarionDLL.Synkarion" RUNONCLIENT;
+      apiArticle@1101103004 : DotNet "'NavSynkarionDLL, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bc52fb4d226f0168'.SynkarionDLL.Article" RUNONCLIENT;
+      apiArticleList@1101103003 : DotNet "'NavSynkarionDLL, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bc52fb4d226f0168'.SynkarionDLL.Articles" RUNONCLIENT;
+      rServiceLineL@1101103002 : Record 5025625;
+      rItemL@1101103006 : Record 27;
+      rLaborL@1101103009 : Record 5025601;
+      jsonRequestL@1101103012 : BigText;
+      response@1101103001 : Text[1024];
+      JsonConvert@1101103008 : DotNet "'Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed'.Newtonsoft.Json.JsonConvert" RUNONCLIENT;
+      JsonSetting@1101103011 : DotNet "'Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed'.Newtonsoft.Json.JsonSerializerSettings" RUNONCLIENT;
+      fil@1101103010 : File;
+      tempItemL@1101103013 : TEMPORARY Record 27;
+    BEGIN
+
+      rSynkarionSetupL.GET;
+      rSynkarionSetupL.TESTFIELD(EndpointURL);
+      rSynkarionSetupL.TESTFIELD(AuthToken);
+
+      apiArticleList := apiArticleList.Articles;
+
+      rServiceLineL.RESET;
+      rServiceLineL.SETRANGE("Document Type", rServiceLineL."Document Type"::Order);
+      rServiceLineL.SETRANGE("Document No." , OrderNoP);
+      //rServiceLineL.SETRANGE(Type           , rServiceLineL.Type::Item);
+      IF rServiceLineL.FINDSET(FALSE) THEN
+      REPEAT
+
+        CASE rServiceLineL.Type OF
+
+          rServiceLineL.Type::Item:
+            BEGIN
+              IF rItemL.GET(rServiceLineL."No.") THEN
+              BEGIN
+
+                //Make sure we dont send same item twice...
+                IF NOT tempItemL.GET(rItemL."No.") THEN
+                BEGIN
+                  apiArticle := apiArticle.Article;
+
+                  apiArticle.articleNo    := rItemL."No.";
+                  apiArticle.createdDate  := CREATEDATETIME(rItemL."Creation Date", 0T);
+                  apiArticle.currency     := 'NOK';
+                  apiArticle.itemType     := 'Item';
+                  apiArticle.description  := rItemL."Description 2";
+                  apiArticle.disabled     := rItemL.Blocked;
+                  apiArticle.name         := rItemL.Description;
+                  apiArticle.price        := rItemL."Unit Price";
+                  apiArticle.unit         := rItemL."Base Unit of Measure";
+                  apiArticle.updatedDate  := CREATEDATETIME(rItemL."Last Date Modified", 0T);
+                  apiArticle.vatPercentage:= 25;
+
+                  apiArticleList.AddArticle(apiArticle);
+
+                  CLEAR(apiArticle);
+
+                  tempItemL."No." := rItemL."No.";
+                  tempItemL.INSERT;
+                END;
+
+              END;
+            END;
+
+          rServiceLineL.Type::Labor:
+            BEGIN
+
+              //Make sure we dont send same labor twice...
+              IF NOT tempItemL.GET(rServiceLineL."No.") THEN
+              BEGIN
+                apiArticle := apiArticle.Article;
+
+                apiArticle.articleNo    := rServiceLineL."No.";
+                apiArticle.createdDate  := CREATEDATETIME(TODAY, 0T);
+                apiArticle.currency     := 'NOK';
+                apiArticle.itemType     := 'Labor';
+                apiArticle.description  := rServiceLineL."Description 2";
+                apiArticle.disabled     := FALSE;
+                apiArticle.name         := rServiceLineL.Description;
+                apiArticle.price        := rServiceLineL."Unit Price";
+                apiArticle.unit         := rServiceLineL."Unit of Measure";
+                apiArticle.updatedDate  := CREATEDATETIME(TODAY, 0T);
+                apiArticle.vatPercentage:= 25;
+
+                apiArticleList.AddArticle(apiArticle);
+
+                CLEAR(apiArticle);
+
+                tempItemL."No." := rServiceLineL."No.";
+                tempItemL.INSERT;
+              END;
+            END;
+
+          rServiceLineL.Type::"G/L Account":
+            BEGIN
+
+              //Make sure we dont send same labor twice...
+              IF NOT tempItemL.GET(rServiceLineL."No.") THEN
+              BEGIN
+                apiArticle := apiArticle.Article;
+
+                apiArticle.articleNo    := rServiceLineL."No.";
+                apiArticle.createdDate  := CREATEDATETIME(TODAY, 0T);
+                apiArticle.currency     := 'NOK';
+                apiArticle.itemType     := 'Finance';
+                apiArticle.description  := rServiceLineL."Description 2";
+                apiArticle.disabled     := FALSE;
+                apiArticle.name         := rServiceLineL.Description;
+                apiArticle.price        := rServiceLineL."Unit Price";
+                apiArticle.unit         := rServiceLineL."Unit of Measure";
+                apiArticle.updatedDate  := CREATEDATETIME(TODAY, 0T);
+                apiArticle.vatPercentage:= 25;
+
+                apiArticleList.AddArticle(apiArticle);
+
+                CLEAR(apiArticle);
+
+                tempItemL."No." := rServiceLineL."No.";
+                tempItemL.INSERT;
+              END;
+            END;
+
+
+        END;
+
+      UNTIL rServiceLineL.NEXT = 0;
+
+      synkarion := synkarion.Synkarion;
+
+      synkarion.authToken   := rSynkarionSetupL.AuthToken;
+      synkarion.endPointUrl := rSynkarionSetupL.EndpointURL + 'UpdateArticleList';
+
+      IF fil.CREATE('c:\temp\UpdateArticleList2.json') THEN
+      BEGIN
+        fil.WRITE(JsonConvert.SerializeObject(apiArticleList));
+        fil.CLOSE;
+      END;
+
+      response := synkarion.PostArticleList(apiArticleList.value);
+
+      jsonRequestL.ADDTEXT(JsonConvert.SerializeObject(apiArticleList.value));
+      InsertLog('UpdateArticleList', jsonRequestL, StatusG::OK, response);
+
+      //MESSAGE(response);
+    END;
+
+    PROCEDURE PostOrder@1101103003(orderNoP@1101103000 : Code[20]);
+    VAR
+      rSynkarionSetupL@1101103019 : Record 50001;
+      synkarion@1101103006 : DotNet "'NavSynkarionDLL, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bc52fb4d226f0168'.SynkarionDLL.Synkarion" RUNONCLIENT;
+      apiOrder@1101103005 : DotNet "'NavSynkarionDLL, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bc52fb4d226f0168'.SynkarionDLL.Order" RUNONCLIENT;
+      apiOrderLine@1101103010 : DotNet "'NavSynkarionDLL, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bc52fb4d226f0168'.SynkarionDLL.OrderLine" RUNONCLIENT;
+      apiOrderLineList@1101103009 : DotNet "'NavSynkarionDLL, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bc52fb4d226f0168'.SynkarionDLL.OrderLineList" RUNONCLIENT;
+      apiVehicle@1101103008 : DotNet "'NavSynkarionDLL, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bc52fb4d226f0168'.SynkarionDLL.Vehicle" RUNONCLIENT;
+      apiCustomer@1101103021 : DotNet "'NavSynkarionDLL, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bc52fb4d226f0168'.SynkarionDLL.Customer" RUNONCLIENT;
+      apiServiceJobList@1101103004 : DotNet "'NavSynkarionDLL, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bc52fb4d226f0168'.SynkarionDLL.ServiceJobList" RUNONCLIENT;
+      apiServiceJob@1101103023 : DotNet "'NavSynkarionDLL, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bc52fb4d226f0168'.SynkarionDLL.ServiceJob" RUNONCLIENT;
+      apiArticleList@1101103011 : DotNet "'NavSynkarionDLL, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bc52fb4d226f0168'.SynkarionDLL.Articles" RUNONCLIENT;
+      apiOrderType@1101103014 : DotNet "'NavSynkarionDLL, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bc52fb4d226f0168'.SynkarionDLL.OrderType" RUNONCLIENT;
+      rServiceHeaderL@1101103007 : Record 5025624;
+      rServiceLineL@1101103003 : Record 5025625;
+      rServiceJobLineL@1101103012 : Record 5025627;
+      rVehicleL@1101103013 : Record 5025400;
+      rCustomerL@1101103022 : Record 18;
+      rItemL@1101103002 : Record 27;
+      jsonRequestL@1101103025 : BigText;
+      response@1101103001 : Text[1024];
+      recipientTypeL@1101103020 : Text;
+      "---"@1101103015 : Integer;
+      JsonConvert@1101103016 : DotNet "'Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed'.Newtonsoft.Json.JsonConvert" RUNONCLIENT;
+      JsonSetting@1101103024 : DotNet "'Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed'.Newtonsoft.Json.JsonSerializerSettings" RUNONCLIENT;
+      fil@1101103017 : File;
+      js@1101103018 : BigText;
+    BEGIN
+
+      rSynkarionSetupL.GET;
+      rSynkarionSetupL.TESTFIELD(EndpointURL);
+      rSynkarionSetupL.TESTFIELD(AuthToken);
+
+
+      IF rServiceHeaderL.GET(rServiceHeaderL."Document Type"::Order, orderNoP) THEN
+      BEGIN
+
+        // ----------- ORDER LINES -------------
+
+        apiOrderLineList := apiOrderLineList.OrderLineList;
+
+        rServiceLineL.RESET;
+        rServiceLineL.SETRANGE("Document Type", rServiceLineL."Document Type"::Order);
+        rServiceLineL.SETRANGE("Document No." , orderNoP);
+        IF rServiceLineL.FINDSET(FALSE) THEN
+        REPEAT
+
+          apiOrderLine := apiOrderLine.OrderLine;
+
+          apiOrderLine.amount             := rServiceLineL.Amount;
+          apiOrderLine.createdDate        := CURRENTDATETIME;
+          //apiOrderLine.description        := rServiceLineL.Description;
+          apiOrderLine.discountAmount     := rServiceLineL."Line Discount Amount";
+          apiOrderLine.discountPercentage := rServiceLineL."Line Discount %";
+
+          apiOrderLine.itemNumber         := rServiceLineL."No.";
+          CASE rServiceLineL.Type OF
+            rServiceLineL.Type::Item         : apiOrderLine.itemType := 'Item';
+            rServiceLineL.Type::Labor        : apiOrderLine.itemType := 'Labor';
+            rServiceLineL.Type::"G/L Account": apiOrderLine.itemType := 'Finance';
+            rServiceLineL.Type::" "          :
+            BEGIN
+              apiOrderLine.itemType   := 'Text';
+              apiOrderLine.itemNumber := '';      // do not send Standard Text Numbers!
+            END;
+          END;
+
+          apiOrderLine.lineNumber         := rServiceLineL."Line No.";
+          apiOrderLine.name               := rServiceLineL.Description;
+          apiOrderLine.price              := rServiceLineL."Unit Price";
+          apiOrderLine.quantity           := rServiceLineL.Quantity;
+          apiOrderLine.serviceJobLineNo   := rServiceLineL."Service Job No.";
+          apiOrderLine.updatedDate        := CURRENTDATETIME;
+          apiOrderLine.vatPercentage      := rServiceLineL."VAT %";
+
+          apiOrderLineList.AddOrderLine(apiOrderLine);
+
+          CLEAR(apiOrderLine);
+
+        UNTIL rServiceLineL.NEXT = 0;
+
+        // ----------- SERVICE JOB LINES -------------
+        apiServiceJobList := apiServiceJobList.ServiceJobList();
+
+        rServiceJobLineL.RESET;
+        rServiceJobLineL.SETRANGE(rServiceJobLineL."Document Type", rServiceJobLineL."Document Type"::Order);
+        rServiceJobLineL.SETRANGE(rServiceJobLineL."Document No." , orderNoP);
+        IF rServiceJobLineL.FINDSET(FALSE) THEN
+        REPEAT
+          apiServiceJob := apiServiceJob.ServiceJob();
+
+          apiServiceJob.makeCode          := rServiceJobLineL."Instruction Data Make Code";
+          apiServiceJob.lineNo            := rServiceJobLineL."Line No.";
+
+          IF rServiceJobLineL.Complaint <> '' THEN
+            apiServiceJob.name            := rServiceJobLineL.Complaint
+          ELSE
+            apiServiceJob.name            := rServiceJobLineL.Instruction;
+
+          apiServiceJob.jobTypeId         := rServiceJobLineL."Instruction No.";
+          apiServiceJob.incadeaCustomerNo := rServiceJobLineL."Bill-to Customer No.";
+
+          apiServiceJobList.AddServiceJob(apiServiceJob);
+
+          CLEAR(apiServiceJob);
+
+        UNTIL rServiceJobLineL.NEXT = 0;
+
+        // ----------- VEHICLE -------------
+        apiVehicle := apiVehicle.Vehicle;
+
+        IF rVehicleL.GET(rServiceHeaderL.VIN) THEN
+        BEGIN
+          apiVehicle.chassisNumber      := rVehicleL.VIN;
+          apiVehicle.createdDate        := CREATEDATETIME(rVehicleL."Creation Date", 0T);
+
+          IF rVehicleL."Initial Registration" <> 0D THEN
+            apiVehicle.firstRegDate       := CREATEDATETIME(rVehicleL."Initial Registration", 0T)
+          ELSE
+            apiVehicle.firstRegDate       := CREATEDATETIME(DMY2DATE(1,1,1900), 0T);
+
+          apiVehicle.keyNumber          := rVehicleL."Key No.";
+          apiVehicle.milleage           := rVehicleL.Mileage;
+          apiVehicle.model              := rVehicleL.Model;
+          apiVehicle.modelYear          := rVehicleL."Model Year";
+          apiVehicle.paintColor         := '';
+          apiVehicle.producer           := rVehicleL."Make Code";
+
+          apiVehicle.registrationNumber := rVehicleL."License No.";
+          IF rVehicleL."Last Date Modified" <> 0D THEN
+            apiVehicle.updatedDate        := CREATEDATETIME(rVehicleL."Last Date Modified", 0T);
+        END;
+
+
+        // ------------- CUSTOMER --------------
+        apiCustomer := apiCustomer.Customer;
+
+        IF rCustomerL.GET(rServiceHeaderL."Sell-to Customer No.") THEN
+        BEGIN
+          apiCustomer.countryCode       := rCustomerL."Country/Region Code";
+          apiCustomer.createdDate       := CREATEDATETIME(rCustomerL."Creation Date", 0T);;
+          apiCustomer.email             := rCustomerL."E-Mail";
+          apiCustomer.firstName         := rCustomerL."First Name";
+          apiCustomer.incadeaCustomerNo := rCustomerL."No.";
+          apiCustomer.lastName          := rCustomerL."Last Name";
+          apiCustomer.mobilePhone       := rCustomerL."Mobile Phone No.";
+          apiCustomer.postalCode        := rCustomerL."Post Code";
+          apiCustomer.postalPlace       := rCustomerL.City;
+          apiCustomer.street            := rCustomerL.Address;
+          apiCustomer.updatedDate       := CREATEDATETIME(rCustomerL."Last Date Modified", 0T);;
+        END
+        ELSE
+          MESSAGE('Fant ikke kundenr ' + rServiceHeaderL."Sell-to Customer No.");
+
+
+        //Forsikring
+        //Leasing
+        //Privatkunde
+        //Bedriftskunde
+        recipientTypeL := 'Privatkunde';
+
+        // ----------- ORDER -------------
+        apiOrder := apiOrder.Order;
+
+        apiOrder.createdDate        := CREATEDATETIME(rServiceHeaderL."Creation Date", rServiceHeaderL."Creation Time");
+        apiOrder.damageNumber       := GetDamageNoFromServiceLines(orderNoP);
+        IF rServiceHeaderL."Pickup Date" <> 0D THEN
+          apiOrder.deliveryDate       := CREATEDATETIME(rServiceHeaderL."Pickup Date", rServiceHeaderL."Pickup Time");
+        apiOrder.description        := '';
+        apiOrder.discountAmount     := 0;
+        apiOrder.discountPercentage := 0;
+
+        // Customer object
+        apiOrder.customer           := apiCustomer;
+
+        apiOrder.invoiceAddress     := '';
+        apiOrder.location           := rServiceHeaderL."Location Code";
+        apiOrder.order              := '';
+        apiOrder.orderDate          := CREATEDATETIME(rServiceHeaderL."Order Date", rServiceHeaderL."Time of Order");
+        apiOrder.orderNumber        := rServiceHeaderL."No.";
+        apiOrder.paymentMethod      := apiOrderType.KREDITT;
+        apiOrder.recepientType      := recipientTypeL;
+        apiOrder.updatedDate        := CREATEDATETIME(rServiceHeaderL."Order Date", 0T);
+
+        apiOrder.vehicle            := apiVehicle;
+        apiOrder.serviceJobs        := apiServiceJobList.serviceJobs;
+        apiOrder.orderLines         := apiOrderLineList.orderLines;
+
+      END;
+
+      synkarion := synkarion.Synkarion;
+
+      synkarion.authToken   := rSynkarionSetupL.AuthToken;
+      synkarion.endPointUrl := rSynkarionSetupL.EndpointURL + 'PostOrder';
+
+      JsonSetting := JsonSetting.JsonSerializerSettings;
+      JsonSetting.DateTimeZoneHandling := 0;
+
+      IF fil.CREATE('C:\temp\apiOrder.json') THEN
+      BEGIN
+        fil.WRITE(JsonConvert.SerializeObject(apiOrder, JsonSetting));
+        fil.CLOSE;
+      END;
+      //ELSE
+      //  MESSAGE('kunne ikke lage fil...');
+
+      response := synkarion.PostOrder(apiOrder);
+
+      jsonRequestL.ADDTEXT(JsonConvert.SerializeObject(apiOrder));
+      InsertLog('PostOrder', jsonRequestL, StatusG::OK, response);
+
+      IF (STRPOS(response, 'semsId') > 0) THEN
+      BEGIN
+        MESSAGE('Overf›ring ok!');
+
+        rServiceHeaderL."Status Code" := 'SENDTSYNKARION';
+        rServiceHeaderL.MODIFY(FALSE);
+
+      END
+      ELSE
+        MESSAGE(response);
+    END;
+
+    PROCEDURE SetOrderStatus@1101103005(orderNoP@1101103001 : Code[20]);
+    VAR
+      rSynkarionSetupL@1101103020 : Record 50001;
+      synkarion@1101103019 : DotNet "'NavSynkarionDLL, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bc52fb4d226f0168'.SynkarionDLL.Synkarion" RUNONCLIENT;
+      apiOrderStatus@1101103018 : DotNet "'NavSynkarionDLL, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bc52fb4d226f0168'.SynkarionDLL.OrderStatus" RUNONCLIENT;
+      rServiceHeaderL@1101103011 : Record 5025624;
+      jsonRequestL@1101103007 : BigText;
+      response@1101103006 : Text[1024];
+      "---"@1101103004 : Integer;
+      JsonConvert@1101103003 : DotNet "'Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed'.Newtonsoft.Json.JsonConvert" RUNONCLIENT;
+      JsonSetting@1101103005 : DotNet "'Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed'.Newtonsoft.Json.JsonSerializerSettings" RUNONCLIENT;
+      fil@1101103002 : File;
+      js@1101103000 : BigText;
+    BEGIN
+
+      rSynkarionSetupL.GET;
+      rSynkarionSetupL.TESTFIELD(EndpointURL);
+      rSynkarionSetupL.TESTFIELD(AuthToken);
+
+
+      apiOrderStatus := apiOrderStatus.OrderStatus();
+
+      apiOrderStatus.orderNumber := orderNoP;
+      apiOrderStatus.name        := '2';
+
+
+      synkarion := synkarion.Synkarion;
+
+      synkarion.authToken   := rSynkarionSetupL.AuthToken;
+      synkarion.endPointUrl := rSynkarionSetupL.EndpointURL + 'SetOrderStatus';
+
+      //fil.CREATE('c:\temp\apiOrder.json');
+      //fil.WRITE(JsonConvert.SerializeObject(apiOrder));
+      //fil.CLOSE;
+
+      response := synkarion.PostOrderStatus(apiOrderStatus);
+
+      jsonRequestL.ADDTEXT(JsonConvert.SerializeObject(apiOrderStatus));
+      InsertLog('SetOrderStatus', jsonRequestL, StatusG::OK, response);
+
+      MESSAGE(response);
+    END;
+
+    PROCEDURE GetDamageNoFromServiceLines@1101103007(orderNoP@1101103000 : Code[20]) damageNos : Text[250];
+    VAR
+      rServiceLineL@1101103001 : Record 5025625;
+      damageTextL@1101103002 : Text[100];
+    BEGIN
+
+      damageTextL := 'Skadenummer:';
+
+      damageNos := '';
+
+      rServiceLineL.RESET;
+      rServiceLineL.SETRANGE("Document Type" , rServiceLineL."Document Type"::Order);
+      rServiceLineL.SETRANGE("Document No."  , orderNoP);
+      rServiceLineL.SETRANGE(Type            , rServiceLineL.Type::" ");
+      rServiceLineL.SETFILTER(Description    , damageTextL + '*');
+
+      IF rServiceLineL.FIND('-') THEN
+      REPEAT
+
+        IF damageNos <> '' THEN
+          damageNos += ' ';
+
+        damageNos += COPYSTR(rServiceLineL.Description, STRLEN(damageTextL)+1);
+
+      UNTIL rServiceLineL.NEXT = 0;
+    END;
+
+    PROCEDURE GetSystemVersion@1101103006();
+    VAR
+      rSynkarionSetupL@1101103005 : Record 50001;
+      synkarion@1101103000 : DotNet "'NavSynkarionDLL, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bc52fb4d226f0168'.SynkarionDLL.Synkarion" RUNONCLIENT;
+      response@1101103003 : Text[1024];
+      JsonConvert@1101103006 : DotNet "'Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed'.Newtonsoft.Json.JsonConvert" RUNONCLIENT;
+      JsonSetting@1101103007 : DotNet "'Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed'.Newtonsoft.Json.JsonSerializerSettings" RUNONCLIENT;
+      jsonRequestL@1101103008 : BigText;
+    BEGIN
+
+      rSynkarionSetupL.GET;
+      rSynkarionSetupL.TESTFIELD(EndpointURL);
+      rSynkarionSetupL.TESTFIELD(AuthToken);
+
+      synkarion := synkarion.Synkarion;
+
+      synkarion.authToken   := rSynkarionSetupL.AuthToken;
+      synkarion.endPointUrl := rSynkarionSetupL.EndpointURL + 'GetSystemVersion';
+
+      //her
+      //response := synkarion.GetSystemVersion;
+
+      //jsonRequestL.ADDTEXT('{GetSystemVersion}');
+      //InsertLog('GetSystemVersion', jsonRequestL, StatusG::OK, response);
+
+      MESSAGE(response);
+    END;
+
+    PROCEDURE "---"@1101103009();
+    BEGIN
+    END;
+
+    PROCEDURE InsertLog@1101103010(MethodP@1101103000 : Text[250];JsonRequestP@1101103001 : BigText;StatusP@1101103002 : 'OK,ERROR';JsonResponseP@1101103003 : Text[1024]);
+    VAR
+      rSynkarionLogL@1101103004 : Record 50000;
+      reqShort@1101103005 : Text[250];
+      os@1101103006 : OutStream;
+    BEGIN
+
+      JsonRequestP.GETSUBTEXT(reqShort, 1, 250);
+
+      rSynkarionLogL.INIT;
+      rSynkarionLogL.Datetime         := CURRENTDATETIME;
+      rSynkarionLogL.Direction        := rSynkarionLogL.Direction::"Nav -> Synkarion";
+      rSynkarionLogL.Method           := MethodP;
+
+      rSynkarionLogL.JsonRequest.CREATEOUTSTREAM(os);
+      JsonRequestP.WRITE(os);
+
+      rSynkarionLogL.JsonRequestShort := reqShort;
+      rSynkarionLogL.Status           := StatusP;
+      rSynkarionLogL.JsonResponse     := COPYSTR(JsonResponseP, 1, 250);
+
+      rSynkarionLogL.INSERT;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

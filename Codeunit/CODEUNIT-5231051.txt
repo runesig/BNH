@@ -1,0 +1,153 @@
+OBJECT Codeunit 5231051 BlanketOrder ExitPoint
+{
+  OBJECT-PROPERTIES
+  {
+    Date=23.04.18;
+    Time=11:12:58;
+    Modified=Yes;
+    Version List=BlanketOrderBNH;
+  }
+  PROPERTIES
+  {
+    TableNo=5207300;
+    OnRun=VAR
+            SalesHeaderL@1101261798 : Record 36;
+            DummyTextL@1101261800 : Text[50];
+          BEGIN
+            // Exit Point for 'Sales-Post + Print'
+            // IMPORTATNT: Both Inside1 and Inside2 MUST be set for this to work
+
+            EPSetupG := Rec;
+            EPUnitG.GetParamsShort(FirstRecRefG, SecondRecRefG, EPParamG, DummyTextL);
+
+            FirstRecRefG.SETTABLE(SalesHeaderL);
+
+            CASE EPSetupG.Type OF
+              //EPSetupG.Type::Pre:
+              //  ChecksPre(SalesHeaderL);
+
+              EPSetupG.Type::"Inside 1":
+                Inside1(SalesHeaderL);
+
+              EPSetupG.Type::"Inside 2":
+                BEGIN
+                  Inside2(SalesHeaderL);
+                  //FirstRecRefG.GETTABLE(SalesHeaderL);
+
+                END;
+              ELSE
+                EXIT;
+            END;
+
+            EPUnitG.SetParamsShort(FirstRecRefG,SecondRecRefG,EPParamG,DummyTextL);
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      UserSetupG@1109400002 : Record 91;
+      EPSetupG@1101165285 : Record 5207300;
+      EPParamG@1101165289 : Record 5207301;
+      EPUnitG@1101165288 : Codeunit 5207300;
+      FirstRecRefG@1101165287 : RecordRef;
+      SecondRecRefG@1101165286 : RecordRef;
+      BlanketOrderSingleInstG@1101103000 : Codeunit 5231052;
+      C_INC001@1101103001 : TextConst 'ENU=Another Sales Order already exists for this reference number.';
+
+    PROCEDURE ChecksPre@1101103001(SalesHeaderP@1101103000 : Record 36);
+    VAR
+      SalesLineL@1101103001 : Record 37;
+    BEGIN
+
+      //NOT IN USE!!!
+
+      IF SalesHeaderP."Order Type" <> SalesHeaderP."Order Type"::"Vehicle Sales & Purchases" THEN
+        EXIT;
+
+      BlanketOrderSingleInstG.ResetValues;
+
+      SalesLineL.RESET;
+      SalesLineL.SETRANGE("Document Type", SalesHeaderP."Document Type");
+      SalesLineL.SETRANGE("Document No.", SalesHeaderP."No.");
+      SalesLineL.SETRANGE(Type, SalesLineL.Type::Item);
+      SalesLineL.SETRANGE("Item Type", SalesLineL."Item Type"::Vehicle);
+      IF NOT SalesLineL.FINDFIRST THEN
+        EXIT; // No vehicle is present so skip it
+    END;
+
+    PROCEDURE Inside1@1101103000(SalesHeaderP@1101103000 : Record 36);
+    VAR
+      SalesLineL@1101103001 : Record 37;
+    BEGIN
+      // @ Inside 1
+
+      BlanketOrderSingleInstG.ResetValues;
+
+      IF SalesHeaderP."Document Type" <> SalesHeaderP."Document Type"::Order THEN
+        EXIT;
+
+      BlanketOrderSingleInstG.SetOrderValues(SalesHeaderP."No.", SalesHeaderP."Posting Date", SalesHeaderP."Document Date");
+    END;
+
+    PROCEDURE Inside2@1101286982(VAR SalesHeaderP@1101103000 : Record 36);
+    VAR
+      orderNoL@1101103001 : Code[20];
+      postingDateL@1101103002 : Date;
+      documentDateL@1101103003 : Date;
+      modified@1101103004 : Boolean;
+    BEGIN
+      // @ Inside 2
+
+      IF SalesHeaderP."Document Type" <> SalesHeaderP."Document Type"::Order THEN
+        EXIT;
+
+      orderNoL      := BlanketOrderSingleInstG.GetOrderNo;
+      postingDateL  := BlanketOrderSingleInstG.GetPostingDate;
+      documentDateL := BlanketOrderSingleInstG.GetDocumentDate;
+
+      IF orderNoL = SalesHeaderP."No." THEN
+      BEGIN
+
+        modified := FALSE;
+
+        IF postingDateL <> 0D THEN
+          IF SalesHeaderP."Posting Date" <> postingDateL THEN
+          BEGIN
+            SalesHeaderP.VALIDATE("Posting Date", postingDateL);
+            modified := TRUE;
+          END;
+
+        IF documentDateL <> 0D THEN
+          IF SalesHeaderP."Document Date" <> documentDateL THEN
+          BEGIN
+            SalesHeaderP.VALIDATE("Document Date", documentDateL);
+            modified := TRUE;
+          END;
+
+        IF modified THEN
+        BEGIN
+          SalesHeaderP.MODIFY;
+          FirstRecRefG.GETTABLE(SalesHeaderP);
+          //COMMIT;
+        END;
+
+      END;
+
+      BlanketOrderSingleInstG.ResetValues;
+    END;
+
+    BEGIN
+    {
+      +----------------------------------------------+
+      | Copyright ¸ 2017 Incadea                     |
+      +----------------------------------------------+
+      | MYENGINE@INCADEA                             |
+      +----------------------------------------------+
+      No.  Version  Date      ID  Remark
+      ------------------------------------------------
+    }
+    END.
+  }
+}
+

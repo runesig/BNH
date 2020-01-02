@@ -1,0 +1,185 @@
+OBJECT Report 5231050 Opprette gjentakelsesordre
+{
+  OBJECT-PROPERTIES
+  {
+    Date=31.10.17;
+    Time=15:45:40;
+    Modified=Yes;
+    Version List=BlanketOrderBNH;
+  }
+  PROPERTIES
+  {
+    ProcessingOnly=Yes;
+    OnInitReport=BEGIN
+                   SkjulFeil       := TRUE;
+                   OppretteSeneste := TRUE;
+                 END;
+
+  }
+  DATASET
+  {
+    { 1101103000;;DataItem;                  ;
+               DataItemTable=Table36;
+               DataItemTableView=SORTING(Document Type,No.)
+                                 WHERE(Document Type=CONST(Blanket Order));
+               OnPreDataItem=BEGIN
+                               IF BehandlingsDato = 0D THEN
+                                 ERROR('Vennligst angi behandlingsdato.');
+                               OrdreTeller := 0;
+                               FeilTeller := 0;
+                             END;
+
+               OnAfterGetRecord=BEGIN
+                                  //SID.01. START
+                                  //"Order Date" := WORKDATE;
+                                  //MODIFY;
+                                  //COMMIT;
+                                  //SID.01 STOP
+                                  // Plukke ut dem som ikke skal gjentas
+
+                                  IF NOT rGjentakelsesordreDataL.GET("Sales Header"."No.") THEN
+                                    CurrReport.SKIP;
+
+                                  GjentakGruppe.GET(rGjentakelsesordreDataL."Repeating Group Code");
+
+                                  IF SkjulFeil THEN
+                                  BEGIN
+                                    IF "Order Date" > BehandlingsDato THEN
+                                      CurrReport.SKIP;
+
+                                    IF (GjentakGruppe."Start Date" > BehandlingsDato) OR
+                                       ((GjentakGruppe."End Date" < BehandlingsDato) AND (GjentakGruppe."End Date" <> 0D)) THEN
+                                      CurrReport.SKIP;
+
+                                    IF rGjentakelsesordreDataL."Disable repeat" THEN
+                                      CurrReport.SKIP;
+                                  END;
+
+                                  //GjentaOrdre();
+                                END;
+
+               OnPostDataItem=BEGIN
+                                IF FeilTeller = 0 THEN
+                                  MESSAGE('Det er opprettet %1 ordrer.',OrdreTeller)
+                                ELSE
+                                  IF CONFIRM(
+                                    'Det er opprettet %1 ordre(r).\' +
+                                    '%2 ordre(r) kunne ikke opprettes p† grunn av feil.\\nsker du † se disse gjentakelsesordre ?',
+                                    TRUE,OrdreTeller,FeilTeller)
+                                  THEN BEGIN
+                                    COMMIT;
+                                    "Sales Header".MARKEDONLY(TRUE);
+                                    OrdreOversikt.SETTABLEVIEW("Sales Header");
+                                    OrdreOversikt.RUNMODAL;
+                                  END;
+                              END;
+
+               ReqFilterFields=No. }
+
+    { 1101103001;1;DataItem;GjentaOrdre      ;
+               DataItemTable=Table2000000026;
+               DataItemTableView=SORTING(Number);
+               OnAfterGetRecord=BEGIN
+                                  HuskOrdreDato := "Sales Header"."Order Date";
+                                  RammeOrdreTilOrdre.Initialisere(BehandlingsDato,OppretteSeneste);
+
+                                  IF SkjulFeil THEN BEGIN
+                                    //RammeOrdreTilOrdre.RUN("Sales Header");
+                                    IF RammeOrdreTilOrdre.RUN("Sales Header") THEN
+                                      OrdreTeller := OrdreTeller + 1
+                                    ELSE BEGIN
+                                      FeilTeller := FeilTeller + 1;
+                                      "Sales Header".MARK(TRUE);
+                                    END;
+                                  END ELSE BEGIN
+                                    RammeOrdreTilOrdre.RUN("Sales Header");
+                                    OrdreTeller := OrdreTeller + 1;
+                                  END;
+
+                                  // Sjekke om ordren skal gjentas flere ganger
+                                  // Stoppe hvis dato er overskrevet eller ordredatoen ikke er flyttet (Datoformel er fx. 0D):
+                                  IF ("Sales Header"."Order Date" > BehandlingsDato) OR (HuskOrdreDato = "Sales Header"."Order Date") THEN
+                                    CurrReport.BREAK;
+                                END;
+                                 }
+
+  }
+  REQUESTPAGE
+  {
+    PROPERTIES
+    {
+      OnOpenPage=BEGIN
+                   BehandlingsDato := WORKDATE;
+                 END;
+
+    }
+    CONTROLS
+    {
+      { 1101103002;;Container;
+                  ContainerType=ContentArea }
+
+      { 1101103000;1;Field  ;
+                  Name=BehandlingsDato;
+                  SourceExpr=BehandlingsDato }
+
+      { 1101103001;1;Field  ;
+                  Name=OppretteSeneste;
+                  SourceExpr=OppretteSeneste }
+
+      { 1101103003;1;Field  ;
+                  Name=Gjentakelsesgruppekode;
+                  SourceExpr=GjentakelsesgruppekodeG;
+                  OnLookup=VAR
+                             rGjentakelsesgruppeL@1101103000 : Record 5231050;
+                             pGjentakelsesgruppeoversiktL@1101103001 : Page 5231055;
+                           BEGIN
+
+                             pGjentakelsesgruppeoversiktL.LOOKUPMODE(TRUE);
+
+                             IF pGjentakelsesgruppeoversiktL.RUNMODAL = ACTION::LookupOK THEN
+                             BEGIN
+                               pGjentakelsesgruppeoversiktL.GETRECORD(rGjentakelsesgruppeL);
+                               GjentakelsesgruppekodeG := rGjentakelsesgruppeL.Code;
+                             END;
+                           END;
+                            }
+
+    }
+  }
+  LABELS
+  {
+  }
+  CODE
+  {
+    VAR
+      rGjentakelsesordreDataL@1101103010 : Record 5231052;
+      SalgsOrdreHode@1101103009 : Record 36;
+      GjentakGruppe@1101103008 : Record 5231050;
+      RammeOrdreTilOrdre@1101103007 : Codeunit 5231050;
+      OrdreOversikt@1101103006 : Page 5231057;
+      GjentakelsesgruppekodeG@1101103011 : Code[20];
+      OrdreTeller@1101103005 : Integer;
+      FeilTeller@1101103004 : Integer;
+      BehandlingsDato@1101103003 : Date;
+      OppretteSeneste@1101103002 : Boolean;
+      SkjulFeil@1101103001 : Boolean;
+      HuskOrdreDato@1101103000 : Date;
+
+    PROCEDURE SetteSkjulFeil@1(NySkjulFeil@1117700000 : Boolean);
+    BEGIN
+      SkjulFeil := NySkjulFeil;
+    END;
+
+    PROCEDURE SetteOpprettelsesdato@2(NyBehandlingsDato@1117700000 : Date);
+    BEGIN
+      BehandlingsDato := NyBehandlingsDato;
+    END;
+
+    BEGIN
+    END.
+  }
+  RDLDATA
+  {
+  }
+}
+

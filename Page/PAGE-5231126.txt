@@ -1,0 +1,225 @@
+OBJECT Page 5231126 BNH History Line
+{
+  OBJECT-PROPERTIES
+  {
+    Date=30.11.17;
+    Time=20:33:21;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    CaptionML=[ENU=BnH History Line;
+               NOR=BnH Historikk linje];
+    SourceTable=Table5231132;
+    PageType=List;
+    ActionList=ACTIONS
+    {
+      { 1101103079;  ;ActionContainer;
+                      ActionContainerType=ActionItems }
+      { 1101103063;1 ;Action    ;
+                      Name=Delete All Records;
+                      CaptionML=[ENU=Delete All Records;
+                                 NOR=Slett alle poster];
+                      Image=DeleteXML;
+                      OnAction=VAR
+                                 QHistoryLineL@1101103000 : Record 5231132;
+                               BEGIN
+                                 IF CONFIRM( C_DeleteAllRecords, FALSE ) THEN
+                                   IF CONFIRM( C_Sure, FALSE ) THEN
+                                     QHistoryLineL.DELETEALL( FALSE );
+                               END;
+                                }
+      { 1101103061;1 ;Action    ;
+                      Name=Import Data;
+                      CaptionML=[ENU=Import Data;
+                                 NOR=Importer data];
+                      RunObject=XMLport 5231127;
+                      Image=Import;
+                      PromotedCategory=Process }
+      { 1101103080;1 ;Action    ;
+                      Name=Create Records;
+                      CaptionML=[ENU=Create Records;
+                                 NOR=Opprett poster];
+                      Promoted=Yes;
+                      PromotedIsBig=Yes;
+                      Image=TransferOrder;
+                      PromotedCategory=Process;
+                      OnAction=VAR
+                                 QHistoryLineL@1101103001 : Record 5231132;
+                               BEGIN
+                                 CurrPage.SETSELECTIONFILTER( QHistoryLineL );
+                                 CODEUNIT.RUN( CODEUNIT::"BNH History Line", QHistoryLineL );
+                               END;
+                                }
+      { 1101103006;1 ;Action    ;
+                      Name=HistoryList;
+                      CaptionML=[DAN=Deb./k›ret›j - historik - (tidligere anvendt DMS);
+                                 DEU=Deb.-/Fzg.-Hist.(Alts.) šbersicht;
+                                 ENU=Cust./Veh. History (Legacy) List;
+                                 NOR=Kunde/Kj›ret›y historikk oversikt;
+                                 SVE=Kund-/ford. historik (Žrvd DMS) lista];
+                      RunObject=Page 5029012;
+                      Promoted=Yes;
+                      PromotedIsBig=Yes;
+                      Image=ListPage;
+                      PromotedCategory=Process }
+      { 1101103037;1 ;Action    ;
+                      Name=HistoryPage;
+                      CaptionML=[DAN=Deb./k›ret›j - historik - (tidligere anvendt DMS);
+                                 DEU=Deb.-/Fzg.-Historie (Altsyst.);
+                                 ENU=Cust./Veh. History (Legacy DMS);
+                                 NOR=Kunde/Kj›ret›y historikk;
+                                 SVE=Kund-/ford. historik (Žrvd DMS)];
+                      Promoted=Yes;
+                      PromotedIsBig=Yes;
+                      Image=Document;
+                      PromotedCategory=Process;
+                      OnAction=BEGIN
+                                 ShowHistoryHeader;
+                               END;
+                                }
+      { 1101103017;1 ;Action    ;
+                      Name=Forget Records;
+                      CaptionML=[ENU=Forget Records;
+                                 NOR=Glem poster];
+                      Promoted=Yes;
+                      PromotedIsBig=Yes;
+                      Image=TransferOrder;
+                      PromotedCategory=Process;
+                      OnAction=VAR
+                                 QHistoryLineL@1101103001 : Record 5231132;
+                               BEGIN
+                                 CurrPage.SETSELECTIONFILTER( QHistoryLineL );
+                                 CODEUNIT.RUN( CODEUNIT::Codeunit58042, QHistoryLineL );
+                               END;
+                                }
+      { 1101103018;1 ;Action    ;
+                      Name=Vehicle Card;
+                      OnAction=BEGIN
+                                 ShowVehicleCard();
+                               END;
+                                }
+      { 1101103019;1 ;Action    ;
+                      Name=Nullstill referanser;
+                      OnAction=VAR
+                                 QHistoryLineL@1101103000 : Record 5231132;
+                                 BNHHistoryLineL@1101103001 : Codeunit 5231136;
+                               BEGIN
+                                 CurrPage.SETSELECTIONFILTER( QHistoryLineL );
+                                 //CODEUNIT.RUN( CODEUNIT::"BNH History Line", QHistoryLineL );
+                                 BNHHistoryLineL.ResetStatus(QHistoryLineL);
+                               END;
+                                }
+    }
+  }
+  CONTROLS
+  {
+    { 1101103000;0;Container;
+                ContainerType=ContentArea }
+
+    { 1101103001;1;Group  ;
+                Name=Group;
+                GroupType=Repeater }
+
+    { 1101103002;2;Field  ;
+                SourceExpr="Q Primary Key" }
+
+    { 1101103003;2;Field  ;
+                SourceExpr="Q Status" }
+
+    { 1101103004;2;Field  ;
+                SourceExpr="Q Datetime" }
+
+    { 1101103005;2;Field  ;
+                SourceExpr="Q Update message" }
+
+    { 1101103007;2;Field  ;
+                SourceExpr="Q Record ID" }
+
+    { 1101103008;2;Field  ;
+                SourceExpr=RegNr }
+
+    { 1101103009;2;Field  ;
+                SourceExpr=OrdrNr }
+
+    { 1101103010;2;Field  ;
+                SourceExpr=Faktnr }
+
+    { 1101103011;2;Field  ;
+                SourceExpr=LType }
+
+    { 1101103012;2;Field  ;
+                SourceExpr=VareNrServNr }
+
+    { 1101103013;2;Field  ;
+                SourceExpr=Tekst }
+
+    { 1101103014;2;Field  ;
+                SourceExpr=FaktDt }
+
+    { 1101103015;2;Field  ;
+                SourceExpr=Upris }
+
+    { 1101103016;2;Field  ;
+                SourceExpr=FakAnt }
+
+  }
+  CODE
+  {
+    VAR
+      CustomerG@1101103001 : Record 18;
+      C_DeleteAllRecords@1101103000 : TextConst 'ENU=Delete All Records?;NOR=Slett alle poster?';
+      C_Sure@1101103002 : TextConst 'ENU=Sure?;NOR=Sikker?';
+      C_NoHeader@1101103004 : TextConst 'ENU=No header found. Filter %1;NOR=Finner ikke hode. Filter %1.';
+      C_MultipleHeaders@1101103003 : TextConst 'ENU=Multiple headers found. Filter %1;NOR=Finner flere poster. Filter %1.';
+
+    PROCEDURE ShowHistoryHeader@1101103000();
+    VAR
+      CustVehHistHdrLegacyDMSL@1101103000 : Record 5210222;
+    BEGIN
+      WITH CustVehHistHdrLegacyDMSL DO BEGIN
+        RESET;
+        SETRANGE( "License No.", Rec.RegNr );
+        SETRANGE( "Order No.", Rec.OrdrNr );
+        SETRANGE( "Document No.", Rec.Faktnr );
+        CASE TRUE OF
+          ISEMPTY:
+            MESSAGE( C_NoHeader, GETFILTERS );
+          COUNT = 1:
+            BEGIN
+              FINDFIRST;
+              PAGE.RUN( PAGE::"KillMe P5029010", CustVehHistHdrLegacyDMSL );
+            END;
+          ELSE
+            MESSAGE( C_MultipleHeaders, GETFILTERS );
+        END;
+      END;
+
+    END;
+
+    PROCEDURE ShowVehicleCard@1101103004();
+    VAR
+      VehicleL@1101103000 : Record 5025400;
+      Vehicle2L@1101103002 : Record 5025400;
+      BNHHistoryHeaderL@1101103001 : Record 5231131;
+    BEGIN
+      WITH Vehicle2L DO BEGIN
+        RESET;
+        SETRANGE( "License No.", RegNr );
+      //    BNHHistoryHeaderL.SETRANGE("REGISTER-NUMBER", RegNr);
+      //    BNHHistoryHeaderL.SETFILTER(VIN, '<>%1', '');
+        IF Vehicle2L.FINDFIRST THEN
+      //    IF BNHHistoryHeaderL.FINDFIRST THEN
+      //      IF VehicleL.GET(BNHHistoryHeaderL.VIN) THEN
+            PAGE.RUN( PAGE::"Vehicle Card", Vehicle2L )
+      END;
+
+      CurrPage.UPDATE( FALSE );
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

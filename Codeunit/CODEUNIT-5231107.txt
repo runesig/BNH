@@ -1,0 +1,154 @@
+OBJECT Codeunit 5231107 BB Regnskapsposter Update
+{
+  OBJECT-PROPERTIES
+  {
+    Date=26.11.17;
+    Time=13:47:43;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    TableNo=5231101;
+    OnRun=BEGIN
+            BBFinansG.COPY( Rec );
+
+            CASE TRUE OF
+              BBFinansG.Status = Status::Ignore:
+                EXIT;
+              ELSE
+                InsertRecord();
+            END;
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      BBFinansG@1101103000 : Record 5231101;
+      Teller@1101103001 : Integer;
+
+    PROCEDURE InsertRecord@1101103040();
+    VAR
+      GenJournalLineL@1101103001 : Record 81;
+      GenJournalLine2L@1101103002 : Record 81;
+      VendorL@1101103000 : Record 23;
+      tmpDecL@1101103003 : Decimal;
+      Erstatt@1101103004 : Codeunit 5231127;
+    BEGIN
+      GenJournalLine2L.SETRANGE("Journal Template Name", 'GENERELT');
+      GenJournalLine2L.SETRANGE("Journal Batch Name", 'BB_HB17_N');
+
+      GenJournalLineL.INIT;
+      GenJournalLineL.VALIDATE("Journal Template Name", 'GENERELT');
+      GenJournalLineL.VALIDATE("Journal Batch Name", 'BB_HB17_N');
+      IF GenJournalLine2L.FINDLAST THEN
+        GenJournalLineL."Line No." := GenJournalLine2L."Line No." + 10
+        ELSE
+        GenJournalLineL."Line No." := 10;
+
+      GenJournalLineL.VALIDATE("Posting Date", BBFinansG."Bokf. dato");
+      GenJournalLineL.VALIDATE("Document No.", 'xBB' + BBFinansG."Document No.");
+      GenJournalLineL.VALIDATE("External Document No.", BBFinansG."Document No.");
+
+      BBFinansG.CALCFIELDS("Incadea konto");
+      IF BBFinansG."Incadea konto" = '' THEN
+        ERROR('Konto i incadea mangler for %1', BBFinansG."G/L Account No.");
+      GenJournalLineL.VALIDATE("Account Type", GenJournalLineL."Account Type"::"G/L Account");
+      GenJournalLineL.VALIDATE("Account No.", BBFinansG."Incadea konto");
+
+      IF BBFinansG."Make Code" = 'DEKK' THEN
+        GenJournalLineL.VALIDATE("Shortcut Dimension 2 Code", 'CONTI')
+        ELSE
+        GenJournalLineL.VALIDATE("Shortcut Dimension 2 Code", BBFinansG."Make Code");
+
+      //EVALUATE(tmpDecL, BBFinansG.Bel›p);
+      GenJournalLineL.VALIDATE(Amount, BBFinansG."Bel›p");
+      GenJournalLineL.VALIDATE("Location Code", BBFinansG."Branch Code");
+      GenJournalLineL.Description := COPYSTR(BBFinansG.Description + ' ('+ BBFinansG."G/L Account No." +')',1,50); //XXX
+
+      CASE BBFinansG."Department Code" OF
+        '300' :
+        BBFinansG."Department Code" := '10';
+        '330' :
+         BBFinansG."Department Code" := '10';
+        '340' :
+        BBFinansG."Department Code" := '10';
+        '350' :
+        BBFinansG."Department Code" := '12';
+        '370' :
+        BBFinansG."Department Code" := '10';
+        '400' :
+        BBFinansG."Department Code" := '12';
+        '500' :
+        BBFinansG."Department Code" := '80';
+        '600'   :
+        BBFinansG."Department Code" := '30';
+        '700' :
+        BBFinansG."Department Code" := '20';
+        '900' :
+        BBFinansG."Department Code" := '00';
+      END;
+      GenJournalLineL.VALIDATE("Shortcut Dimension 1 Code", BBFinansG."Department Code");
+      GenJournalLineL."Gen. Prod. Posting Group" := '';
+      GenJournalLineL."VAT Prod. Posting Group" := '';
+      GenJournalLineL."Mva. kode" := '';
+      GenJournalLineL."VAT Amount" := 0;
+      GenJournalLineL."VAT Amount (LCY)" := 0;
+      GenJournalLineL."VAT %" := 0;
+      GenJournalLineL."VAT Base Amount (LCY)" := GenJournalLineL.Amount; //XXX
+      GenJournalLineL."Gen. Posting Type" := 0;
+      GenJournalLineL."Motkonto mva. kode" := '';
+      GenJournalLineL.INSERT(TRUE);
+      Teller += 1;
+      IF Teller>1000 THEN BEGIN
+        COMMIT;
+        Teller := 0;
+      END;
+    END;
+
+    PROCEDURE Str2Date@1117700019(InnDato@1117700000 : Text[30];InnFormat@1117700001 : Integer) UtDato : Date;
+    VAR
+      Dag@1117700002 : Integer;
+      Mnd@1117700003 : Integer;
+      Aar@1117700004 : Integer;
+    BEGIN
+      IF InnDato = '' THEN EXIT(0D);
+
+      CASE InnFormat OF
+        0: // DD-MM-YYYY
+          BEGIN
+            EVALUATE(Dag, COPYSTR(InnDato,2,2));
+            EVALUATE(Mnd, COPYSTR(InnDato,5,2));
+            EVALUATE(Aar, COPYSTR(InnDato,8,4));
+            UtDato := DMY2DATE(Dag, Mnd, Aar);
+          END;
+        1: // MM-DD-YYYY
+          BEGIN
+            EVALUATE(Dag, COPYSTR(InnDato,4,2));
+            EVALUATE(Mnd, COPYSTR(InnDato,1,2));
+            EVALUATE(Aar, COPYSTR(InnDato,7,4));
+            UtDato := DMY2DATE(Dag, Mnd, Aar);
+          END;
+        2: // DDMMYY
+          BEGIN
+            EVALUATE(Dag, COPYSTR(InnDato,1,2));
+            EVALUATE(Mnd, COPYSTR(InnDato,3,2));
+            EVALUATE(Aar, COPYSTR(InnDato,5,2));
+            UtDato := DMY2DATE(Dag, Mnd, Aar+2000);
+          END;
+        3: // YYYYMMDD
+          BEGIN
+            EVALUATE(Dag, COPYSTR(InnDato,7,2));
+            EVALUATE(Mnd, COPYSTR(InnDato,5,2));
+            EVALUATE(Aar, COPYSTR(InnDato,1,4));
+            UtDato := DMY2DATE(Dag, Mnd, Aar);
+          END;
+      END;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

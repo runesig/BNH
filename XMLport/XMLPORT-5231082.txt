@@ -1,0 +1,166 @@
+OBJECT XMLport 5231082 Portrait Dialog Campaign Exp.
+{
+  OBJECT-PROPERTIES
+  {
+    Date=17.11.17;
+    Time=15:40:41;
+    Modified=Yes;
+    Version List=BNH Portrait;
+  }
+  PROPERTIES
+  {
+    CaptionML=ENU=Portrait Dialog Campaign Exp.;
+    Direction=Export;
+    TextEncoding=WINDOWS;
+    Format=Variable Text;
+    FieldDelimiter=<None>;
+    FieldSeparator=<TAB>;
+    TableSeparator=<NewLine>;
+    UseRequestPage=Yes;
+  }
+  ELEMENTS
+  {
+    { [{C19D763B-C1F1-473D-8D3E-3640AD129D95}];  ;root                ;Element ;Text    ;
+                                                  MinOccurs=Zero }
+
+    { [{D21756C9-8F62-4CEF-9BBF-29124808DA37}];1 ;Header              ;Element ;Table   ;
+                                                  SourceTable=Table98 }
+
+    { [{175502B8-88A8-43EC-BB4D-6EA2FCBDB01B}];2 ;MakeCodeHeader      ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 MakeCodeHeader := 'Make_Code';
+                                                                               END;
+                                                                                }
+
+    { [{E46C689D-D177-4A50-A32C-0DBB8A79F86C}];2 ;CampaignNoHeader    ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 CampaignNoHeader := 'Campaign_Id';
+                                                                               END;
+                                                                                }
+
+    { [{2D99A961-DBB2-4F88-902C-5DD543FA05FF}];2 ;VinHeader           ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 VinHeader := 'Vin';
+                                                                               END;
+                                                                                }
+
+    { [{C8D36371-9A12-4FAD-92D6-9E176855B0E5}];2 ;AddressNoHeader     ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 AddressNoHeader := 'Record_Id';
+                                                                               END;
+                                                                                }
+
+    { [{16B4F915-2A49-4B02-B62F-A685386F2B84}];2 ;CampaignTypeHeader  ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 CampaignTypeHeader := 'Campaign_Type';
+                                                                               END;
+                                                                                }
+
+    { [{F7ABCBD0-DEB7-41AD-8721-82054804D688}];2 ;DescriptionHeader   ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 DescriptionHeader := 'Description';
+                                                                               END;
+                                                                                }
+
+    { [{FD4FA629-5221-4CA6-976F-C9D599F56860}];2 ;ValidFromHeader     ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 ValidFromHeader := 'Valid_From';
+                                                                               END;
+                                                                                }
+
+    { [{881AEC85-E975-4608-9FA3-EE58D8769BDB}];2 ;ValidToHeader       ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 ValidToHeader := 'Valid_To';
+                                                                               END;
+                                                                                }
+
+    { [{72F096D1-C6D6-41EA-B29A-65D19F39E5CA}];2 ;RecordOperationHeader;Element;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 RecordOperationHeader := 'Record_Operation';
+                                                                               END;
+                                                                                }
+
+    { [{9698B9A0-4888-4D14-8244-21655401C575}];1 ;Campaign            ;Element ;Table   ;
+                                                  SourceTable=Table5025571;
+                                                  Export::OnAfterGetRecord=VAR
+                                                                             CampaignHeaderL@1101103000 : Record 5025570;
+                                                                           BEGIN
+                                                                             CampaignHeaderL.RESET;
+                                                                             CampaignHeaderL.SETRANGE("No.", "Serv. Campaign-Affected Veh."."Serv. Campaign No.");
+                                                                             IF CampaignHeaderL.FINDFIRST THEN BEGIN
+                                                                               CampaignType := FORMAT(CampaignHeaderL."Make Campaign Type");
+                                                                               ValidFrom := FORMAT(CampaignHeaderL."Valid-From Date", 0, '<Day,2>.<Month,2>.<Year4>');
+                                                                               ValidTo := FORMAT(CampaignHeaderL."Valid-To Date", 0, '<Day,2>.<Month,2>.<Year4>');
+                                                                             END ELSE BEGIN
+                                                                               CampaignType := '';
+                                                                               ValidFrom := '';
+                                                                               ValidTo := '';
+                                                                             END;
+                                                                             IF CampaignType = '' THEN
+                                                                               currXMLport.SKIP;
+                                                                           END;
+                                                                            }
+
+    { [{F2724088-11D7-43CA-A763-D7C9BF019738}];2 ;MakeCode            ;Element ;Field   ;
+                                                  DataType=Code;
+                                                  SourceField=Serv. Campaign-Affected Veh.::Make Code }
+
+    { [{35DF9C32-D266-46A0-8A56-34AFC2B8297F}];2 ;CampaignNo          ;Element ;Field   ;
+                                                  DataType=Code;
+                                                  SourceField=Serv. Campaign-Affected Veh.::Serv. Campaign No. }
+
+    { [{9E421EEB-6C9B-4F57-AB3D-F82E46DDFEE1}];2 ;VIN                 ;Element ;Field   ;
+                                                  DataType=Code;
+                                                  SourceField=Serv. Campaign-Affected Veh.::VIN }
+
+    { [{6CD9045B-957F-42FD-8D28-87FEFD6AE178}];2 ;AddressNo           ;Element ;Field   ;
+                                                  DataType=Integer;
+                                                  SourceField=Serv. Campaign-Affected Veh.::Address No. }
+
+    { [{3083763C-F5A5-41C2-BAEA-7019B1961091}];2 ;CampaignType        ;Element ;Text     }
+
+    { [{4388A5E3-6D75-4A65-9C91-B34D84F44930}];2 ;Description         ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=Serv. Campaign-Affected Veh.::Name 2 }
+
+    { [{D2A3A7B9-23CF-4ABD-9C2D-F8F587658C47}];2 ;ValidFrom           ;Element ;Text     }
+
+    { [{60304517-7891-4BE8-8E72-1D066D8A3A3B}];2 ;ValidTo             ;Element ;Text     }
+
+    { [{28E2300A-66AC-4116-A859-E38BC2247027}];2 ;RecordOperation     ;Element ;Text    ;
+                                                  Export::OnBeforePassVariable=BEGIN
+                                                                                 RecordOperation := 'U';
+                                                                               END;
+                                                                                }
+
+  }
+  EVENTS
+  {
+  }
+  REQUESTPAGE
+  {
+    PROPERTIES
+    {
+    }
+    CONTROLS
+    {
+    }
+  }
+  CODE
+  {
+    VAR
+      C_NoData@1101103000 : TextConst 'ENU=" ";NOR=" "';
+
+    BEGIN
+    {
+      +----------------------------------------------+
+      | Copyright ¸ 2017   incadea.dms               |
+      +----------------------------------------------+
+      No.   Version Date      ID    Remark
+      ------------------------------------------------
+                    26.09.17  DHO   Initial Version
+    }
+    END.
+  }
+}
+

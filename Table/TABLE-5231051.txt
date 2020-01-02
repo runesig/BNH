@@ -1,0 +1,70 @@
+OBJECT Table 5231051 Blanker Order Ledger Entry
+{
+  OBJECT-PROPERTIES
+  {
+    Date=01.11.17;
+    Time=10:03:19;
+    Modified=Yes;
+    Version List=BlanketOrderBNH;
+  }
+  PROPERTIES
+  {
+    OnInsert=BEGIN
+               IF "Entry No." = 0 THEN
+                 IF GjentakPost.FIND('+') THEN
+                   "Entry No." := GjentakPost."Entry No." + 1
+                 ELSE
+                   "Entry No." := 1;
+             END;
+
+    CaptionML=[ENU=Blanker Order Ledger Entry;
+               NOR=Rammeordre poster];
+  }
+  FIELDS
+  {
+    { 1   ;   ;Entry No.           ;Integer       ;CaptionML=[DAN=L›benr.;
+                                                              ENU=Entry No.;
+                                                              NOR=L›penr.;
+                                                              SVE=L”pnr.] }
+    { 2   ;   ;Blanket Order No.   ;Code20        ;CaptionML=[DAN=Rammeordrenr.;
+                                                              ENU=Blanket Order No.;
+                                                              NOR=Rammeordrenr.;
+                                                              SVE=Ramordernr.] }
+    { 3   ;   ;Date                ;Date          ;CaptionML=[DAN=Dato;
+                                                              ENU=Date;
+                                                              NOR=Dato;
+                                                              SVE=Datum] }
+    { 4   ;   ;Time                ;Time          ;CaptionML=[DAN=Tid;
+                                                              ENU=Time;
+                                                              NOR=Tid;
+                                                              SVE=Tid] }
+    { 5   ;   ;Document Type       ;Option        ;CaptionML=[DAN=Bilagstype;
+                                                              ENU=Document Type;
+                                                              NOR=Bilagstype;
+                                                              SVE=Bilagstyp];
+                                                   OptionString=Tilbud,Ordre,Faktura,Kreditnota,Rammeordre }
+    { 6   ;   ;Document No.        ;Code20        ;CaptionML=[DAN=Bilagsnr.;
+                                                              NOR=Bilagsnr.;
+                                                              SVE=Bilagsnr.] }
+    { 7   ;   ;User ID             ;Code20        ;CaptionML=[DAN=Bruger ID;
+                                                              ENU=User ID;
+                                                              NOR=Bruker ID;
+                                                              SVE=Anv„ndar ID] }
+  }
+  KEYS
+  {
+    {    ;Entry No.                               ;Clustered=Yes }
+  }
+  FIELDGROUPS
+  {
+  }
+  CODE
+  {
+    VAR
+      GjentakPost@1117700000 : Record 5231051;
+
+    BEGIN
+    END.
+  }
+}
+

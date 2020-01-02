@@ -1,0 +1,276 @@
+OBJECT Page 5231102 BB Vehicle
+{
+  OBJECT-PROPERTIES
+  {
+    Date=12.12.17;
+    Time=19:36:25;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    SourceTable=Table5231103;
+    PageType=List;
+    ActionList=ACTIONS
+    {
+      { 1101103063;  ;ActionContainer;
+                      ActionContainerType=ActionItems }
+      { 1101103064;1 ;Action    ;
+                      Name=Import;
+                      RunObject=XMLport 5231101 }
+      { 1101103066;1 ;Action    ;
+                      Name=Sjekk om kj›ret›y eksisterer;
+                      OnAction=VAR
+                                 "BBKj›ret›yL"@1101103000 : Codeunit 5231105;
+                               BEGIN
+                                 "BBKj›ret›yL".CheckIfExist();
+                                 CurrPage.UPDATE;
+                               END;
+                                }
+      { 1101103067;1 ;Action    ;
+                      Name=Create Vehicle;
+                      Promoted=Yes;
+                      PromotedIsBig=Yes;
+                      Image=CreateForm;
+                      PromotedCategory=Process;
+                      OnAction=VAR
+                                 BBVehicleL@1101103000 : Record 5231103;
+                               BEGIN
+                                 CurrPage.SETSELECTIONFILTER( BBVehicleL );
+                                 CODEUNIT.RUN( CODEUNIT::"BB Vehicle", BBVehicleL );
+                                 CurrPage.UPDATE( FALSE );
+                               END;
+                                }
+      { 1101103068;1 ;Action    ;
+                      Name=Card;
+                      Promoted=Yes;
+                      PromotedIsBig=Yes;
+                      Image=card;
+                      PromotedCategory=Process;
+                      OnAction=VAR
+                                 VehicleL@1101103000 : Record 5025400;
+                               BEGIN
+                                 WITH VehicleL DO BEGIN
+                                   RESET;
+                                 //  SETRANGE( "License No.", "REGISTER-NUMBER" );
+                                   CASE TRUE OF
+                                     GET(codeVin) :
+                                       PAGE.RUN( PAGE::"Vehicle Card", VehicleL )
+                                   END;
+                                 END;
+
+                                 CurrPage.UPDATE( FALSE );
+                               END;
+                                }
+    }
+  }
+  CONTROLS
+  {
+    { 1101103000;0;Container;
+                ContainerType=ContentArea }
+
+    { 1101103001;1;Group  ;
+                Name=Group;
+                GroupType=Repeater }
+
+    { 1101103002;2;Field  ;
+                SourceExpr="Primary Key" }
+
+    { 1101103003;2;Field  ;
+                SourceExpr=Status }
+
+    { 1101103004;2;Field  ;
+                SourceExpr=Datetime }
+
+    { 1101103005;2;Field  ;
+                SourceExpr="Update message" }
+
+    { 1101103006;2;Field  ;
+                SourceExpr="No." }
+
+    { 1101103069;2;Field  ;
+                SourceExpr=Kunde }
+
+    { 1101103070;2;Field  ;
+                SourceExpr=Extra2 }
+
+    { 1101103065;2;Field  ;
+                SourceExpr="BNH VIN" }
+
+    { 1101103007;2;Field  ;
+                SourceExpr=codeVin }
+
+    { 1101103008;2;Field  ;
+                SourceExpr=Model }
+
+    { 1101103009;2;Field  ;
+                SourceExpr=Type }
+
+    { 1101103010;2;Field  ;
+                SourceExpr=Class }
+
+    { 1101103011;2;Field  ;
+                SourceExpr="Model No." }
+
+    { 1101103012;2;Field  ;
+                SourceExpr="Make Code" }
+
+    { 1101103013;2;Field  ;
+                SourceExpr="Variant Code" }
+
+    { 1101103014;2;Field  ;
+                SourceExpr="Customer No." }
+
+    { 1101103015;2;Field  ;
+                SourceExpr="License No." }
+
+    { 1101103016;2;Field  ;
+                SourceExpr=Mileage }
+
+    { 1101103017;2;Field  ;
+                SourceExpr="Annual Mileage" }
+
+    { 1101103018;2;Field  ;
+                SourceExpr="Prod. Year" }
+
+    { 1101103019;2;Field  ;
+                SourceExpr="Initial Registration" }
+
+    { 1101103020;2;Field  ;
+                SourceExpr="Power (kW)" }
+
+    { 1101103021;2;Field  ;
+                SourceExpr="Power (hp)" }
+
+    { 1101103022;2;Field  ;
+                SourceExpr=Tires }
+
+    { 1101103023;2;Field  ;
+                SourceExpr="Empty Weight (kg)" }
+
+    { 1101103024;2;Field  ;
+                SourceExpr="Total Weight (kg)" }
+
+    { 1101103025;2;Field  ;
+                SourceExpr="Roof Load (kg)" }
+
+    { 1101103026;2;Field  ;
+                SourceExpr="Data Processing No." }
+
+    { 1101103027;2;Field  ;
+                SourceExpr="Engine Code" }
+
+    { 1101103028;2;Field  ;
+                SourceExpr="Engine No." }
+
+    { 1101103029;2;Field  ;
+                SourceExpr="Key No." }
+
+    { 1101103030;2;Field  ;
+                SourceExpr="Vehicle Category Cod" }
+
+    { 1101103031;2;Field  ;
+                SourceExpr="Emissions Test Categ" }
+
+    { 1101103032;2;Field  ;
+                SourceExpr="Cylinder Capacity (c" }
+
+    { 1101103033;2;Field  ;
+                SourceExpr="Customer Registratio" }
+
+    { 1101103034;2;Field  ;
+                SourceExpr="Model Code" }
+
+    { 1101103035;2;Field  ;
+                SourceExpr="Transmission Type Co" }
+
+    { 1101103036;2;Field  ;
+                SourceExpr="Engine Type Code" }
+
+    { 1101103037;2;Field  ;
+                SourceExpr="No. of Cylinders" }
+
+    { 1101103038;2;Field  ;
+                SourceExpr="Trailer Load (kg)" }
+
+    { 1101103039;2;Field  ;
+                SourceExpr="Trailer Tongue Load" }
+
+    { 1101103040;2;Field  ;
+                SourceExpr="4WD" }
+
+    { 1101103041;2;Field  ;
+                SourceExpr="No. of Axles" }
+
+    { 1101103042;2;Field  ;
+                SourceExpr="Wheel Distance (mm)" }
+
+    { 1101103043;2;Field  ;
+                SourceExpr="Front Axle Load (kg)" }
+
+    { 1101103044;2;Field  ;
+                SourceExpr="Rear Axle Load (kg)" }
+
+    { 1101103045;2;Field  ;
+                SourceExpr="No. of Doors" }
+
+    { 1101103046;2;Field  ;
+                SourceExpr="Purchase Invoice Dat" }
+
+    { 1101103047;2;Field  ;
+                SourceExpr="Old Customer No." }
+
+    { 1101103048;2;Field  ;
+                SourceExpr="Purchase Receipt Dat" }
+
+    { 1101103049;2;Field  ;
+                SourceExpr="Current Book No." }
+
+    { 1101103050;2;Field  ;
+                SourceExpr="Date of Sale" }
+
+    { 1101103051;2;Field  ;
+                SourceExpr="Color Description" }
+
+    { 1101103052;2;Field  ;
+                SourceExpr="Color Class" }
+
+    { 1101103053;2;Field  ;
+                SourceExpr="Upholstery Descripti" }
+
+    { 1101103054;2;Field  ;
+                SourceExpr="Upholstery Class" }
+
+    { 1101103055;2;Field  ;
+                SourceExpr="M†ned Serviceinnkall" }
+
+    { 1101103056;2;Field  ;
+                SourceExpr="Forrige kilometersta" }
+
+    { 1101103057;2;Field  ;
+                SourceExpr="Serviceintervall lin" }
+
+    { 1101103058;2;Field  ;
+                SourceExpr=Innkallingskriterie }
+
+    { 1101103059;2;Field  ;
+                SourceExpr=Serviceintervall }
+
+    { 1101103060;2;Field  ;
+                SourceExpr="Antall innkallinger" }
+
+    { 1101103061;2;Field  ;
+                SourceExpr="Antall utf›rte innka" }
+
+    { 1101103062;2;Field  ;
+                SourceExpr="Dato siste bevegelse" }
+
+  }
+  CODE
+  {
+
+    BEGIN
+    END.
+  }
+}
+

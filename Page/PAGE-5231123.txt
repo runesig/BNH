@@ -1,0 +1,90 @@
+OBJECT Page 5231123 BNH masterdata2lev
+{
+  OBJECT-PROPERTIES
+  {
+    Date=22.11.17;
+    Time=18:16:27;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    SourceTable=Table5231129;
+    PageType=List;
+    ActionList=ACTIONS
+    {
+      { 1101103017;  ;ActionContainer;
+                      ActionContainerType=ActionItems }
+      { 1101103018;1 ;Action    ;
+                      Name=Import File;
+                      OnAction=VAR
+                                 "BNH masterdata2lev"@1101103000 : XMLport 5231124;
+                               BEGIN
+                                 "BNH masterdata2lev".RUN;
+                               END;
+                                }
+    }
+  }
+  CONTROLS
+  {
+    { 1101103000;0;Container;
+                ContainerType=ContentArea }
+
+    { 1101103001;1;Group  ;
+                Name=Group;
+                GroupType=Repeater }
+
+    { 1101103002;2;Field  ;
+                SourceExpr="Primary Key" }
+
+    { 1101103003;2;Field  ;
+                SourceExpr=Status }
+
+    { 1101103004;2;Field  ;
+                SourceExpr=Datetime }
+
+    { 1101103005;2;Field  ;
+                SourceExpr="Update message" }
+
+    { 1101103006;2;Field  ;
+                SourceExpr="No." }
+
+    { 1101103007;2;Field  ;
+                SourceExpr="Levr.nr" }
+
+    { 1101103008;2;Field  ;
+                SourceExpr="Sted/By" }
+
+    { 1101103009;2;Field  ;
+                SourceExpr=Banknr }
+
+    { 1101103010;2;Field  ;
+                SourceExpr=Betalingsbetingelser }
+
+    { 1101103011;2;Field  ;
+                SourceExpr=betalingsm†te }
+
+    { 1101103012;2;Field  ;
+                SourceExpr=Bankgironr }
+
+    { 1101103013;2;Field  ;
+                SourceExpr=organisasjonsnr }
+
+    { 1101103014;2;Field  ;
+                SourceExpr="Leverand›rtype" }
+
+    { 1101103015;2;Field  ;
+                SourceExpr=Telefon }
+
+    { 1101103016;2;Field  ;
+                SourceExpr="sist fakturert" }
+
+  }
+  CODE
+  {
+
+    BEGIN
+    END.
+  }
+}
+

@@ -1,0 +1,66 @@
+OBJECT Page 5231116 Chassis og modellkoder
+{
+  OBJECT-PROPERTIES
+  {
+    Date=19.11.17;
+    Time=18:08:10;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    SourceTable=Table5231120;
+    PageType=List;
+    ActionList=ACTIONS
+    {
+      { 1101103009;  ;ActionContainer;
+                      ActionContainerType=ActionItems }
+      { 1101103010;1 ;Action    ;
+                      Name=Import File;
+                      OnAction=VAR
+                                 ChassisogmodellkoderL@1101103000 : XMLport 5231118;
+                               BEGIN
+                                 ChassisogmodellkoderL.RUN;
+                               END;
+                                }
+    }
+  }
+  CONTROLS
+  {
+    { 1101103000;0;Container;
+                ContainerType=ContentArea }
+
+    { 1101103001;1;Group  ;
+                Name=Group;
+                GroupType=Repeater }
+
+    { 1101103002;2;Field  ;
+                SourceExpr="Primary Key" }
+
+    { 1101103003;2;Field  ;
+                SourceExpr=Status }
+
+    { 1101103004;2;Field  ;
+                SourceExpr=Datetime }
+
+    { 1101103005;2;Field  ;
+                SourceExpr="Update message" }
+
+    { 1101103006;2;Field  ;
+                SourceExpr="No." }
+
+    { 1101103007;2;Field  ;
+                SourceExpr=Chassis_vin }
+
+    { 1101103008;2;Field  ;
+                SourceExpr=Modellkode }
+
+  }
+  CODE
+  {
+
+    BEGIN
+    END.
+  }
+}
+

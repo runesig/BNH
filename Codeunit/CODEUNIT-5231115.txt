@@ -1,0 +1,625 @@
+OBJECT Codeunit 5231115 BnH Vehicle Update
+{
+  OBJECT-PROPERTIES
+  {
+    Date=26.11.17;
+    Time=10:04:14;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    TableNo=5231115;
+    OnRun=VAR
+            WorldManufacturerCodeL@1101103000 : Record 5045460;
+          BEGIN
+            BnHVehicleG.COPY( Rec );
+
+            WITH BnHVehicleG DO BEGIN
+
+              CALCFIELDS( VIN );
+
+              CASE TRUE OF
+
+                "Q Status" = "Q Status"::Ignore:
+                  EXIT;
+
+                "CHASSIS-NUMBER" = '':
+                  ERROR( C_NoVIN );
+
+                STRLEN("CHASSIS-NUMBER") <> 17:
+                  ERROR(C_LengthVIN);
+
+                NOT WorldManufacturerCodeL.GET(COPYSTR("CHASSIS-NUMBER", 1, 3)):
+                  ERROR('Finner ikke kode %1 i tabell "World Manufacturer Code"', COPYSTR("CHASSIS-NUMBER", 1, 3));
+
+                VIN <> '':
+                  ModifyRecord;
+
+                ELSE
+                  InsertRecord;
+
+              END;
+            END;
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      C_ConfirmProcess@1101103000 : TextConst 'ENU=Process %1 records?;NOR=Prosesser %1 poster?';
+      BnHVehicleG@1101103001 : Record 5231115;
+      VehicleG@1101103002 : Record 5025400;
+      C_NoVIN@1101103003 : TextConst 'ENU=VIN missing;NOR=Mangler chassisnummer';
+      C_LengthVIN@1101103004 : TextConst 'ENU=VIN is not 17 digits';
+
+    PROCEDURE InsertRecord@1101103000();
+    BEGIN
+      CLEAR( VehicleG );
+      WITH VehicleG DO BEGIN
+        INIT;
+        VIN := BnHVehicleG."CHASSIS-NUMBER"; // Insert mÜ kjõres etter chassisnr. Hvis ikke overskrives modell bl.a.
+      //  SetFields;
+        INSERT( TRUE );
+        ModifyRecord();
+      END;
+    END;
+
+    PROCEDURE ModifyRecord@1101103001();
+    BEGIN
+      WITH VehicleG DO BEGIN
+        BnHVehicleG.CALCFIELDS(VIN);
+        GET( BnHVehicleG.VIN );
+        SetFields;
+        MODIFY( TRUE );
+      END;
+    END;
+
+    PROCEDURE SetFields@1101103005();
+    VAR
+      txtHelp@1101103000 : Text[250];
+    BEGIN
+      WITH VehicleG DO BEGIN
+
+      //  VIN := BnHVehicleG."CHASSIS-NUMBER";
+
+        // := BnHVehicleG.KEY;
+        // := BnHVehicleG."STATE-CODE";
+        // := BnHVehicleG."TRANSACT-DATE";
+        // := BnHVehicleG.HANDLER;
+        SetCustomerNo2;
+        EVALUATE( "License No.", BnHVehicleG."REGISTER-NUMBER" );
+        // := BnHVehicleG."CAR-GROUP";
+        // := BnHVehicleG.STATUS;
+        // := BnHVehicleG."CHASSIS-NUMBER";
+        // := BnHVehicleG."USER-CODE";
+        // := BnHVehicleG."OWNER-CODE";
+        // := BnHVehicleG."UNIT-ACCOUNTING";
+        // := BnHVehicleG."CONTACT-PERSON";
+        "Initial Registration" := EvalDate( BnHVehicleG."FIRST-REG-DATE" );
+        "Customer Registration Date" := EvalDate( BnHVehicleG."LATEST-REG-DATE" );
+        // := BnHVehicleG."FIRST-OCCURRENCE-DAT";
+        // := BnHVehicleG."EXPECTED-ARIVAL-DATE";
+        // := BnHVehicleG."ARIVAL-DATE";
+        // := BnHVehicleG."LAST-OWNER-CHANGE";
+        "Last Purchaser No." := BnHVehicleG."SALESMAN-BUY";
+        "Last Salesperson No." := BnHVehicleG."SALESMAN-SALE";
+        // := BnHVehicleG."RESERVATION-DATE";
+        // := BnHVehicleG.RESERVATION;
+        Model := BnHVehicleG."MODEL-TEXT";
+        // := BnHVehicleG."ORIG-MODEL-CODE1";
+        // := BnHVehicleG."ORIG-MODEL-CODE2";
+        "Model Code" := BnHVehicleG."MODEL-CODE";
+        // := BnHVehicleG.CLASSIFICATION;
+        "Engine No." := BnHVehicleG."MOTOR-NUMBER";
+        IF BnHVehicleG."KEY-CODE" <> '' THEN
+          CreateProtectedVehCode(VehicleG, BnHVehicleG."KEY-CODE", 'NùKKEL') ;
+        BnHVehicleG.CALCFIELDS(Radio);
+        IF BnHVehicleG.Radio <> '' THEN
+          CreateProtectedVehCode(VehicleG, BnHVehicleG.Radio, 'RADIO') ;
+        "Model Year" := BnHVehicleG."YEAR-MODEL";
+        IF EVALUATE( "Cylinder Capacity (ccm)", BnHVehicleG."CYLINDER-VOLUME" ) THEN ;
+        IF EVALUATE( "No. of Seats", BnHVehicleG.SEATS ) THEN ;
+        // := BnHVehicleG."DECLARATION-DATE";
+        // := BnHVehicleG."DECLARATION-PLACE";
+        // := BnHVehicleG."DECLARATION-NUMBER";
+        // := BnHVehicleG."ARRIVAL-SHIP";
+        // := BnHVehicleG."ARRIVAL-NUMBER";
+        // := BnHVehicleG."BIL-OF-LANDING";
+        // := BnHVehicleG."SCRUTINEERING-DATE";
+        IF BnHVehicleG."EQUIPMENT-1" <> '' THEN
+          BEGIN
+          CreateExtraCode1(COPYSTR(BnHVehicleG."EQUIPMENT-1", 1, 10));
+          VehicleG."Extra Code 1" := COPYSTR(BnHVehicleG."EQUIPMENT-1", 1, 10);
+          END;
+        IF BnHVehicleG."EQUIPMENT-2" <> '' THEN
+          VehicleG."Text 4" := BnHVehicleG."EQUIPMENT-2";
+        IF BnHVehicleG."EQUIPMENT-3" <> '' THEN
+          VehicleG."Text 2" := BnHVehicleG."EQUIPMENT-3";
+        IF BnHVehicleG."EQUIPMENT-4" <> '' THEN
+          VehicleG."Date 1" := CreateEquipment4(BnHVehicleG."EQUIPMENT-4");
+        // := BnHVehicleG.INSURANCE;
+        IF EVALUATE( Mileage, BnHVehicleG.MILEAGE ) THEN ;
+        //txtHelp := BnHVehicleG."MISC-1" +' / ' + BnHVehicleG."MISC-2" + ' / ' + BnHVehicleG."MISC-3" + ' / ' + BnHVehicleG."MISC-7" ;
+        //"Text 4" := COPYSTR(txtHelp,1,30); Trengs denne informasjonen?
+        // := BnHVehicleG."MISC-2";
+        // := BnHVehicleG."MISC-3";
+        // := BnHVehicleG."MISC-4";
+        // := BnHVehicleG."MISC-5";
+        // := BnHVehicleG."MISC-6";
+        // := BnHVehicleG."MISC-7";
+        // := BnHVehicleG."MISC-8";
+        // := BnHVehicleG."MISC-9";
+        // := BnHVehicleG."MISC-10";
+        // := BnHVehicleG."LAST-INVOICE-DTE";
+        // := BnHVehicleG."CONTACT-DATE";
+        // := BnHVehicleG."MAIL-CODE-1";
+        // := BnHVehicleG."MAIL-CODE-2";
+        // := BnHVehicleG."MAIL-CODE-3";
+        // := BnHVehicleG."MAIL-CODE-4";
+        // := BnHVehicleG."MAIL-CODE-5";
+        // := BnHVehicleG."MAIL-CODE-6";
+        // := BnHVehicleG."MAIL-CODE-7";
+        // := BnHVehicleG."MAIL-CODE-8";
+        // := BnHVehicleG."MAIL-CODE-9";
+        // := BnHVehicleG."SALE-THIS-YR";
+        // := BnHVehicleG."SALE-LAST-YR";
+        // := BnHVehicleG."SALE-LAST-YR-1";
+        // := BnHVehicleG."DELETE-PROPOSAL";
+        // := BnHVehicleG.LEASING;
+      //"Color Description" := BnHVehicleG.COLOUR;  //JRO tilleggsfil, mÜ tas som vehicle option
+      BnHVehicleG.CALCFIELDS("Fabrik. fargekode", "Fabrikantens fargenavn", "Interiõrkode", Modellkode, "Interiõr");
+      IF BnHVehicleG.Modellkode <>'' THEN
+        BEGIN
+        CreateModelNo(COPYSTR(BnHVehicleG.Modellkode,1 ,20));
+        VALIDATE("Model No.", COPYSTR(BnHVehicleG.Modellkode,1 ,20));
+        END;
+      IF BnHVehicleG."Fabrik. fargekode" <> '' THEN
+       CreateOptions(VehicleG, BnHVehicleG."Fabrik. fargekode", 'Color') ;
+      //IF BnHVehicleG.Interiõrkode <> '' THEN
+      // CreateTrim(VehicleG, BnHVehicleG.Interiõrkode, 'Upholstery') ;
+      IF BnHVehicleG."Interiõr" <> ''THEN
+        CreateTrim(VehicleG, BnHVehicleG."Interiõr", 'Upholstery');
+      IF BnHVehicleG."MAIL-CODE-7" <> '' THEN
+        BEGIN
+        CreateExtraCode2(COPYSTR(BnHVehicleG."MAIL-CODE-7", 1, 10));
+        VALIDATE("Extra Code 2", COPYSTR(BnHVehicleG."MAIL-CODE-7", 1, 10));
+        END;
+      END;
+    END;
+
+    PROCEDURE EvalDate@1101103004(TextP@1101103003 : Text) : Date;
+    VAR
+      DateL@1101103000 : Date;
+    BEGIN
+      IF EVALUATE( DateL, STRSUBSTNO( '%1.%2.%3', COPYSTR( TextP, 7, 2 ), COPYSTR( TextP, 5, 2 ), COPYSTR( TextP, 1, 4 ))) THEN
+        EXIT( DateL )
+      ELSE
+        EXIT( 0D );
+    END;
+
+    PROCEDURE SetCustomerNo@1101103002();
+    VAR
+      CustomerL@1101103000 : Record 18;
+      ContactL@1101103001 : Record 5050;
+      VehicleCustomerL@1101103002 : Record 5025469;
+      BNHCustomerL@1101103004 : Record 5231110;
+    BEGIN
+      WITH BNHCustomerL DO BEGIN
+        SETCURRENTKEY( "CUSTOMER-NUMBER" );
+        SETRANGE( "CUSTOMER-NUMBER", BnHVehicleG."DEBIT-CUSTOMER" );
+      //  IF ISEMPTY THEN
+      //    EXIT
+      //  ELSE
+      //    FINDFIRST;
+        IF NOT ISEMPTY THEN
+          BEGIN
+            FINDFIRST;
+        END ELSE
+          BEGIN
+          SETCURRENTKEY( "CUSTOMER-NUMBER" );
+          SETRANGE( "CUSTOMER-NUMBER", BnHVehicleG."OWNER-CODE" );
+          IF ISEMPTY THEN
+            EXIT
+          ELSE
+            FINDFIRST;
+          END;
+
+      END;
+
+      WITH CustomerL DO
+        CASE GET( BNHCustomerL."No." ) OF
+          FALSE:
+            BEGIN
+              VehicleG."Customer No." := '';
+              VehicleG."Address No." := 0;
+            END;
+          TRUE:
+            BEGIN
+              VehicleG."Customer No." := "No.";
+              VehicleG."Address No." := "Address No.";
+
+              WITH ContactL DO BEGIN
+                SETCURRENTKEY( "Address No.", Type );
+                SETRANGE( "Address No.", VehicleG."Address No." );
+                SETRANGE( "Customer No.", CustomerL."No." );
+                SETRANGE( Type, Type::Company );
+                IF FINDFIRST THEN
+                  VehicleG."Contact No." := "No."
+                ELSE
+                  VehicleG."Contact No." := '';
+              END;
+
+              WITH VehicleCustomerL DO BEGIN
+                RESET;
+                VehicleCustomerL.SETRANGE( VIN, VehicleG.VIN );
+                VehicleCustomerL.SETFILTER( Type, '%1|%2', VehicleCustomerL.Type::Buyer, VehicleCustomerL.Type::Owner );
+                IF VehicleCustomerL.FINDSET THEN
+                  REPEAT
+                    VehicleCustomerL.VALIDATE( "Customer No.", CustomerL."No." );
+                    VehicleCustomerL.MODIFY( TRUE );
+                  UNTIL VehicleCustomerL.NEXT = 0;
+              END;
+            END;
+        END;
+
+      VehicleG.CALCFIELDS( Name );
+    END;
+
+    PROCEDURE SetCustomerNo2@1101103010();
+    VAR
+      CustomerL@1101103000 : Record 18;
+      ContactL@1101103001 : Record 5050;
+      VehicleCustomerL@1101103002 : Record 5025469;
+      BNHCustomerL@1101103004 : Record 5231110;
+    BEGIN
+      WITH BNHCustomerL DO BEGIN
+        SETCURRENTKEY( "CUSTOMER-NUMBER" );
+
+        VehicleCustomerL.SETRANGE(VIN, BnHVehicleG."CHASSIS-NUMBER");
+        IF VehicleCustomerL.FINDFIRST THEN
+          VehicleCustomerL.DELETEALL;
+
+        VehicleCustomerL.RESET;
+
+        IF (UPPERCASE(BnHVehicleG."OWNER-CODE") = UPPERCASE(BnHVehicleG."USER-CODE")) AND (UPPERCASE(BnHVehicleG."OWNER-CODE") = UPPERCASE(BnHVehicleG."DEBIT-CUSTOMER")) THEN
+          BEGIN
+          SETRANGE( "CUSTOMER-NUMBER", BnHVehicleG."OWNER-CODE" );
+          IF BNHCustomerL.FINDFIRST THEN
+            BEGIN
+            CustomerL.GET(BNHCustomerL."No.");
+            VehicleG."Customer No." := CustomerL."No.";
+            VehicleG."Address No." := CustomerL."Address No.";
+            VehicleG.MODIFY(TRUE);
+            END;
+          END;
+
+        IF (UPPERCASE(BnHVehicleG."OWNER-CODE") <> UPPERCASE(BnHVehicleG."USER-CODE")) THEN
+          BEGIN
+          SETRANGE( "CUSTOMER-NUMBER", BnHVehicleG."OWNER-CODE" );
+          IF BNHCustomerL.FINDFIRST THEN
+            BEGIN
+            VehicleCustomerL.SETRANGE(VIN, BnHVehicleG."CHASSIS-NUMBER");
+            VehicleCustomerL.SETRANGE(Type, VehicleCustomerL.Type::Owner);
+            IF NOT VehicleCustomerL.FINDFIRST THEN
+              BEGIN
+              VehicleCustomerL.INIT;
+              VehicleCustomerL.VALIDATE(VIN, BnHVehicleG."CHASSIS-NUMBER");
+              VehicleCustomerL.VALIDATE(Type, VehicleCustomerL.Type::Owner);
+              VehicleCustomerL."Line No." := FindLastVehCustLine(BnHVehicleG."CHASSIS-NUMBER");
+              VehicleCustomerL.VALIDATE("Customer No.", BNHCustomerL."No.");
+              VehicleCustomerL.INSERT(TRUE);
+              VehicleG.VALIDATE("Customer No.", BNHCustomerL."No.");
+              END;
+            END;
+
+          SETRANGE( "CUSTOMER-NUMBER", BnHVehicleG."USER-CODE" );
+          IF BNHCustomerL.FINDFIRST THEN
+            BEGIN
+            VehicleCustomerL.SETRANGE(VIN, BnHVehicleG."CHASSIS-NUMBER");
+            VehicleCustomerL.SETRANGE(Type, VehicleCustomerL.Type::"Vehicle User");
+            IF NOT VehicleCustomerL.FINDFIRST THEN
+              BEGIN
+              VehicleCustomerL.INIT;
+              VehicleCustomerL.VALIDATE(VIN, BnHVehicleG."CHASSIS-NUMBER");
+              VehicleCustomerL.VALIDATE(Type, VehicleCustomerL.Type::"Vehicle User");
+              VehicleCustomerL."Line No." := FindLastVehCustLine(BnHVehicleG."CHASSIS-NUMBER");
+              VehicleCustomerL.VALIDATE("Customer No.", BNHCustomerL."No.");
+              VehicleCustomerL.VALIDATE("Def. Service Bill-to Customer", (TRUE));
+              VehicleCustomerL.INSERT(TRUE);
+              VehicleG.VALIDATE("Customer No.", BNHCustomerL."No.");
+              END;
+            END;
+
+        END;
+        IF (COPYSTR(UPPERCASE(BnHVehicleG."DEBIT-CUSTOMER"), 1, 2) = '50') AND (UPPERCASE(BnHVehicleG."DEBIT-CUSTOMER") <> UPPERCASE(BnHVehicleG."USER-CODE")) THEN
+          BEGIN
+            CASE VehicleG."Make Code" OF
+              'NISSAN'  :
+                BEGIN
+                VehicleCustomerL.INIT;
+                VehicleCustomerL.VALIDATE(VIN, BnHVehicleG."CHASSIS-NUMBER");
+                VehicleCustomerL.VALIDATE(Type, VehicleCustomerL.Type::"Service Contract");
+                VehicleCustomerL."Line No." := FindLastVehCustLine(BnHVehicleG."CHASSIS-NUMBER");
+                VehicleCustomerL.VALIDATE("Customer No.", 'SERV-NISSAN');
+                VehicleCustomerL.VALIDATE("Def. Service Bill-to Customer", (TRUE));
+                VehicleCustomerL.INSERT(TRUE);
+                END;
+              'SUBARU'  :
+                BEGIN
+                VehicleCustomerL.INIT;
+                VehicleCustomerL.VALIDATE(VIN, BnHVehicleG."CHASSIS-NUMBER");
+                VehicleCustomerL.VALIDATE(Type, VehicleCustomerL.Type::"Service Contract");
+                VehicleCustomerL."Line No." := FindLastVehCustLine(BnHVehicleG."CHASSIS-NUMBER");
+                VehicleCustomerL.VALIDATE("Customer No.", 'SERV-SUBARU');
+                VehicleCustomerL.VALIDATE("Def. Service Bill-to Customer", (TRUE));
+                VehicleCustomerL.INSERT(TRUE);
+                END;
+              'HYUNDAI'  :
+                BEGIN
+                VehicleCustomerL.INIT;
+                VehicleCustomerL.VALIDATE(VIN, BnHVehicleG."CHASSIS-NUMBER");
+                VehicleCustomerL.VALIDATE(Type, VehicleCustomerL.Type::"Service Contract");
+                VehicleCustomerL."Line No." := FindLastVehCustLine(BnHVehicleG."CHASSIS-NUMBER");
+                VehicleCustomerL.VALIDATE("Customer No.", 'SERV-HYUNDAI');
+                VehicleCustomerL.VALIDATE("Def. Service Bill-to Customer", (TRUE));
+                VehicleCustomerL.INSERT(TRUE);
+                END;
+            END;
+
+            IF (UPPERCASE(BnHVehicleG."OWNER-CODE") <> UPPERCASE(BnHVehicleG."USER-CODE")) THEN
+              BEGIN
+              SETRANGE( "CUSTOMER-NUMBER", BnHVehicleG."OWNER-CODE" );
+              IF BNHCustomerL.FINDFIRST THEN
+                BEGIN
+                VehicleCustomerL.SETRANGE(VIN, BnHVehicleG."CHASSIS-NUMBER");
+                VehicleCustomerL.SETRANGE(Type, VehicleCustomerL.Type::Owner);
+                IF NOT VehicleCustomerL.FINDFIRST THEN
+                  BEGIN
+                  VehicleCustomerL.INIT;
+                  VehicleCustomerL.VALIDATE(VIN, BnHVehicleG."CHASSIS-NUMBER");
+                  VehicleCustomerL.VALIDATE(Type, VehicleCustomerL.Type::Owner);
+                  VehicleCustomerL."Line No." := FindLastVehCustLine(BnHVehicleG."CHASSIS-NUMBER");
+                  VehicleCustomerL.VALIDATE("Customer No.", BNHCustomerL."No.");
+                  VehicleCustomerL.INSERT(TRUE);
+                  VehicleG.VALIDATE("Customer No.", BNHCustomerL."No.");
+                  END;
+                END;
+
+              SETRANGE( "CUSTOMER-NUMBER", BnHVehicleG."USER-CODE" );
+              IF BNHCustomerL.FINDFIRST THEN
+                BEGIN
+                VehicleCustomerL.SETRANGE(VIN, BnHVehicleG."CHASSIS-NUMBER");
+                VehicleCustomerL.SETRANGE(Type, VehicleCustomerL.Type::"Vehicle User");
+                IF NOT VehicleCustomerL.FINDFIRST THEN
+                  BEGIN
+                  VehicleCustomerL.INIT;
+                  VehicleCustomerL.VALIDATE(VIN, BnHVehicleG."CHASSIS-NUMBER");
+                  VehicleCustomerL.VALIDATE(Type, VehicleCustomerL.Type::"Vehicle User");
+                  VehicleCustomerL."Line No." := FindLastVehCustLine(BnHVehicleG."CHASSIS-NUMBER");
+                  VehicleCustomerL.VALIDATE("Customer No.", BNHCustomerL."No.");
+                  VehicleCustomerL.VALIDATE("Def. Service Bill-to Customer", (TRUE));
+                  VehicleCustomerL.INSERT(TRUE);
+                  VehicleG.VALIDATE("Customer No.", BNHCustomerL."No.");
+                  END;
+                END;
+              END;
+
+            IF (UPPERCASE(BnHVehicleG."OWNER-CODE") = UPPERCASE(BnHVehicleG."USER-CODE")) THEN
+              BEGIN
+              SETRANGE( "CUSTOMER-NUMBER", BnHVehicleG."OWNER-CODE" );
+              IF BNHCustomerL.FINDFIRST THEN
+                BEGIN
+                CustomerL.GET(BNHCustomerL."No.");
+                VehicleG."Customer No." := CustomerL."No.";
+                VehicleG."Address No." := CustomerL."Address No.";
+                VehicleG.MODIFY(TRUE);
+                END;
+              END;
+          END;
+      END;
+
+
+
+      VehicleCustomerL.RESET;
+      VehicleCustomerL.SETRANGE(VIN, BnHVehicleG."CHASSIS-NUMBER");
+      VehicleCustomerL.SETRANGE(Type, VehicleCustomerL.Type::"Previous Customer");
+      IF VehicleCustomerL.FINDFIRST THEN
+        VehicleCustomerL.DELETEALL;
+    END;
+
+    PROCEDURE FindLastVehCustLine@1101103016(VINP@1101103000 : Code[20]) : Integer;
+    VAR
+      VehicleCustomerL@1101103001 : Record 5025469;
+    BEGIN
+      VehicleCustomerL.SETRANGE(VIN, VINP);
+      IF VehicleCustomerL.FINDLAST THEN
+        EXIT(VehicleCustomerL."Line No." + 10000)
+        ELSE
+        EXIT(10000);
+    END;
+
+    PROCEDURE CreateModelNo@1101103012(ModelNoP@1101103000 : Code[20]);
+    VAR
+      ModelNoL@1101103001 : Record 27;
+    BEGIN
+      IF NOT ModelNoL.GET(ModelNoP) THEN
+        BEGIN
+        ModelNoL.INIT;
+        ModelNoL.VALIDATE("No.", ModelNoP);
+        ModelNoL.VALIDATE("Item Type", ModelNoL."Item Type"::Vehicle);
+        ModelNoL.VALIDATE("Make Code", VehicleG."Make Code");
+        ModelNoL.VALIDATE(Description, BnHVehicleG."MODEL-TEXT");
+        ModelNoL.INSERT(TRUE);
+        END;
+    END;
+
+    PROCEDURE CreateProtectedVehCode@1101103009(recP@1101103002 : Record 5025400;CodeP@1101103003 : Text[30];CodeTypeP@1101103004 : Code[10]);
+    VAR
+      ProtectedVehCodeL@1101103000 : Record 5045458;
+      ProtectedVehCode2L@1101103001 : Record 5045458;
+      ProtectedVehCodeTypeL@1101103005 : Record 5045457;
+    BEGIN
+      IF NOT ProtectedVehCodeTypeL.GET(recP."Make Code", CodeTypeP) THEN BEGIN
+        ProtectedVehCodeTypeL.INIT;
+        ProtectedVehCodeTypeL.VALIDATE("Make Code", recP."Make Code");
+        ProtectedVehCodeTypeL.VALIDATE(Code, CodeTypeP);
+        ProtectedVehCodeTypeL.VALIDATE(Description, CodeTypeP);
+        ProtectedVehCodeTypeL.INSERT(TRUE);
+      END;
+      ProtectedVehCode2L.SETRANGE(VIN, recP.VIN);
+      ProtectedVehCode2L.SETRANGE("Code Type", CodeTypeP);
+      ProtectedVehCode2L.SETRANGE(Code, COPYSTR(CodeP, 1, 20));
+      IF NOT ProtectedVehCode2L.FINDFIRST THEN BEGIN
+        ProtectedVehCodeL.INIT;
+        ProtectedVehCodeL.VIN := recP.VIN;
+        ProtectedVehCodeL.VALIDATE("Make Code", recP."Make Code");
+        ProtectedVehCodeL."Code Type" :=  CodeTypeP;
+        IF (ProtectedVehCode2L.FINDLAST) AND (ProtectedVehCode2L.Remark <> CodeP)  THEN
+          ProtectedVehCodeL.VALIDATE("Line No.", ProtectedVehCode2L."Line No." + 10000)
+        ELSE
+          ProtectedVehCodeL.VALIDATE("Line No.", 10000);
+          ProtectedVehCodeL.VALIDATE(Code, COPYSTR(CodeP, 1, 20));
+        IF STRLEN (CodeP) > 20 THEN
+          ProtectedVehCodeL.Remark := CodeP;
+        ProtectedVehCodeL.INSERT(TRUE);
+      END;
+    END;
+
+    PROCEDURE CreateOptions@1101103003(recP@1101103002 : Record 5025400;CodeP@1101103004 : Text[30];CodeTypeP@1101103003 : Code[10]);
+    VAR
+      VehicleOptionL@1101103000 : Record 5025422;
+      VehicleOptionL2@1101103005 : Record 5025422;
+      ManuOptionsL@1101103001 : Record 5025419;
+      Teller@1101103006 : Integer;
+    BEGIN
+      IF NOT ManuOptionsL.GET(recP."Make Code", recP."Model No.", CodeTypeP) THEN BEGIN
+        ManuOptionsL.INIT;
+        ManuOptionsL.VALIDATE("Make Code", recP."Make Code");
+        ManuOptionsL.VALIDATE("Model No.", recP."Model No.");
+        ManuOptionsL.VALIDATE(Code, BnHVehicleG."Fabrik. fargekode");
+        ManuOptionsL."Option Type" := 1;
+        ManuOptionsL.VALIDATE(Description, BnHVehicleG."Fabrikantens fargenavn");
+        IF NOT ManuOptionsL.INSERT(TRUE) THEN;
+      END;
+      VehicleOptionL.SETRANGE(VIN, recP.VIN);
+      VehicleOptionL.SETRANGE("Make Code", recP."Make Code");
+      VehicleOptionL.SETRANGE("Option Type", 1);
+      IF VehicleOptionL.FINDFIRST THEN BEGIN
+        VehicleOptionL."Option Code" := BnHVehicleG."Fabrik. fargekode";
+        VehicleOptionL.VALIDATE(Description, BnHVehicleG."Fabrikantens fargenavn");
+        VehicleOptionL.MODIFY;
+      END ELSE BEGIN
+        VehicleOptionL2.SETRANGE(VIN, recP.VIN);
+        IF VehicleOptionL2.FINDLAST THEN
+          Teller := VehicleOptionL2."Line No." + 10000;
+        VehicleOptionL.INIT;
+        VehicleOptionL.VIN := recP.VIN;
+        VehicleOptionL.VALIDATE("Line No.", Teller);
+        VehicleOptionL."Make Code" := recP."Make Code";
+        VehicleOptionL.VALIDATE("Model No.", recP."Model No.");
+        VehicleOptionL.VALIDATE(Type, VehicleOptionL.Type::"Manuf. Option");
+        VehicleOptionL."Option Type" := 1;
+        VehicleOptionL."Option Code" := BnHVehicleG."Fabrik. fargekode";
+        VehicleOptionL.VALIDATE(Description, BnHVehicleG."Fabrikantens fargenavn");
+        VehicleOptionL.INSERT;
+      END;
+    END;
+
+    PROCEDURE CreateTrim@1101103007(recP@1101103002 : Record 5025400;CodeP@1101103001 : Text[30];CodeTypeP@1101103000 : Code[10]);
+    VAR
+      VehicleOptionL@1101103004 : Record 5025422;
+      ManuOptionsL@1101103003 : Record 5025419;
+      VehicleOptionL2@1101103007 : Record 5025422;
+      Teller@1101103005 : Integer;
+    BEGIN
+      IF NOT ManuOptionsL.GET(recP."Make Code", recP."Model No.", CodeTypeP) THEN BEGIN
+        ManuOptionsL.INIT;
+        ManuOptionsL.VALIDATE("Make Code", recP."Make Code");
+        ManuOptionsL.VALIDATE("Model No.", recP."Model No.");
+      //  ManuOptionsL.VALIDATE(Code, BnHVehicleG.Interiõrkode);
+        ManuOptionsL.VALIDATE(Code, 'Int');
+        ManuOptionsL."Option Type" := 2;
+        ManuOptionsL.VALIDATE(Description, 'Interiõrkode');
+        IF NOT ManuOptionsL.INSERT(TRUE) THEN;
+      END;
+      VehicleOptionL.SETRANGE(VIN, recP.VIN);
+      VehicleOptionL.SETRANGE("Make Code", recP."Make Code");
+      VehicleOptionL.SETRANGE("Option Type", 2);
+      IF VehicleOptionL.FINDFIRST THEN BEGIN
+      //  VehicleOptionL."Option Code" := BnHVehicleG.Interiõrkode;
+        VehicleOptionL."Option Code" := 'Int';
+        VehicleOptionL.VALIDATE(Description, CodeP);
+        VehicleOptionL.MODIFY;
+      END ELSE BEGIN
+        VehicleOptionL2.SETRANGE(VIN, recP.VIN);
+        IF VehicleOptionL2.FINDLAST THEN
+          Teller := VehicleOptionL2."Line No." + 10000;
+        VehicleOptionL.INIT;
+        VehicleOptionL.VIN := recP.VIN;
+        VehicleOptionL.VALIDATE("Line No.", Teller);
+        VehicleOptionL."Make Code" := recP."Make Code";
+        VehicleOptionL.VALIDATE("Model No.", recP."Model No.");
+        VehicleOptionL.VALIDATE(Type, VehicleOptionL.Type::"Manuf. Option");
+        VehicleOptionL."Option Type" := 2;
+      //  VehicleOptionL."Option Code" := BnHVehicleG.Interiõrkode;
+      //  VehicleOptionL.VALIDATE(Description, 'Interõrkode');
+        VehicleOptionL."Option Code" := 'Int';
+        VehicleOptionL.VALIDATE(Description, CodeP);
+
+        VehicleOptionL.INSERT;
+      END;
+    END;
+
+    PROCEDURE CreateExtraCode1@1101103006(CodeP@1101103001 : Code[20]);
+    VAR
+      VehicleExtraCode1L@1101103002 : Record 5025447;
+    BEGIN
+      IF NOT VehicleExtraCode1L.GET(CodeP) THEN
+        BEGIN
+        VehicleExtraCode1L.INIT;
+        VehicleExtraCode1L.VALIDATE(Code, COPYSTR(CodeP, 1, 10));
+        VehicleExtraCode1L.VALIDATE(Description, CodeP);
+        VehicleExtraCode1L.INSERT(TRUE);
+        END;
+    END;
+
+    PROCEDURE CreateExtraCode2@1101103011(CodeP@1101103001 : Code[20]);
+    VAR
+      VehicleExtraCode2L@1101103002 : Record 5025448;
+    BEGIN
+      IF NOT VehicleExtraCode2L.GET(CodeP) THEN
+        BEGIN
+        VehicleExtraCode2L.INIT;
+        VehicleExtraCode2L.VALIDATE(Code, COPYSTR(CodeP,1 ,10));
+        VehicleExtraCode2L.VALIDATE(Description, CodeP);
+        VehicleExtraCode2L.INSERT(TRUE);
+        END;
+    END;
+
+    PROCEDURE CreateEquipment4@1101103008(DateP@1101103000 : Text[30]) DateR : Date;
+    BEGIN
+
+
+      IF STRLEN(DateP) = 4 THEN
+        BEGIN
+        IF EVALUATE( DateR, STRSUBSTNO( '%1.%2.%3', '01', COPYSTR( DateP, 1, 2 ), COPYSTR( DateP, 3, 2 ))) THEN
+        EXIT( DateR )
+        ELSE
+        EXIT( 0D );
+        END;
+
+      IF STRLEN(DateP) = 8 THEN
+        BEGIN
+        IF EVALUATE( DateR, STRSUBSTNO( '%1.%2.%3', COPYSTR( DateP, 1, 2 ), COPYSTR( DateP, 4, 2 ), COPYSTR( DateP, 7, 2 ))) THEN
+        EXIT( DateR )
+        ELSE
+        EXIT( 0D );
+        END;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

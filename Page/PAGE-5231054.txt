@@ -1,0 +1,69 @@
+OBJECT Page 5231054 Gjentakelsesgruppe kort
+{
+  OBJECT-PROPERTIES
+  {
+    Date=03.10.17;
+    Time=12:27:17;
+    Modified=Yes;
+    Version List=BlanketOrderBNH;
+  }
+  PROPERTIES
+  {
+    SourceTable=Table5231050;
+    PageType=Card;
+  }
+  CONTROLS
+  {
+    { 1101103000;0;Container;
+                ContainerType=ContentArea }
+
+    { 1101103001;1;Group  ;
+                Name=Generelt;
+                GroupType=Group }
+
+    { 1101103002;2;Field  ;
+                SourceExpr=Code }
+
+    { 1101103003;2;Field  ;
+                SourceExpr=Description }
+
+    { 1101103004;2;Field  ;
+                SourceExpr="Date Formula" }
+
+    { 1101103005;2;Field  ;
+                SourceExpr="Create only latest" }
+
+    { 1101103006;2;Field  ;
+                SourceExpr="Start Date" }
+
+    { 1101103007;2;Field  ;
+                SourceExpr="End Date" }
+
+    { 1101103008;1;Group  ;
+                Name=Oppdatering;
+                GroupType=Group }
+
+    { 1101103009;2;Field  ;
+                SourceExpr="Update Postingdate" }
+
+    { 1101103010;2;Field  ;
+                SourceExpr="Postingdate Formula" }
+
+    { 1101103011;2;Field  ;
+                SourceExpr="Delivery Date Formula" }
+
+    { 1101103012;2;Field  ;
+                SourceExpr="Update Price" }
+
+    { 1101103013;2;Field  ;
+                SourceExpr="Update Quantity" }
+
+  }
+  CODE
+  {
+
+    BEGIN
+    END.
+  }
+}
+

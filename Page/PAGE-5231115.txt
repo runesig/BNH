@@ -1,0 +1,270 @@
+OBJECT Page 5231115 4754 uttrekk 8100_Biler
+{
+  OBJECT-PROPERTIES
+  {
+    Date=07.11.17;
+    Time=07:31:17;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    SourceTable=Table5231117;
+    PageType=List;
+    ActionList=ACTIONS
+    {
+      { 1101103074;  ;ActionContainer;
+                      ActionContainerType=ActionItems }
+      { 1101103075;1 ;Action    ;
+                      Name=Import File;
+                      OnAction=VAR
+                                 "4754uttrekk8100BilerL"@1101103000 : XMLport 5231117;
+                               BEGIN
+                                 "4754uttrekk8100BilerL".RUN;
+                               END;
+                                }
+    }
+  }
+  CONTROLS
+  {
+    { 1101103000;0;Container;
+                ContainerType=ContentArea }
+
+    { 1101103001;1;Group  ;
+                Name=Group;
+                GroupType=Repeater }
+
+    { 1101103002;2;Field  ;
+                SourceExpr="Primary Key" }
+
+    { 1101103003;2;Field  ;
+                SourceExpr=Status }
+
+    { 1101103004;2;Field  ;
+                SourceExpr=Datetime }
+
+    { 1101103005;2;Field  ;
+                SourceExpr="Update message" }
+
+    { 1101103006;2;Field  ;
+                SourceExpr="No." }
+
+    { 1101103076;2;Field  ;
+                SourceExpr=UNIT_NUMBER }
+
+    { 1101103007;2;Field  ;
+                SourceExpr=Enhetsnr }
+
+    { 1101103008;2;Field  ;
+                SourceExpr=Enhetstype }
+
+    { 1101103009;2;Field  ;
+                SourceExpr=Merke }
+
+    { 1101103010;2;Field  ;
+                SourceExpr=Modellinje }
+
+    { 1101103011;2;Field  ;
+                SourceExpr=Status2 }
+
+    { 1101103012;2;Field  ;
+                SourceExpr=Chassisnummer }
+
+    { 1101103013;2;Field  ;
+                SourceExpr="Reg.nr" }
+
+    { 1101103014;2;Field  ;
+                SourceExpr="1. reg" }
+
+    { 1101103015;2;Field  ;
+                SourceExpr=Enhetsgruppe }
+
+    { 1101103016;2;Field  ;
+                SourceExpr=Verkstedsmodellkode }
+
+    { 1101103017;2;Field  ;
+                SourceExpr=Kategori }
+
+    { 1101103018;2;Field  ;
+                SourceExpr=Modelltekst }
+
+    { 1101103019;2;Field  ;
+                SourceExpr="Bokf.kode" }
+
+    { 1101103020;2;Field  ;
+                SourceExpr=Avd }
+
+    { 1101103021;2;Field  ;
+                SourceExpr=Lokasjon }
+
+    { 1101103023;2;Field  ;
+                SourceExpr="Fabrik.fargekode" }
+
+    { 1101103024;2;Field  ;
+                SourceExpr="Fabrikantens fargena" }
+
+    { 1101103025;2;Field  ;
+                SourceExpr="Interi›rtype" }
+
+    { 1101103026;2;Field  ;
+                SourceExpr=Motorkode }
+
+    { 1101103027;2;Field  ;
+                SourceExpr=Motornummer }
+
+    { 1101103028;2;Field  ;
+                SourceExpr=Girkassenummer }
+
+    { 1101103029;2;Field  ;
+                SourceExpr="Utstyr 1" }
+
+    { 1101103030;2;Field  ;
+                SourceExpr="Utstyr 2" }
+
+    { 1101103031;2;Field  ;
+                SourceExpr="Utstyr 3" }
+
+    { 1101103032;2;Field  ;
+                SourceExpr="Utstyr 4" }
+
+    { 1101103033;2;Field  ;
+                SourceExpr="N›kkelnummer" }
+
+    { 1101103034;2;Field  ;
+                SourceExpr=Radio }
+
+    { 1101103035;2;Field  ;
+                SourceExpr="Drivstoff type" }
+
+    { 1101103036;2;Field  ;
+                SourceExpr="Sti for foto" }
+
+    { 1101103037;2;Field  ;
+                SourceExpr="Kj›pt av" }
+
+    { 1101103038;2;Field  ;
+                SourceExpr="Innkj›psavd" }
+
+    { 1101103039;2;Field  ;
+                SourceExpr="Forventet ankomst" }
+
+    { 1101103040;2;Field  ;
+                SourceExpr="Ank.dato" }
+
+    { 1101103041;2;Field  ;
+                SourceExpr="Kj›psdato" }
+
+    { 1101103042;2;Field  ;
+                SourceExpr=Fakturanummer }
+
+    { 1101103043;2;Field  ;
+                SourceExpr="Solgt av" }
+
+    { 1101103044;2;Field  ;
+                SourceExpr=Salgsavd }
+
+    { 1101103045;2;Field  ;
+                SourceExpr=Kundenr }
+
+    { 1101103046;2;Field  ;
+                SourceExpr=Fakturanummer2 }
+
+    { 1101103047;2;Field  ;
+                SourceExpr=Salgsordrenr }
+
+    { 1101103048;2;Field  ;
+                SourceExpr="Enhet innbytte" }
+
+    { 1101103049;2;Field  ;
+                SourceExpr=Reservert }
+
+    { 1101103050;2;Field  ;
+                SourceExpr="Reservert til dato" }
+
+    { 1101103051;2;Field  ;
+                SourceExpr="Reservert av" }
+
+    { 1101103052;2;Field  ;
+                SourceExpr="Ordrebekr dato" }
+
+    { 1101103053;2;Field  ;
+                SourceExpr=LevDat }
+
+    { 1101103054;2;Field  ;
+                SourceExpr=Enhetsdestinasjon }
+
+    { 1101103055;2;Field  ;
+                SourceExpr=Salgsdato }
+
+    { 1101103056;2;Field  ;
+                SourceExpr="Budsj salgspris" }
+
+    { 1101103057;2;Field  ;
+                SourceExpr="Budsj kj›pspris" }
+
+    { 1101103022;2;Field  ;
+                SourceExpr=MISC_1_CF }
+
+    { 1101103077;2;Field  ;
+                SourceExpr=MISC_2_CF }
+
+    { 1101103058;2;Field  ;
+                SourceExpr="Diverse 3" }
+
+    { 1101103059;2;Field  ;
+                SourceExpr="Diverse 10" }
+
+    { 1101103060;2;Field  ;
+                SourceExpr=Underforhandler }
+
+    { 1101103061;2;Field  ;
+                SourceExpr="Forsikringspolisenr." }
+
+    { 1101103062;2;Field  ;
+                SourceExpr=Forsikringsselskap }
+
+    { 1101103078;2;Field  ;
+                SourceExpr=EXP_KM_PER_YEAR }
+
+    { 1101103063;2;Field  ;
+                SourceExpr="N†v.eier" }
+
+    { 1101103064;2;Field  ;
+                SourceExpr="Tidligere eier" }
+
+    { 1101103065;2;Field  ;
+                SourceExpr=Opprettet }
+
+    { 1101103066;2;Field  ;
+                SourceExpr="Valgfri dato 1" }
+
+    { 1101103067;2;Field  ;
+                SourceExpr="Valgfri dato 2" }
+
+    { 1101103068;2;Field  ;
+                SourceExpr="Internettekst - till" }
+
+    { 1101103069;2;Field  ;
+                SourceExpr="Rabattmatrise varer" }
+
+    { 1101103070;2;Field  ;
+                SourceExpr="Rabatt % Service" }
+
+    { 1101103071;2;Field  ;
+                SourceExpr=EngangAvg }
+
+    { 1101103072;2;Field  ;
+                SourceExpr=Kommisjonsnr }
+
+    { 1101103073;2;Field  ;
+                SourceExpr=Priskort }
+
+  }
+  CODE
+  {
+
+    BEGIN
+    END.
+  }
+}
+

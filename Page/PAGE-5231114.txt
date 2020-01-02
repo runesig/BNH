@@ -1,0 +1,255 @@
+OBJECT Page 5231114 BnH Vehicle_m520 Uttrekk
+{
+  OBJECT-PROPERTIES
+  {
+    Date=16.11.17;
+    Time=07:53:49;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    SourceTable=Table5231116;
+    PageType=List;
+    ActionList=ACTIONS
+    {
+      { 1101103072;  ;ActionContainer;
+                      ActionContainerType=ActionItems }
+      { 1101103073;1 ;Action    ;
+                      Name=Import File;
+                      OnAction=VAR
+                                 BnHVehiclem520Uttrekkl@1101103000 : XMLport 5231116;
+                               BEGIN
+                                 BnHVehiclem520Uttrekkl.RUN;
+                               END;
+                                }
+    }
+  }
+  CONTROLS
+  {
+    { 1101103000;0;Container;
+                ContainerType=ContentArea }
+
+    { 1101103001;1;Group  ;
+                Name=Group;
+                GroupType=Repeater }
+
+    { 1101103002;2;Field  ;
+                SourceExpr="Primary Key" }
+
+    { 1101103003;2;Field  ;
+                SourceExpr=Status }
+
+    { 1101103004;2;Field  ;
+                SourceExpr=Datetime }
+
+    { 1101103005;2;Field  ;
+                SourceExpr="Update message" }
+
+    { 1101103006;2;Field  ;
+                SourceExpr="No." }
+
+    { 1101103007;2;Field  ;
+                SourceExpr=Basisnr }
+
+    { 1101103008;2;Field  ;
+                SourceExpr="Reg.nr" }
+
+    { 1101103009;2;Field  ;
+                SourceExpr=Betalernr }
+
+    { 1101103010;2;Field  ;
+                SourceExpr=Chassisnummer }
+
+    { 1101103011;2;Field  ;
+                SourceExpr=Navn }
+
+    { 1101103012;2;Field  ;
+                SourceExpr=EnhGrp }
+
+    { 1101103013;2;Field  ;
+                SourceExpr=Merke }
+
+    { 1101103014;2;Field  ;
+                SourceExpr="Mod.ln" }
+
+    { 1101103015;2;Field  ;
+                SourceExpr="Mod.Ür" }
+
+    { 1101103016;2;Field  ;
+                SourceExpr="Dekk lokasjon" }
+
+    { 1101103017;2;Field  ;
+                SourceExpr=Fabrikkmodell }
+
+    { 1101103018;2;Field  ;
+                SourceExpr="Vk.mod.kd" }
+
+    { 1101103019;2;Field  ;
+                SourceExpr=AktKm }
+
+    { 1101103020;2;Field  ;
+                SourceExpr="1. reg" }
+
+    { 1101103021;2;Field  ;
+                SourceExpr="S. reg" }
+
+    { 1101103022;2;Field  ;
+                SourceExpr=Eiersk }
+
+    { 1101103023;2;Field  ;
+                SourceExpr="S.enhet" }
+
+    { 1101103024;2;Field  ;
+                SourceExpr=Enh }
+
+    { 1101103025;2;Field  ;
+                SourceExpr="CO2 ut" }
+
+    { 1101103026;2;Field  ;
+                SourceExpr="Fabrik.fargekode" }
+
+    { 1101103027;2;Field  ;
+                SourceExpr="Fabrikantens fargena" }
+
+    { 1101103028;2;Field  ;
+                SourceExpr="Interiõrkode" }
+
+    { 1101103029;2;Field  ;
+                SourceExpr="F. ank" }
+
+    { 1101103030;2;Field  ;
+                SourceExpr="A.sete" }
+
+    { 1101103031;2;Field  ;
+                SourceExpr="LF utlõp" }
+
+    { 1101103032;2;Field  ;
+                SourceExpr=Motorkode }
+
+    { 1101103033;2;Field  ;
+                SourceExpr=Girkassenummer }
+
+    { 1101103034;2;Field  ;
+                SourceExpr="Utstyr 1" }
+
+    { 1101103035;2;Field  ;
+                SourceExpr="Utstyr 2" }
+
+    { 1101103036;2;Field  ;
+                SourceExpr="Sy.vol" }
+
+    { 1101103037;2;Field  ;
+                SourceExpr=Motornummer }
+
+    { 1101103038;2;Field  ;
+                SourceExpr="Nõkkelnummer" }
+
+    { 1101103039;2;Field  ;
+                SourceExpr=Radio }
+
+    { 1101103040;2;Field  ;
+                SourceExpr=Hestekr }
+
+    { 1101103041;2;Field  ;
+                SourceExpr=Drivst }
+
+    { 1101103042;2;Field  ;
+                SourceExpr="Mobiltelefon 1" }
+
+    { 1101103043;2;Field  ;
+                SourceExpr="Mobiltelefon 2" }
+
+    { 1101103044;2;Field  ;
+                SourceExpr=Kontaktperson }
+
+    { 1101103045;2;Field  ;
+                SourceExpr="Kontr?" }
+
+    { 1101103046;2;Field  ;
+                SourceExpr=Kontak }
+
+    { 1101103047;2;Field  ;
+                SourceExpr=Oppf }
+
+    { 1101103048;2;Field  ;
+                SourceExpr="E-mail adresse" }
+
+    { 1101103049;2;Field  ;
+                SourceExpr=Brukernr }
+
+    { 1101103050;2;Field  ;
+                SourceExpr="Owner No" }
+
+    { 1101103051;2;Field  ;
+                SourceExpr=BrKd }
+
+    { 1101103052;2;Field  ;
+                SourceExpr="E-mail adresse 2" }
+
+    { 1101103053;2;Field  ;
+                SourceExpr="Eier 2 nu" }
+
+    { 1101103054;2;Field  ;
+                SourceExpr="SjÜfõrnr." }
+
+    { 1101103055;2;Field  ;
+                SourceExpr=BrKd2 }
+
+    { 1101103056;2;Field  ;
+                SourceExpr="Diverse 4" }
+
+    { 1101103057;2;Field  ;
+                SourceExpr=SiInsp }
+
+    { 1101103058;2;Field  ;
+                SourceExpr="S fakt" }
+
+    { 1101103059;2;Field  ;
+                SourceExpr=NServ1 }
+
+    { 1101103060;2;Field  ;
+                SourceExpr="S. ser" }
+
+    { 1101103061;2;Field  ;
+                SourceExpr=Forsikringsselskap }
+
+    { 1101103062;2;Field  ;
+                SourceExpr="Verk.loka" }
+
+    { 1101103063;2;Field  ;
+                SourceExpr=FoKmèr }
+
+    { 1101103064;2;Field  ;
+                SourceExpr="Salg dette Ür" }
+
+    { 1101103065;2;Field  ;
+                SourceExpr="Salg siste Ür" }
+
+    { 1101103066;2;Field  ;
+                SourceExpr="Salg f.Ü" }
+
+    { 1101103067;2;Field  ;
+                SourceExpr="S. av" }
+
+    { 1101103068;2;Field  ;
+                SourceExpr=Oppr }
+
+    { 1101103069;2;Field  ;
+                SourceExpr=LeFiKo }
+
+    { 1101103070;2;Field  ;
+                SourceExpr=LeFiNa }
+
+    { 1101103071;2;Field  ;
+                SourceExpr="LF sta" }
+
+  }
+  CODE
+  {
+
+    BEGIN
+    END.
+  }
+}
+

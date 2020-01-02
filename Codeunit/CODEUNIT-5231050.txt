@@ -1,0 +1,562 @@
+OBJECT Codeunit 5231050 Gjentakelsesordre til ordre
+{
+  OBJECT-PROPERTIES
+  {
+    Date=30.10.17;
+    Time=14:20:13;
+    Modified=Yes;
+    Version List=BlanketOrderBNH;
+  }
+  PROPERTIES
+  {
+    TableNo=36;
+    OnRun=VAR
+            rGjentakelsesordreDataL@1101103000 : Record 5231052;
+            rDocumentStatusLineL@1101103001 : Record 5045607;
+          BEGIN
+            //05. START HJL
+            IF BehandlingsDato = 0D THEN
+              BehandlingsDato := WORKDATE;
+            //05. STOP HJL
+            TESTFIELD("Document Type","Document Type"::"Blanket Order");// Kontroll
+
+            rGjentakelsesordreDataL.GET("No.");
+
+            IF "Order Date" > BehandlingsDato THEN
+              ERROR(
+                'Gjentakelsesordre %1 kan ikke opprettes.\Ordredato %2 ligger etter behandlingsdatoen %3.',
+                "No.","Order Date",BehandlingsDato);
+
+            GjentakGruppe.GET(rGjentakelsesordreDataL."Repeating Group Code");
+            GjentakGruppe.TESTFIELD("Date Formula");
+
+            IF (GjentakGruppe."Start Date" > BehandlingsDato) OR
+               ((GjentakGruppe."End Date" < BehandlingsDato) AND (GjentakGruppe."End Date" <> 0D)) THEN
+              ERROR(
+                'Gjentakelsesordre %1 kan ikke opprettes.\' +
+                'Behandlingsdatoen er %2 og gjentakelsesgruppen %3 er bare aktiv i perioden %4..%5.',
+                "No.",BehandlingsDato,GjentakGruppe.Code,GjentakGruppe."Start Date",GjentakGruppe."End Date");
+
+            rGjentakelsesordreDataL.TESTFIELD("Disable repeat",FALSE);
+
+            TESTFIELD("Order Date");
+
+            SalgsOppsett.GET;
+
+            {{
+
+            RammeOrdreLinje.SETRANGE("Document Type","Document Type");
+            RammeOrdreLinje.SETRANGE("Document No.","No.");
+            RammeOrdreLinje.SETRANGE(Type,RammeOrdreLinje.Type::Item);
+            RammeOrdreLinje.SETFILTER("No.",'<>%1','');
+            IF RammeOrdreLinje.FIND('-') THEN
+              REPEAT
+            //SID.09 START
+            //    RammeOrdreLinje.MODIFY(TRUE);                  //HAN
+            //SID.09 STOP
+                IF (RammeOrdreLinje."Qty. to Ship" > 0) THEN BEGIN
+                  SalgLinje := RammeOrdreLinje;
+            //03. START HJL
+                  IF Veh.GET(SalgLinje.VIN) THEN
+                    IF Veh."Current Book No." <> '' THEN BEGIN
+                      SalgLinje."Book No." := Veh."Current Book No.";
+                      SalgLinje.MODIFY;
+                   END;
+            //03. STOP HJL
+                  ResettAntallFelter(SalgLinje);
+                  SalgLinje.VALIDATE(Quantity,RammeOrdreLinje."Qty. to Ship");
+                  SalgLinje."Line No." := 0;
+                  IF SalgLinje.Reserve <> SalgLinje.Reserve::Always THEN
+            //04. START HJL
+            //        COMMIT;
+            //04. STOP HJL
+                    IF NOT SkjulValideringsDialog THEN
+                      VareKontrTilgj.SalesLineCheck(SalgLinje);
+                  "Amount Including VAT" := "Amount Including VAT" + SalgLinje."Amount Including VAT";
+
+                END;
+              UNTIL RammeOrdreLinje.NEXT = 0;
+
+            }}
+
+            // Gjentakelsesordre: Skal bare seneste opprettes m† ordredatoen flyttes til seneste mulige:
+            IF OppretteSeneste OR GjentakGruppe."Create only latest" THEN BEGIN
+              NesteOrdreDato := "Order Date";
+              REPEAT
+                VALIDATE("Order Date",NesteOrdreDato);
+                NesteOrdreDato := CALCDATE(GjentakGruppe."Date Formula","Order Date");
+                // Stoppe hvis datoen overskrides eller datoen ikke flyttes (Datoformel er fx. 0D):
+              UNTIL (NesteOrdreDato > BehandlingsDato) OR (NesteOrdreDato = "Order Date");
+            END ELSE
+              NesteOrdreDato := CALCDATE(GjentakGruppe."Date Formula","Order Date");
+
+            SalgsOrdreHode := Rec;
+            SalgsOrdreHode."Document Type" := SalgsOrdreHode."Document Type"::Order;
+            //IF NOT SkjulValideringsDialog THEN
+            //  KundeKontrKredittgr.SalesHeaderCheck(SalgsOrdreHode);
+            //06. START HJL
+            IF rGjentakelsesordreDataL."Rental Agreement No." <> '' THEN BEGIN
+              //SalgsOrdreHode."Utleieavtalenr." := "Utleieavtalenr.";
+              SalgsOrdreHode."Order Type" := SalgsOrdreHode."Order Type"::"3";
+            END;
+            //06. STOP HJL
+            SalgsOrdreHode."No. Printed" := 0;
+
+            SalgsOrdreHode."No." := '';
+
+            SalgsOrdreLinje.LOCKTABLE;
+            SalgsOrdreHode.INSERT(TRUE);
+
+            // Gjentakelsesordre: Oppdatere hode
+            SalgsOrdreHode."Order Date" := "Order Date";
+            SalgsOrdreHode."Posting Date" := "Order Date";
+            //SID.07
+            SalgsOrdreHode."Location Code" := "Location Code";
+            SalgsOrdreHode."Branch Code" := "Location Code";
+            //SID.07
+
+
+            // This is a workaround !
+            //SalgsOrdreHode."Rammeordre til bokf›ring" := TRUE;
+            SalgsOrdreHode."Boolean 2" := TRUE;
+
+            CASE GjentakGruppe."Update Postingdate" OF
+              GjentakGruppe."Update Postingdate"::"Bokf›ringsdato":
+                SalgsOrdreHode.VALIDATE("Document Date",CALCDATE(GjentakGruppe."Postingdate Formula",SalgsOrdreHode."Posting Date"));
+              GjentakGruppe."Update Postingdate"::Behandlingsdato:
+                SalgsOrdreHode.VALIDATE("Document Date",CALCDATE(GjentakGruppe."Postingdate Formula",BehandlingsDato));
+            END;
+            SalgsOrdreHode.VALIDATE("Shipment Date",CALCDATE(GjentakGruppe."Delivery Date Formula",SalgsOrdreHode."Posting Date"));
+
+            //SalgsOrdreHode.VALIDATE("Status Code", 'LEVKLAR');
+
+            SalgsOrdreHode.MODIFY;
+
+            //05. START HJL
+            OpprettTekstlinje(Rec);
+            //05. STOP HJL
+
+            RammeOrdreLinje.RESET;
+            RammeOrdreLinje.SETRANGE("Document Type","Document Type");
+            RammeOrdreLinje.SETRANGE("Document No.","No.");
+            LinjerOpprettet := FALSE;
+            IF RammeOrdreLinje.FIND('-') THEN
+              REPEAT
+
+                SalgLinje.RESET;
+                SalgLinje.SETCURRENTKEY("Document Type","Blanket Order No.","Blanket Order Line No.");
+                SalgLinje.SETRANGE("Blanket Order No."     , RammeOrdreLinje."Document No.");
+                SalgLinje.SETRANGE("Blanket Order Line No.", RammeOrdreLinje."Line No.");
+
+                AntallP†Ordrer := 0;
+
+                // Gjentakelsesordre: Ikke sjekke salgsordrer hvis Oppdatering av antall er konstant:
+                IF SalgLinje.FIND('-') AND (GjentakGruppe."Update Quantity" = GjentakGruppe."Update Quantity"::Redusere) THEN
+                REPEAT
+                  IF SalgLinje."Document Type" = SalgLinje."Document Type"::"Credit Memo" THEN
+                    AntallP†Ordrer := AntallP†Ordrer - SalgLinje."Outstanding Qty. (Base)"
+                  ELSE
+                    AntallP†Ordrer := AntallP†Ordrer + SalgLinje."Outstanding Qty. (Base)";
+                UNTIL SalgLinje.NEXT = 0;
+
+                IF (ABS(RammeOrdreLinje."Qty. to Ship (Base)") + ABS(AntallP†Ordrer) >
+                    ABS(RammeOrdreLinje."Outstanding Qty. (Base)")) OR
+                   (RammeOrdreLinje."Quantity (Base)" * RammeOrdreLinje."Outstanding Qty. (Base)" < 0)
+                THEN
+                  ERROR(
+                    '%1 av %2 %3 i %4 %5 kan ikke v‘re mer enn %9.\' +
+                    '%6\' +
+                    '%7 - %8 = %9',
+                    RammeOrdreLinje.FIELDNAME("Qty. to Ship (Base)"),
+                    RammeOrdreLinje.Type,RammeOrdreLinje."No.",
+                    RammeOrdreLinje.FIELDNAME("Line No."),RammeOrdreLinje."Line No.",
+                    STRSUBSTNO(
+                      '%1 - Ikke bokf›rt %1 = Mulig %2',
+                      RammeOrdreLinje.FIELDNAME("Outstanding Qty. (Base)"),
+                      RammeOrdreLinje.FIELDNAME("Qty. to Ship (Base)")),
+                    RammeOrdreLinje."Outstanding Qty. (Base)",AntallP†Ordrer,
+                    RammeOrdreLinje."Outstanding Qty. (Base)" - AntallP†Ordrer);
+
+                SalgsOrdreLinje := RammeOrdreLinje;
+                ResettAntallFelter(SalgsOrdreLinje);
+
+                SalgsOrdreLinje."Document Type"           := SalgsOrdreHode."Document Type";
+                SalgsOrdreLinje."Document No."            := SalgsOrdreHode."No.";
+                SalgsOrdreLinje."Shipment Date"           := SalgsOrdreHode."Shipment Date";
+                SalgsOrdreLinje."Blanket Order No."       := "No.";
+                SalgsOrdreLinje."Blanket Order Line No."  := RammeOrdreLinje."Line No.";
+
+                //03. START HJL
+                IF Veh.GET(SalgsOrdreLinje.VIN) THEN
+                  IF Veh."Current Book No." <> '' THEN
+                    SalgsOrdreLinje."Book No." := Veh."Current Book No.";
+                //03. STOP HJL
+
+                IF SalgsOrdreLinje."No." <> '' THEN
+                BEGIN
+                  SalgsOrdreLinje.VALIDATE(Quantity         , RammeOrdreLinje."Qty. to Ship");
+                  SalgsOrdreLinje.VALIDATE("Shipment Date"  , RammeOrdreLinje."Shipment Date");
+                  SalgsOrdreLinje.VALIDATE("Line Discount %", RammeOrdreLinje."Line Discount %");
+                  SalgsOrdreLinje.VALIDATE("Qty. to Ship");
+
+                  IF RammeOrdreLinje."Reserved Qty. (Base)" <> 0 THEN
+                    ReservStyr.TransferSaleLineToSalesLine(
+                      RammeOrdreLinje,SalgsOrdreLinje,RammeOrdreLinje."Qty. to Ship (Base)");
+                END;
+                // Gjentakelsesordre: Oppdatere pris
+
+                //01. START SID2.30.CFO
+                IF SalgsOrdreLinje.Type <> SalgsOrdreLinje.Type::" " THEN
+                BEGIN
+                //01. SLUTT SID2.30.CFO
+                  CASE GjentakGruppe."Update Price" OF
+
+                    GjentakGruppe."Update Price"::Fast:
+                      SalgsOrdreLinje.VALIDATE("Unit Price",RammeOrdreLinje."Unit Price");  // Prisen er uendret. Intet gj›res.
+
+                    GjentakGruppe."Update Price"::Gjenberegne:
+                      IF SalgsOrdreLinje.Type IN [SalgsOrdreLinje.Type::Item,SalgsOrdreLinje.Type::Resource] THEN
+                      BEGIN
+                        HuskAntall := SalgsOrdreLinje.Quantity;
+                        OppdaterEnhetsPris;
+                        SalgsOrdreLinje.VALIDATE(Quantity,HuskAntall);
+                      END;
+
+                    GjentakGruppe."Update Price"::Nullstille:
+                      SalgsOrdreLinje.VALIDATE("Unit Price",0);
+                  END;
+                //01. START SID2.30.CFO
+                END;
+                //01. SLUTT SID2.30.CFO
+
+                //avdelingskode
+                SalgsOrdreLinje.VALIDATE("Shortcut Dimension 1 Code", RammeOrdreLinje."Shortcut Dimension 1 Code");
+
+                SalgsOrdreLinje.INSERT(TRUE);
+
+                IF RammeOrdreLinje."Qty. to Ship" <> 0 THEN
+                BEGIN
+                  LinjerOpprettet := TRUE;
+                  // Gjentakelsesordre: Oppdatere antall
+                  CASE GjentakGruppe."Update Quantity" OF
+
+                    GjentakGruppe."Update Quantity"::Konstant:
+                      ; // "Levere (antall)" uendret. Intet gj›res.
+
+                    GjentakGruppe."Update Quantity"::Redusere:
+                      RammeOrdreLinje.VALIDATE("Qty. to Ship",0); // Dette er std. behandlingsm†ten
+                  END;
+
+                  RammeOrdreLinje.MODIFY;
+                END;
+
+              UNTIL RammeOrdreLinje.NEXT = 0;
+            //  CreateOrderLine(); //xx
+            IF NOT LinjerOpprettet THEN
+              ERROR('Det finnes ingen linjer til † opprette.');
+
+            IF SalgsOppsett."Copy Comments Blanket to Order" THEN
+            BEGIN
+              SalgBemerkLinje.SETRANGE("Document Type",SalgBemerkLinje."Document Type"::"Blanket Order");
+              SalgBemerkLinje.SETRANGE("No.","No.");
+              IF SalgBemerkLinje.FIND('-') THEN
+              REPEAT
+                SalgBemerkLinje2 := SalgBemerkLinje;
+                SalgBemerkLinje2."Document Type" := SalgsOrdreHode."Document Type";
+                SalgBemerkLinje2."No." := SalgsOrdreHode."No.";
+                SalgBemerkLinje2.INSERT;
+              UNTIL SalgBemerkLinje.NEXT = 0;
+            END;
+
+            // Gjentakelsesordre: Oppdatere returparameter
+            //SID.08 START
+            NesteOrdreDato := DMY2DATE(1, DATE2DMY(NesteOrdreDato,2), DATE2DMY(NesteOrdreDato,3));
+            //SID.08 STOP
+            VALIDATE("Order Date",NesteOrdreDato);
+            MODIFY;
+            OpprettePost(Rec,SalgsOrdreHode);
+
+
+            rDocumentStatusLineL.RESET;
+            rDocumentStatusLineL.SETRANGE(Area, rDocumentStatusLineL.Area::"Parts Sales");
+            rDocumentStatusLineL.SETRANGE("Document Type", rDocumentStatusLineL."Document Type"::"Purch. Order/Sales Order");
+            rDocumentStatusLineL.SETRANGE("Status Type", rDocumentStatusLineL."Status Type"::"Document Status");
+            rDocumentStatusLineL.SETRANGE(Type, rDocumentStatusLineL.Type::"Ready for Invoicing");
+            IF rDocumentStatusLineL.FINDFIRST THEN
+            BEGIN
+              SalgsOrdreHode."Status Code" := rDocumentStatusLineL."Status Code";
+              SalgsOrdreHode.MODIFY;
+            END;
+
+            COMMIT;
+            CLEAR(KundeKontrKredittgr);
+            CLEAR(VareKontrTilgj);
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      RammeOrdreLinje@1117700000 : Record 37;
+      SalgLinje@1117700001 : TEMPORARY Record 37;
+      SalgsOrdreHode@1117700002 : Record 36;
+      SalgsOrdreLinje@1117700003 : Record 37;
+      SalgBemerkLinje@1117700004 : Record 44;
+      SalgBemerkLinje2@1117700005 : Record 44;
+      SalgsOppsett@1117700006 : Record 311;
+      GjentakGruppe@1117700007 : Record 5231050;
+      Vare@1117700008 : Record 27;
+      KundeKontrKredittgr@1117700009 : Codeunit 312;
+      VareKontrTilgj@1117700010 : Codeunit 311;
+      ReservStyr@1117700011 : Codeunit 99000845;
+      LinjerOpprettet@1117700012 : Boolean;
+      SkjulValideringsDialog@1117700013 : Boolean;
+      AntallP†Ordrer@1117700014 : Decimal;
+      BehandlingsDato@1117700015 : Date;
+      HuskAntall@1117700016 : Decimal;
+      OppretteSeneste@1117700017 : Boolean;
+      NesteOrdreDato@1117700018 : Date;
+      PostDato@1117700019 : Date;
+      PostTid@1117700020 : Time;
+      _SID_@1117700021 : Integer;
+      Veh@1117700022 : Record 5025400;
+      C_SID001@1101103000 : TextConst 'NOR=Avdrag %1 av %2';
+
+    PROCEDURE ResettAntallFelter@1(VAR MidlSalgsLinje@1117700000 : Record 37);
+    BEGIN
+      MidlSalgsLinje."Qty. Shipped Not Invoiced" := 0;
+      MidlSalgsLinje."Quantity Shipped" := 0;
+      MidlSalgsLinje."Quantity Invoiced" := 0;
+      MidlSalgsLinje."Reserved Quantity" := 0;
+      MidlSalgsLinje."Qty. Shipped Not Invd. (Base)" := 0;
+      MidlSalgsLinje."Qty. Shipped (Base)" := 0;
+      MidlSalgsLinje."Qty. Invoiced (Base)" := 0;
+      MidlSalgsLinje."Reserved Qty. (Base)" := 0;
+    END;
+
+    PROCEDURE HentSalgsOrdreHode@2(VAR SalgHode@1117700000 : Record 36);
+    BEGIN
+      SalgHode := SalgsOrdreHode;
+    END;
+
+    PROCEDURE SettSkjulValideringsDialog@14(NySkjulValideringsDialog@1117700000 : Boolean);
+    BEGIN
+      SkjulValideringsDialog := NySkjulValideringsDialog;
+    END;
+
+    PROCEDURE Initialisere@3(NyBehandlingsDato@1117700000 : Date;NyOppretteSeneste@1117700001 : Boolean);
+    BEGIN
+      BehandlingsDato := NyBehandlingsDato;
+      OppretteSeneste := NyOppretteSeneste; //xxx
+      PostDato := TODAY;
+      PostTid := TIME;
+    END;
+
+    LOCAL PROCEDURE OppdaterEnhetsPris@6();
+    VAR
+      SalgHode@1117700000 : Record 36;
+      Vare@1117700001 : Record 27;
+      VarePris@1117700002 : Record 5046901;
+      KundeVareRab@1117700003 : Record 5046900;
+      ResPris@1117700004 : Record 201;
+      ValutaKurs@1117700005 : Record 330;
+      MvaBokfOppsett@1117700006 : Record 325;
+      Valuta@1117700007 : Record 4;
+      "VareS›kEnhetPris"@1117700008 : Codeunit 52;
+      "ResS›kEnhetPris"@1117700009 : Codeunit 221;
+      PrisIValuta@1117700010 : Boolean;
+      VarePrisInklMva@1117700011 : Boolean;
+    BEGIN
+      //xxx>>> alt etterf›lgende er nytt
+      SalgHode := SalgsOrdreHode;
+      WITH SalgsOrdreLinje DO BEGIN
+
+      TESTFIELD("Qty. per Unit of Measure");
+      //xxxHentsalgsHode;
+      PrisIValuta := FALSE;
+      VarePrisInklMva := FALSE;
+
+      CASE Type OF
+        Type::Item:
+          BEGIN
+            VarePris.INIT;
+            VarePris."Item No." := "No.";
+            VarePris."Price Group Code" := "Price Group Code";
+            VarePris."Currency Code" := SalgHode."Currency Code";
+            VarePris."Unit of Measure Code" := "Unit of Measure Code";
+            IF "Document Type" IN ["Document Type"::Quote,"Document Type"::Order] THEN
+              VarePris."Starting Date" := SalgHode."Order Date"
+            ELSE
+              VarePris."Starting Date" := SalgHode."Posting Date";
+            "VareS›kEnhetPris".RUN(VarePris);
+            "Unit Price" := VarePris."Unit Price";
+            Vare."VAT Bus. Posting Gr. (Price)" := VarePris."VAT Bus. Posting Gr. (Price)";
+            "Allow Quantity Disc." := VarePris."Allow Quantity Disc.";
+            "Allow Invoice Disc." := VarePris."Allow Invoice Disc.";
+            IF VarePris."Allow Cust./Item Disc." THEN BEGIN
+              IF KundeVareRab.GET(SalgHode."Cust./Item Disc. Gr.",Vare."Cust./Item Disc. Gr.") THEN
+                "Cust./Item Disc. %" := KundeVareRab."Discount %";
+            END ELSE
+              "Cust./Item Disc. %" := 0;
+            PrisIValuta := VarePris."Currency Code" <> '';
+            VarePrisInklMva := VarePris."Price Includes VAT";
+          END;
+        Type::Resource:
+          BEGIN
+            ResPris.INIT;
+            //ResPris."Job No." := "Job No.";
+            ResPris.Code := "No.";
+            ResPris."Work Type Code" := "Work Type Code";
+            ResPris."Currency Code" := "Currency Code";
+            "ResS›kEnhetPris".RUN(ResPris);
+            "Unit Price" := ResPris."Unit Price";
+            PrisIValuta := ResPris."Currency Code" <> '';
+          END;
+      END;
+
+      IF (SalgHode."Currency Code" <> '') AND (NOT PrisIValuta) THEN BEGIN
+        SalgHode.TESTFIELD("Currency Factor");
+          "Unit Price" :=
+            ValutaKurs.ExchangeAmtLCYToFCY(
+              GetDate,"Currency Code",
+              "Unit Price",SalgHode."Currency Factor");
+      END;
+
+      IF VarePris."Unit of Measure Code" = '' THEN
+        "Unit Price" := "Unit Price" * "Qty. per Unit of Measure";
+
+      IF VarePrisInklMva THEN BEGIN
+        IF NOT MvaBokfOppsett.GET(Vare."VAT Bus. Posting Gr. (Price)",Vare."VAT Prod. Posting Group") THEN
+          MvaBokfOppsett.INIT;
+        CASE MvaBokfOppsett."VAT Calculation Type" OF
+          MvaBokfOppsett."VAT Calculation Type"::"Reverse Charge VAT":
+            MvaBokfOppsett."VAT %" := 0;
+          MvaBokfOppsett."VAT Calculation Type"::"Sales Tax":
+            ERROR(
+              'Priser inkl. mva. kan ikke beregnes n†r %1 er %2.',
+              MvaBokfOppsett.FIELDNAME("VAT Calculation Type"),
+              MvaBokfOppsett."VAT Calculation Type");
+        END;
+        CASE "VAT Calculation Type" OF
+          "VAT Calculation Type"::"Normal VAT",
+          "VAT Calculation Type"::"Full VAT",
+          "VAT Calculation Type"::"Sales Tax":
+            BEGIN
+              IF SalgHode."Prices Including VAT" THEN BEGIN
+                IF "VAT Bus. Posting Group" <> Vare."VAT Bus. Posting Gr. (Price)" THEN
+                  "Unit Price" := "Unit Price" * (100 + "VAT %") / (100 + MvaBokfOppsett."VAT %");
+              END ELSE
+                "Unit Price" := "Unit Price" / (1 + MvaBokfOppsett."VAT %" / 100);
+            END;
+          "VAT Calculation Type"::"Reverse Charge VAT":
+            "Unit Price" := "Unit Price" / (1 + MvaBokfOppsett."VAT %" / 100);
+        END;
+      END ELSE
+        IF SalgHode."Prices Including VAT" THEN
+          "Unit Price" := "Unit Price" * (1 + "VAT %" / 100);
+      Valuta.TESTFIELD("Unit-Amount Rounding Precision");
+      "Unit Price" := ROUND("Unit Price",Valuta."Unit-Amount Rounding Precision");
+
+      END;
+    END;
+
+    LOCAL PROCEDURE OpprettePost@4(Rammeordre@1117700000 : Record 36;Salgsordre@1117700001 : Record 36);
+    VAR
+      GjentakPost@1117700002 : Record 5231051;
+    BEGIN
+      GjentakPost.VALIDATE("Blanket Order No.",Rammeordre."No.");
+      GjentakPost.VALIDATE(Date,PostDato);
+      GjentakPost.VALIDATE(Time,PostTid);
+      GjentakPost.VALIDATE("Document Type",Salgsordre."Document Type");
+      GjentakPost.VALIDATE("Document No.",Salgsordre."No.");
+      GjentakPost.VALIDATE("User ID",USERID);
+      GjentakPost.INSERT(TRUE);
+    END;
+
+    PROCEDURE _SID__@1117700000();
+    BEGIN
+    END;
+
+    PROCEDURE OpprettTekstlinje@1117700001(RammeOrdreHode@1117700000 : Record 36);
+    VAR
+      StartDato@1117700001 : Date;
+      SluttDato@1117700002 : Date;
+      DatoTabell@1117700003 : Record 2000000007;
+    BEGIN
+      //05. START HJL
+      {
+      UtleieOppsett.GET;
+      IF UtleieOppsett."Tekst p† utleiefaktura langtid" <> '' THEN BEGIN
+        SalgLinje.INIT;
+        SalgLinje."Document Type" := SalgsOrdreHode."Document Type";
+        SalgLinje."Document No." := SalgsOrdreHode."No.";
+        SalgLinje."Line No." := 123;
+        SalgLinje.VALIDATE("Sell-to Customer No.",SalgsOrdreHode."Sell-to Customer No.");
+        SalgLinje.VALIDATE(Type,SalgLinje.Type::" ");
+        SalgLinje.VALIDATE("Shipment Date",SalgsOrdreHode."Shipment Date");
+        SalgLinje."Blanket Order No." := RammeOrdreHode."No.";
+
+        StartDato := DMY2DATE(1,DATE2DMY(BehandlingsDato,2),DATE2DMY(BehandlingsDato,3));
+        DatoTabell.SETFILTER("Period Start",'%1..',StartDato);
+        DatoTabell.SETFILTER("Period End",'<%1',CALCDATE('+1M',StartDato));
+        IF DatoTabell.FIND('+') THEN
+          SluttDato := DatoTabell."Period End";
+
+        SalgLinje.VALIDATE(Description,STRSUBSTNO(UtleieOppsett."Tekst p† utleiefaktura langtid",StartDato,COPYSTR(FORMAT(SluttDato),2)));
+        SalgLinje.INSERT(TRUE);
+      END;
+      //05. STOP HJL
+      }
+    END;
+
+    PROCEDURE CreateOrderLine@1101103000();
+    VAR
+      SalesLineL@1101103000 : Record 37;
+      SalesLine2L@1101103001 : Record 37;
+      SalesLine3L@1101103002 : Record 37;
+      i@1101103003 : Decimal;
+    BEGIN
+      SalesLineL.INIT;
+      SalesLineL."Document Type" := SalgsOrdreHode."Document Type";
+      SalesLineL."Document No." := SalgsOrdreHode."No.";
+      IF SalesLine2L.FINDLAST THEN
+        SalesLineL."Line No." := SalesLine2L."Line No." + 10000
+        ELSE
+        SalesLineL."Line No." := 10000;
+      SalesLine3L.SETRANGE("Document Type", RammeOrdreLinje."Document Type");
+      SalesLine3L.SETRANGE("Document No.", RammeOrdreLinje."Document No.");
+      SalesLine3L.SETRANGE(Type, SalesLine3L.Type::Item);
+      IF SalesLine3L.FINDFIRST THEN
+        BEGIN
+        SalesLineL.Description := STRSUBSTNO(C_SID001, FORMAT(SalesLine3L."Quantity Invoiced" + 1), FORMAT(SalesLine3L.Quantity));
+        END;
+      SalesLineL.INSERT(TRUE);
+    END;
+
+    BEGIN
+    {
+      Navision Software Norge A/S - Gejntakelsesordre
+      - Kopi av Codeunit 87, versjon NO2.01 med diverse tilpasninger.
+
+      +----------------------------------------------+
+      | 2004 SI-DATA A/S (SID)                       |
+      +----------------------------------------------+
+      | INCADEA ENGINE                               |
+      +----------------------------------------------+
+      No.  Version  Date      ID     Remark          |
+      ------------------------------------------------
+      01.  2.30     11.11.04  CFO    Fikser slik at tekstlinjer ogs† kommer med.
+      02.  2.30     11.11.04  CFO    Sletter engangstekst etter at ordre er generert.
+      03.  2.30     11.02.05  HJL    Overf›rer Vehicle.BookNo
+      04.  2.30     03.06.05  HJL    lagt til COMMIT
+      05.  2.30     27.12.05  HJL    UTLEIE2.10 Oppretter f›rste tekstlinje i ordre med datoinformasjon
+      06.  2.30     18.01.06  HJL    UTLEIE2.10 Over›rer utleieavtalenr.
+      07.  2.30     11.01.13  AFO    RSA: Lokasjonskode p† ordren arves n† fra rammeordren, ikke fra kunden.
+      08   3.21     05.06.13  JRO    RSA: Setter neste ordredat alltid til den 1. i mnd.
+      09.  3.21     14.02.14  JRO    RSA: Lagt inn oppdatering av rammeordrelinje. i visse tilfeller er Linjesatatus "blank",
+                                     noe som medf›rer at Antall p† opprinneli blir tilbakestil til 1.
+    }
+    END.
+  }
+}
+

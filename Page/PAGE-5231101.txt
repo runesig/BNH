@@ -1,0 +1,233 @@
+OBJECT Page 5231101 BB Kunde
+{
+  OBJECT-PROPERTIES
+  {
+    Date=24.11.17;
+    Time=23:38:11;
+    Modified=Yes;
+    Version List=Konv. BNH;
+  }
+  PROPERTIES
+  {
+    SourceTable=Table5231104;
+    PageType=List;
+    ActionList=ACTIONS
+    {
+      { 1101103034;  ;ActionContainer;
+                      ActionContainerType=ActionItems }
+      { 1101103035;1 ;Action    ;
+                      Name=Import kunder;
+                      RunObject=XMLport 5231100 }
+      { 1101103037;1 ;Action    ;
+                      Name=Sjekk BNH kunde;
+                      OnAction=VAR
+                                 cuBBKunderL@1101103001 : Codeunit 5231100;
+                               BEGIN
+                                 cuBBKunderL.FindCustomer();
+                                 CurrPage.UPDATE( FALSE );
+                               END;
+                                }
+      { 1101103038;1 ;Action    ;
+                      Name=Nullstill;
+                      OnAction=VAR
+                                 cuBBKunderL@1101103000 : Codeunit 5231100;
+                               BEGIN
+                                 cuBBKunderL.Nullstill();
+                                 CurrPage.UPDATE( FALSE );
+                               END;
+                                }
+      { 1101103041;1 ;Action    ;
+                      Name=Create Customer;
+                      Promoted=Yes;
+                      PromotedIsBig=Yes;
+                      Image=CreateForm;
+                      PromotedCategory=Process;
+                      OnAction=BEGIN
+                                 CurrPage.SETSELECTIONFILTER( BBCustomerG );
+                                 CODEUNIT.RUN( CODEUNIT::"BB Customer", BBCustomerG );
+                               END;
+                                }
+      { 1101103042;1 ;Action    ;
+                      Name=Customer;
+                      CaptionML=ENU=Card;
+                      Promoted=Yes;
+                      PromotedIsBig=Yes;
+                      Image=Card;
+                      PromotedCategory=Process;
+                      OnAction=BEGIN
+                                 ShowCustomerCard();
+                               END;
+                                }
+      { 1101103044;1 ;Action    ;
+                      Name=Set CustomerNo;
+                      OnAction=BEGIN
+                                 FindCustomer();
+                                 MESSAGE('Ferdig');
+                                 CurrPage.UPDATE;
+                               END;
+                                }
+    }
+  }
+  CONTROLS
+  {
+    { 1101103000;0;Container;
+                ContainerType=ContentArea }
+
+    { 1101103001;1;Group  ;
+                Name=Group;
+                GroupType=Repeater }
+
+    { 1101103002;2;Field  ;
+                SourceExpr="Primary Key" }
+
+    { 1101103003;2;Field  ;
+                SourceExpr=Status }
+
+    { 1101103004;2;Field  ;
+                SourceExpr=Datetime }
+
+    { 1101103005;2;Field  ;
+                SourceExpr="Update message" }
+
+    { 1101103006;2;Field  ;
+                CaptionML=[ENU=BNH Cust No.;
+                           NOR=Varenr.];
+                SourceExpr="No." }
+
+    { 1101103036;2;Field  ;
+                SourceExpr="Antall i BNH" }
+
+    { 1101103039;2;Field  ;
+                SourceExpr="BNH Kundenr." }
+
+    { 1101103007;2;Field  ;
+                SourceExpr="Cust No." }
+
+    { 1101103008;2;Field  ;
+                SourceExpr=Name }
+
+    { 1101103009;2;Field  ;
+                SourceExpr="Name 2" }
+
+    { 1101103010;2;Field  ;
+                SourceExpr=Address }
+
+    { 1101103011;2;Field  ;
+                SourceExpr="Address 2" }
+
+    { 1101103012;2;Field  ;
+                SourceExpr=City }
+
+    { 1101103013;2;Field  ;
+                SourceExpr=Contact }
+
+    { 1101103014;2;Field  ;
+                SourceExpr="Phone No." }
+
+    { 1101103015;2;Field  ;
+                SourceExpr="Telex No." }
+
+    { 1101103016;2;Field  ;
+                SourceExpr="Credit Limit (LCY)" }
+
+    { 1101103017;2;Field  ;
+                SourceExpr="Customer Posting Gro" }
+
+    { 1101103018;2;Field  ;
+                SourceExpr="Price Group Code" }
+
+    { 1101103019;2;Field  ;
+                SourceExpr="Payment Terms Code" }
+
+    { 1101103020;2;Field  ;
+                SourceExpr=Blocked }
+
+    { 1101103021;2;Field  ;
+                SourceExpr="Payment Method Code" }
+
+    { 1101103022;2;Field  ;
+                SourceExpr="Home Phone No." }
+
+    { 1101103023;2;Field  ;
+                SourceExpr="Mobile Phone No." }
+
+    { 1101103024;2;Field  ;
+                SourceExpr="Last Name" }
+
+    { 1101103025;2;Field  ;
+                SourceExpr="First Name" }
+
+    { 1101103026;2;Field  ;
+                SourceExpr="Fax No." }
+
+    { 1101103027;2;Field  ;
+                SourceExpr="VAT Registration No." }
+
+    { 1101103028;2;Field  ;
+                SourceExpr="Item Sales Price Gro" }
+
+    { 1101103029;2;Field  ;
+                SourceExpr="Post Code" }
+
+    { 1101103030;2;Field  ;
+                SourceExpr="Home Fax No." }
+
+    { 1101103031;2;Field  ;
+                SourceExpr="Home Mobile Phone No" }
+
+    { 1101103032;2;Field  ;
+                SourceExpr=BBCustomerG."No." }
+
+    { 1101103033;2;Field  ;
+                SourceExpr="E-Mail" }
+
+    { 1101103040;2;Field  ;
+                SourceExpr="Last Date" }
+
+    { 1101103043;2;Field  ;
+                Name=f;
+                SourceExpr="Customer Type" }
+
+  }
+  CODE
+  {
+    VAR
+      BBCustomerG@1101103000 : Record 5231104;
+
+    PROCEDURE ShowCustomerCard@1101103004();
+    VAR
+      CustomerL@1101103000 : Record 18;
+    BEGIN
+      WITH CustomerL DO BEGIN
+        RESET;
+        CASE TRUE OF
+          GET( Rec."No." ):
+            PAGE.RUN( PAGE::"Customer Card", CustomerL );
+          END;
+      END;
+
+      CurrPage.UPDATE( FALSE );
+    END;
+
+    PROCEDURE FindCustomer@1101103000();
+    VAR
+      BBKundeL@1101103000 : Record 5231104;
+      CustomerL@1101103001 : Record 18;
+    BEGIN
+      IF BBKundeL.FINDFIRST THEN
+        REPEAT
+        CustomerL.RESET;
+        CustomerL.SETRANGE("Text 1", BBKundeL."Cust No.");
+        IF CustomerL.FINDFIRST THEN
+          BEGIN
+          BBKundeL."No." := CustomerL."No.";
+          BBKundeL.MODIFY;
+          END;
+        UNTIL BBKundeL.NEXT = 0;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
